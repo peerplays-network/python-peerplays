@@ -7,10 +7,8 @@ TAGSTEEM := $(shell git describe master --abbrev=0 | tr "." "-")
 clean: clean-build clean-pyc
 
 clean-build:
-	rm -fr build/
-	rm -fr dist/
-	rm -fr *.egg-info
-	rm -fr __pycache__/
+	rm -fr build/ dist/ *.egg-info .eggs/ .tox/ __pycache__/ .cache/ .coverage htmlcov src
+	rm -rf contrib/tmp/piston/
 
 clean-pyc:
 	find . -name '*.pyc' -exec rm -f {} +
@@ -18,7 +16,7 @@ clean-pyc:
 	find . -name '*~' -exec rm -f {} +
 
 lint:
-	flake8 steemapi/ steembase/
+	flake8 peerplays*/
 
 test:
 	python3 setup.py test
@@ -44,7 +42,7 @@ dist:
 	python3 setup.py bdist --format=zip upload
 	python3 setup.py bdist_wheel upload
 
-release: clean check dist peerplays-changelog git
+release: clean check dist steem-changelog git
 
-peerplays-changelog:
-	git show -s --pretty=format: $(TAG) | tail -n +4 | piston post --file "-" --author xeroc --permlink "python-peerplays-changelog-$(TAGSTEEM)" --category peerplays --title "[Changelog] python-peerplays $(TAG)" --tags python-peerplays changelog
+steem-changelog:
+	git show -s --pretty=format: $(TAG) | tail -n +4 | piston post --file "-" --author chainsquad --permlink "python-peerplays-changelog-$(TAGSTEEM)" --category peerplays --title "[Changelog] python-peerplays $(TAG)" --tags python-peerplays changelog
