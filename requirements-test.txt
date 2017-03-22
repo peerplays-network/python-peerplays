@@ -1,4 +1,4 @@
--e git://github.com/xeroc/python-graphenelib@develop#egg=graphenelib
+graphenelib>=0.5.0
 pycrypto==2.6.1
 scrypt==0.7.1
 pyyaml

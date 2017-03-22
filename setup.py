@@ -21,7 +21,7 @@ setup(
     author_email='<Fabian@chainsquad.com>',
     maintainer='Fabian Schuh',
     maintainer_email='<Fabian@chainsquad.com>',
-    url='http://www.github.com/xeroc/python-peerplays',
+    url='https://bitbucket.org/peerplaysblockchain/peerplays-python',
     keywords=['peerplays', 'library', 'api', 'rpc'],
     packages=[
         # "peerpays",
@@ -34,17 +34,14 @@ setup(
         'Programming Language :: Python :: 3',
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
-        'Intended Audience :: Financial and Insurance Industry',
-        'Topic :: Office/Business :: Financial',
+        'Intended Audience :: System Administrators',
+        'Topic :: Games/Entertainment',
     ],
     install_requires=[
-        "graphenelib",
+        "graphenelib>=0.5.0",
         "scrypt==0.7.1",
         "appdirs==1.4.0",
         "pycrypto==2.6.1",
-    ],
-    dependency_links=[
-        "git+https://github.com/xeroc/python-graphenelib@minimal#egg=graphenelib"
     ],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
