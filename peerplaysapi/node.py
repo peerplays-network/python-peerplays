@@ -1,6 +1,6 @@
 import re
 from grapheneapi.graphenewsrpc import GrapheneWebsocketRPC
-from bitsharesbase.chains import known_chains
+from peerplaysbase.chains import known_chains
 from . import exceptions
 import logging
 log = logging.getLogger(__name__)
@@ -78,4 +78,4 @@ class PeerPlaysNodeRPC(GrapheneWebsocketRPC):
         for k, v in known_chains.items():
             if v["chain_id"] == chain_id:
                 return v
-        raise("Connecting to unknown network!")
+        raise Exception("Connecting to unknown network!")

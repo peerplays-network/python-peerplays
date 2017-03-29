@@ -38,7 +38,7 @@ class DataDir(object):
          in the `backups/` directory every now and then.
     """
     appname = "peerplays"
-    appauthor = "ChainSquad GmbH"
+    appauthor = "Peerplays Blockchain Standards Association"
     storageDatabase = "peerplays.sqlite"
 
     data_dir = user_data_dir(appname, appauthor)
@@ -218,7 +218,7 @@ class Configuration(DataDir):
 
     #: Default configuration
     config_defaults = {
-        "node": "wss://node.peerplays.com",
+        "node": "wss://ppy-node.bitshares.eu",
         "rpcpassword": "",
         "rpcuser": "",
     }

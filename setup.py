@@ -37,6 +37,11 @@ setup(
         'Intended Audience :: System Administrators',
         'Topic :: Games/Entertainment',
     ],
+    entry_points={
+        'console_scripts': [
+            'peerplays = peerplays.scripts.main:main',
+        ],
+    },
     install_requires=[
         "graphenelib>=0.5.0",
         "scrypt==0.7.1",
