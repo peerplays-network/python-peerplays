@@ -27,10 +27,12 @@ class Transfer(GrapheneObject):
         if isArgsThisClass(self, args):
                 self.data = args[0].data
         else:
+            prefix = kwargs.get("prefix", default_prefix)
+
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
             if "memo" in kwargs and kwargs["memo"]:
-                memo = Optional(Memo(kwargs["memo"]))
+                memo = Optional(Memo(prefix=prefix, **kwargs["memo"]))
             else:
                 memo = Optional(None)
             super().__init__(OrderedDict([

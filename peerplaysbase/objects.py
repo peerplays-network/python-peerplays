@@ -41,7 +41,7 @@ class Operation(GPHOperation):
         super(Operation, self).__init__(*args, **kwargs)
 
     def _getklass(self, name):
-        module = __import__("bitsharesbase.operations", fromlist=["operations"])
+        module = __import__("peerplaysbase.operations", fromlist=["operations"])
         class_ = getattr(module, name)
         return class_
 
@@ -76,24 +76,12 @@ class Asset(GrapheneObject):
 class Memo(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
-                self.data = args[0].data
+            self.data = args[0].data
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
             if "message" in kwargs and kwargs["message"]:
-                if "chain" not in kwargs:
-                    chain = default_prefix
-                else:
-                    chain = kwargs["chain"]
-                if isinstance(chain, str) and chain in known_chains:
-                    chain_params = known_chains[chain]
-                elif isinstance(chain, dict):
-                    chain_params = chain
-                else:
-                    raise Exception("Memo() only takes a string or a dict as chain!")
-                if "prefix" not in chain_params:
-                    raise Exception("Memo() needs a 'prefix' in chain params!")
-                prefix = chain_params["prefix"]
+                prefix = kwargs.pop("prefix", default_prefix)
                 super().__init__(OrderedDict([
                     ('from', PublicKey(kwargs["from"], prefix=prefix)),
                     ('to', PublicKey(kwargs["to"], prefix=prefix)),

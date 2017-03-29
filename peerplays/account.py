@@ -91,7 +91,7 @@ class Account(dict):
 
     def history(
         self, first=None,
-        last=1, limit=100,
+        last=0, limit=100,
         only_ops=[], exclude_ops=[]
     ):
         """ Returns a generator for individual account transactions. The
@@ -117,7 +117,8 @@ class Account(dict):
             raise StopIteration
 
         if not first:
-            first = int(mostrecent[0].get("id").split(".")[2]) + 1
+            # first = int(mostrecent[0].get("id").split(".")[2]) + 1
+            first = 9999999999
 
         while True:
             # RPC call

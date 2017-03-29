@@ -132,10 +132,4 @@ def get_terminal(text="Password", confirm=False, allowedempty=False):
 
 
 def pprintOperation(op):
-    from peerplays.price import Order, FilledOrder
-    if op["op"][0] == 1:
-        return str(Order(op["op"][1]))
-    if op["op"][0] == 4:
-        return str(FilledOrder(op["op"][1]))
-    else:
-        return json.dumps(op["op"][1], indent=4)
+    return json.dumps(op["op"][1], indent=4)

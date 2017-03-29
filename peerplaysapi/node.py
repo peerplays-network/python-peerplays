@@ -20,7 +20,7 @@ class PeerPlaysNodeRPC(GrapheneWebsocketRPC):
     def rpcexec(self, payload):
         """ Execute a call by sending the payload.
             It makes use of the GrapheneRPC library.
-            In here, we mostly deal with BitShares specific error handling
+            In here, we mostly deal with PeerPlays specific error handling
 
             :param json payload: Payload data
             :raises ValueError: if the server does not respond in proper JSON format

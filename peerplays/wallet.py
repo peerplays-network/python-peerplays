@@ -18,7 +18,7 @@ class Wallet():
         your accounts. It either uses manually provided private keys
         or uses a SQLite database managed by storage.py.
 
-        :param BitSharesNodeRPC rpc: RPC connection to a PeerPlays node
+        :param PeerPlaysNodeRPC rpc: RPC connection to a PeerPlays node
         :param array,dict,string keys: Predefine the wif keys to shortcut the wallet database
 
         Three wallet operation modes are possible:

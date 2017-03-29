@@ -180,14 +180,15 @@ def addkey(ctx, key):
         installedKeys = ctx.peerplays.wallet.getPublicKeys()
         if len(installedKeys) == 1:
             name = ctx.peerplays.wallet.getAccountFromPublicKey(installedKeys[0])
-            account = Account(name, peerplays_instance=ctx.peerplays)
-            click.echo("=" * 30)
-            click.echo("Setting new default user: %s" % account["name"])
-            click.echo()
-            click.echo("You can change these settings with:")
-            click.echo("    uptick set default_account <account>")
-            click.echo("=" * 30)
-            config["default_account"] = account["name"]
+            if name:
+                account = Account(name, peerplays_instance=ctx.peerplays)
+                click.echo("=" * 30)
+                click.echo("Setting new default user: %s" % account["name"])
+                click.echo()
+                click.echo("You can change these settings with:")
+                click.echo("    uptick set default_account <account>")
+                click.echo("=" * 30)
+                config["default_account"] = account["name"]
 
 
 @main.command(

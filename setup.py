@@ -9,7 +9,7 @@ except LookupError:
     ascii = codecs.lookup('ascii')
     codecs.register(lambda name, enc=ascii: {True: enc}.get(name == 'mbcs'))
 
-VERSION = '0.4.3'
+VERSION = '0.0.1'
 
 setup(
     name='peerplays',
@@ -24,9 +24,10 @@ setup(
     url='https://bitbucket.org/peerplaysblockchain/peerplays-python',
     keywords=['peerplays', 'library', 'api', 'rpc'],
     packages=[
-        # "peerpays",
-        # "peerplaysapi",
-        # "peerplaysbase"
+        "peerplays",
+        "peerplays.cli",
+        "peerplaysapi",
+        "peerplaysbase",
     ],
     classifiers=[
         'License :: OSI Approved :: MIT License',
@@ -39,7 +40,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'peerplays = peerplays.scripts.main:main',
+            'peerplays = peerplays.cli.main:main',
         ],
     },
     install_requires=[

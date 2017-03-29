@@ -406,7 +406,8 @@ class PeerPlays(object):
                 "amount": int(amount),
                 "asset_id": amount.asset["id"]
             },
-            "memo": memoObj.encrypt(memo)
+            "memo": memoObj.encrypt(memo),
+            "prefix": self.rpc.chain_params["prefix"]
         })
         return self.finalizeOp(op, account, "active")
 
