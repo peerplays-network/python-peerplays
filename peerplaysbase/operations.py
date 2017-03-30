@@ -101,3 +101,18 @@ class Account_update(GrapheneObject):
                 ('new_options', options),
                 ('extensions', Set([])),
             ]))
+
+
+class Account_upgrade(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+                self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('account_to_upgrade', ObjectId(kwargs["account_to_upgrade"], "account")),
+                ('upgrade_to_lifetime_member', Bool(kwargs["upgrade_to_lifetime_member"])),
+                ('extensions', Set([])),
+            ]))

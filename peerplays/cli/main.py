@@ -566,3 +566,18 @@ def transfer(ctx, to, amount, asset, memo, account):
         memo=memo,
         account=account
     ))
+
+
+@main.command(
+    help="Upgrade Account"
+)
+@click.pass_context
+@onlineChain
+@click.argument(
+    "account",
+    nargs=1,
+    default=config["default_account"],
+    type=str)
+@unlockWallet
+def upgrade(ctx, account):
+    pprint(ctx.peerplays.upgrade_account(account))

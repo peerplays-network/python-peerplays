@@ -822,3 +822,22 @@ class PeerPlays(object):
             "prefix": self.rpc.chain_params["prefix"]
         })
         return self.finalizeOp(op, account["name"], "active")
+
+    def upgrade_account(self, account=None):
+        """ Upgrade an account to Lifetime membership
+            :param str account: (optional) the account to allow access
+                to (defaults to ``default_account``)
+        """
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account)
+        op = operations.Account_upgrade(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "account_to_upgrade": account["id"],
+            "upgrade_to_lifetime_member": True,
+            "prefix": self.rpc.chain_params["prefix"]
+        })
+        return self.finalizeOp(op, account["name"], "active")

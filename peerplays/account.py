@@ -143,3 +143,6 @@ class Account(dict):
             if len(txs) < _limit:
                 break
             first = int(txs[-1]["id"].split(".")[2])
+
+    def upgrade(self):
+        return self.peerplays.upgrade_account(account=self)
