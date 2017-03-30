@@ -86,8 +86,8 @@ def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
         return
     click.echo('{prog} {version}'.format(
-        prog=pkg_resources.require("uptick")[0].project_name,
-        version=pkg_resources.require("uptick")[0].version
+        prog=pkg_resources.require("peerplays")[0].project_name,
+        version=pkg_resources.require("peerplays")[0].version
     ))
     ctx.exit()
 
