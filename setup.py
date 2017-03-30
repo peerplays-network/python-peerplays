@@ -9,7 +9,7 @@ except LookupError:
     ascii = codecs.lookup('ascii')
     codecs.register(lambda name, enc=ascii: {True: enc}.get(name == 'mbcs'))
 
-VERSION = '0.4.3'
+VERSION = '0.0.2'
 
 setup(
     name='peerplays',
@@ -18,15 +18,16 @@ setup(
     long_description=open('README.md').read(),
     download_url='https://github.com/xeroc/python-peerplays/tarball/' + VERSION,
     author='Fabian Schuh',
-    author_email='<Fabian@chainsquad.com>',
+    author_email='Fabian@chainsquad.com',
     maintainer='Fabian Schuh',
-    maintainer_email='<Fabian@chainsquad.com>',
+    maintainer_email='Fabian@chainsquad.com',
     url='https://bitbucket.org/peerplaysblockchain/peerplays-python',
     keywords=['peerplays', 'library', 'api', 'rpc'],
     packages=[
-        # "peerpays",
-        # "peerplaysapi",
-        # "peerplaysbase"
+        "peerplays",
+        "peerplays.cli",
+        "peerplaysapi",
+        "peerplaysbase",
     ],
     classifiers=[
         'License :: OSI Approved :: MIT License',
@@ -37,6 +38,11 @@ setup(
         'Intended Audience :: System Administrators',
         'Topic :: Games/Entertainment',
     ],
+    entry_points={
+        'console_scripts': [
+            'peerplays = peerplays.cli.main:main',
+        ],
+    },
     install_requires=[
         "graphenelib>=0.5.0",
         "scrypt==0.7.1",
