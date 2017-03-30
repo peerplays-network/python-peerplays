@@ -222,7 +222,7 @@ class PeerPlays(object):
         self,
         account_name,
         registrar=None,
-        referrer="1.2.35641",
+        referrer="1.2.0",
         referrer_percent=50,
         owner_key=None,
         active_key=None,

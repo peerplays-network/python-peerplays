@@ -495,6 +495,36 @@ def randomwif(prefix, num):
 
 
 @main.command(
+    help="Create a new account"
+)
+@click.pass_context
+@onlineChain
+@click.argument(
+    "accountname",
+    nargs=1,
+    type=str)
+@click.option(
+    "--account",
+    default=config["default_account"],
+    help="Account to pay the registration fee"
+)
+@click.option(
+    '--password',
+    prompt="Account Password",
+    hide_input=True,
+    confirmation_prompt=True,
+    help="Account Password"
+)
+@unlockWallet
+def newaccount(ctx, accountname, account, password):
+    pprint(ctx.peerplays.create_account(
+        accountname,
+        registrar=account,
+        password=password,
+    ))
+
+
+@main.command(
     help="Transfer assets"
 )
 @click.pass_context
