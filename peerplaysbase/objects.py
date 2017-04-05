@@ -6,7 +6,7 @@ from graphenebase.types import (
     Array, PointInTime, Signature, Bool,
     Set, Fixed_array, Optional, Static_variant,
     Map, Id, VoteId,
-    ObjectId as GPHObjectId
+    ObjectId as GPHObjectId,
 )
 from graphenebase.objects import GrapheneObject, isArgsThisClass
 from .chains import known_chains
@@ -20,6 +20,7 @@ default_prefix = "PPY"
 class ObjectId(GPHObjectId):
     """ Encodes object/protocol ids
     """
+    # Overloading to get local obect_type
     def __init__(self, object_str, type_verify=None):
         if len(object_str.split(".")) == 3:
             space, type, id = object_str.split(".")

@@ -156,11 +156,55 @@ class Testcases(unittest.TestCase):
                    "0ca569007dba99a2c49de75bd69b3")
         self.assertEqual(compare[:-130], txWire[:-130])
 
-    def compareConstructedTX(self):
-        op = operations.Account_upgrade(**{
+    def test_sport_create(self):
+        op = operations.Sport_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "account_to_upgrade": "1.2.0",
-            "upgrade_to_lifetime_member": True,
+            "name": [["en", "Football"], ["de", "Fußball"]],
+            "prefix": prefix,
+        })
+        ops = [Operation(op)]
+        tx = Signed_Transaction(ref_block_num=ref_block_num,
+                                ref_block_prefix=ref_block_prefix,
+                                expiration=expiration,
+                                operations=ops)
+        tx = tx.sign([wif], chain=prefix)
+        tx.verify([PrivateKey(wif).pubkey], prefix)
+        txWire = hexlify(bytes(tx)).decode("ascii")
+        compare = ("f68585abf4dce7c80457012d000000000000000000020264650"
+                   "84675c39f62616c6c02656e08466f6f7462616c6c0000011f14"
+                   "eb892a0c4a6c28e0a54852d45526b0d8e017edc4eaac1c0c54c"
+                   "6f944ff1d7e5e909157257fe6e71a4532563564c8c063f38846"
+                   "5f8a9420459d5b6cb1fdfcc1")
+        self.assertEqual(compare[:-130], txWire[:-130])
+
+    def test_competitor_create(self):
+        op = operations.Competitor_create(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "name": [["en", "Fuerth"], ["de", "Greuther Fürth"]],
+            "sport_id": "1.0.1241",
+            "prefix": prefix,
+        })
+        ops = [Operation(op)]
+        tx = Signed_Transaction(ref_block_num=ref_block_num,
+                                ref_block_prefix=ref_block_prefix,
+                                expiration=expiration,
+                                operations=ops)
+        tx = tx.sign([wif], chain=prefix)
+        tx.verify([PrivateKey(wif).pubkey], prefix)
+        txWire = hexlify(bytes(tx)).decode("ascii")
+        compare = ("f68585abf4dce7c80457012e000000000000000000020264"
+                   "650f47726575746865722046c3bc72746802656e06467565"
+                   "727468d9040000000000010000012068e0417811ad383306"
+                   "1dde84281b17daf22e8dfe879506ee06eb6d9c324297a811"
+                   "e04fa8e5983001bb7eee47d3e9fd0e7c48590c10abfa6a6f"
+                   "2a33ed50a2d424")
+        self.assertEqual(compare[:-130], txWire[:-130])
+
+    def compareConstructedTX(self):
+        op = operations.Competitor_create(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "name": [["en", "FCN"], ["de", "Fussball Club Nuremberg"]],
+            "sport_id": "1.0.1241",
             "prefix": prefix,
         })
         ops = [Operation(op)]

@@ -5,7 +5,7 @@ from graphenebase.types import (
     Varint32, Int64, String, Bytes, Void,
     Array, PointInTime, Signature, Bool,
     Set, Fixed_array, Optional, Static_variant,
-    Map, Id, VoteId
+    Map, Id, VoteId, FullObjectId
 )
 from .objects import GrapheneObject, isArgsThisClass
 from .account import PublicKey
@@ -16,8 +16,8 @@ from .objects import (
     Price,
     Permission,
     AccountOptions,
-    ObjectId,
-    Memo
+    Memo,
+    ObjectId
 )
 default_prefix = "PPY"
 
@@ -114,5 +114,66 @@ class Account_upgrade(GrapheneObject):
                 ('fee', Asset(kwargs["fee"])),
                 ('account_to_upgrade', ObjectId(kwargs["account_to_upgrade"], "account")),
                 ('upgrade_to_lifetime_member', Bool(kwargs["upgrade_to_lifetime_member"])),
+                ('extensions', Set([])),
+            ]))
+
+
+"""
+operations["competitor_create"] = 46
+operations["event_group_create"] = 47
+operations["event_create"] = 48
+operations["betting_market_group_create"] = 49
+operations["betting_market_create"] = 50
+operations["bet_place"] = 51
+"""
+
+
+class Sport_create(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+                self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            # Sort names by countrycode
+            kwargs["name"] = sorted(
+                kwargs["name"],
+                key=lambda x: repr(x[0]),
+                reverse=False,
+            )
+            name = Map([
+                [String(e[0]), String(e[1])]
+                for e in kwargs["name"]
+            ])
+
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('name', name),
+                ('extensions', Set([])),
+            ]))
+
+
+class Competitor_create(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+                self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            # Sort names by countrycode
+            kwargs["name"] = sorted(
+                kwargs["name"],
+                key=lambda x: repr(x[0]),
+                reverse=False,
+            )
+            name = Map([
+                [String(e[0]), String(e[1])]
+                for e in kwargs["name"]
+            ])
+
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('name', name),
+                ('sport_id', FullObjectId(kwargs["sport_id"])),
                 ('extensions', Set([])),
             ]))
