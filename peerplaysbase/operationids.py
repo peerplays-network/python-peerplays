@@ -53,6 +53,8 @@ operations["event_create"] = 48
 operations["betting_market_group_create"] = 49
 operations["betting_market_create"] = 50
 operations["bet_place"] = 51
+operations["betting_market_resolve"] = 52
+operations["bet_cancel"] = 53
 
 
 def getOperationNameForId(i):

@@ -17,7 +17,10 @@ from .objects import (
     Permission,
     AccountOptions,
     Memo,
-    ObjectId
+    ObjectId,
+    BettingMarketOptions,
+    BetType,
+    BettingMarketResolution
 )
 default_prefix = "PPY"
 
@@ -77,22 +80,18 @@ class Account_update(GrapheneObject):
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
             prefix = kwargs.get("prefix", default_prefix)
-
             if "owner" in kwargs:
                 owner = Optional(Permission(kwargs["owner"], prefix=prefix))
             else:
                 owner = Optional(None)
-
             if "active" in kwargs:
                 active = Optional(Permission(kwargs["active"], prefix=prefix))
             else:
                 active = Optional(None)
-
             if "new_options" in kwargs:
                 options = Optional(AccountOptions(kwargs["new_options"], prefix=prefix))
             else:
                 options = Optional(None)
-
             super().__init__(OrderedDict([
                 ('fee', Asset(kwargs["fee"])),
                 ('account', ObjectId(kwargs["account"], "account")),
@@ -118,16 +117,6 @@ class Account_upgrade(GrapheneObject):
             ]))
 
 
-"""
-operations["competitor_create"] = 46
-operations["event_group_create"] = 47
-operations["event_create"] = 48
-operations["betting_market_group_create"] = 49
-operations["betting_market_create"] = 50
-operations["bet_place"] = 51
-"""
-
-
 class Sport_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
@@ -145,7 +134,6 @@ class Sport_create(GrapheneObject):
                 [String(e[0]), String(e[1])]
                 for e in kwargs["name"]
             ])
-
             super().__init__(OrderedDict([
                 ('fee', Asset(kwargs["fee"])),
                 ('name', name),
@@ -170,10 +158,169 @@ class Competitor_create(GrapheneObject):
                 [String(e[0]), String(e[1])]
                 for e in kwargs["name"]
             ])
-
             super().__init__(OrderedDict([
                 ('fee', Asset(kwargs["fee"])),
                 ('name', name),
                 ('sport_id', FullObjectId(kwargs["sport_id"])),
+                ('extensions', Set([])),
+            ]))
+
+
+class Event_group_create(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+                self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            # Sort names by countrycode
+            kwargs["name"] = sorted(
+                kwargs["name"],
+                key=lambda x: repr(x[0]),
+                reverse=False,
+            )
+            name = Map([
+                [String(e[0]), String(e[1])]
+                for e in kwargs["name"]
+            ])
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('name', name),
+                ('sport_id', FullObjectId(kwargs["sport_id"])),
+                ('extensions', Set([])),
+            ]))
+
+
+class Event_create(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+                self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+
+            # Sort names by countrycode
+            kwargs["name"] = sorted(
+                kwargs.get("name", []),
+                key=lambda x: repr(x[0]),
+                reverse=False,
+            )
+            name = Map([
+                [String(e[0]), String(e[1])]
+                for e in kwargs.get("name", [])
+            ])
+            # Sort season by countrycode
+            kwargs["season"] = sorted(
+                kwargs.get("season", []),
+                key=lambda x: repr(x[0]),
+                reverse=False,
+            )
+            season = Map([
+                [String(e[0]), String(e[1])]
+                for e in kwargs.get("season", [])
+            ])
+            if "start_time" in kwargs:
+                start_time = Optional(PointInTime(kwargs["start_time"]))
+            else:
+                start_time = Optional(None)
+
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('name', name),
+                ('season', season),
+                ('start_time', start_time),
+                ('event_group_id', FullObjectId(kwargs["event_group_id"])),
+                ('competitors',
+                    Array([FullObjectId(o) for o in kwargs["competitors"]])),
+                ('extensions', Set([])),
+            ]))
+
+
+class Betting_market_group_create(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+                self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('event_id', FullObjectId(kwargs["event_id"])),
+                ('options', BettingMarketOptions(kwargs["options"])),
+                ('extensions', Set([])),
+            ]))
+
+
+class Betting_market_create(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+                self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            # Sort names by countrycode
+            kwargs["payout_condition"] = sorted(
+                kwargs.get("payout_condition", []),
+                key=lambda x: repr(x[0]),
+                reverse=False,
+            )
+            payout_condition = Map([
+                [String(e[0]), String(e[1])]
+                for e in kwargs.get("payout_condition", [])
+            ])
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('group_id', FullObjectId(kwargs["group_id"])),
+                ('payout_condition', payout_condition),
+                ('asset_id', ObjectId(kwargs["asset_id"], "asset")),
+                ('extensions', Set([])),
+            ]))
+
+
+class Bet_place(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+                self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('bettor_id', ObjectId(kwargs["bettor_id"], "account")),
+                ('betting_market_id', ObjectId(kwargs["betting_market_id"], "betting_market")),
+                ('amount_to_bet', Int64(kwargs["amount_to_bet"])),
+                ('amount_to_win', Int64(kwargs["amount_to_win"])),
+                ('amount_reserved_for_fees', Int64(kwargs["amount_reserved_for_fees"])),
+                ('back_or_lay', BetType(kwargs["back_or_lay"])),
+                ('extensions', Set([])),
+            ]))
+
+
+class Betting_market_resolve(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+                self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('betting_market_id', ObjectId(kwargs["betting_market_id"], "betting_market")),
+                ('resolution', BettingMarketResolution(kwargs["resolution"])),
+                ('extensions', Set([])),
+            ]))
+
+
+class Bet_cancel_operation(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+                self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('bettor_id', ObjectId(kwargs["bettor_id"], "account")),
+                ('bet_to_cancel', ObjectId(kwargs["bet_to_cancel"], "bet")),
                 ('extensions', Set([])),
             ]))
