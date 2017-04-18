@@ -1,3 +1,4 @@
+import os
 import json
 import sys
 from peerplays import PeerPlays
@@ -72,7 +73,10 @@ def unlockWallet(f):
     def new_func(ctx, *args, **kwargs):
         if not ctx.obj.get("unsigned", False):
             if ctx.peerplays.wallet.created():
-                pwd = click.prompt("Current Wallet Passphrase", hide_input=True)
+                if "UNLOCK" in os.environ:
+                    pwd = os.environ["UNLOCK"]
+                else:
+                    pwd = click.prompt("Current Wallet Passphrase", hide_input=True)
                 ctx.peerplays.wallet.unlock(pwd)
             else:
                 click.echo("No wallet installed yet. Creating ...")

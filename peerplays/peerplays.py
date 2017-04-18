@@ -21,6 +21,7 @@ from .exceptions import (
 )
 from .wallet import Wallet
 from .transactionbuilder import TransactionBuilder
+from .utils import formatTime
 
 log = logging.getLogger(__name__)
 
@@ -777,10 +778,10 @@ class PeerPlays(object):
                     "prefix": self.rpc.chain_params["prefix"]}))
         return self.finalizeOp(op, account["name"], "active")
 
-    def approveproposal(self, proposal_id, account=None, approver=None):
+    def approveproposal(self, proposal_ids, account=None, approver=None):
         """ Approve Proposal
 
-            :param str proposal_id: Id of the proposal
+            :param list proposal_id: Ids of the proposals
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
@@ -796,21 +797,25 @@ class PeerPlays(object):
         else:
             approver = Account(approver)
 
-        proposal = Proposal(proposal_id)
+        if not isinstance(proposal_ids, (list, set)):
+            proposal_ids = set(proposal_ids)
 
-        op = operations.Proposal_update(**{
-            "fee": {"amount": 0, "asset_id": "1.3.0"},
-            'fee_paying_account': account["id"],
-            'proposal': proposal["id"],
-            'active_approvals_to_add': [approver["id"]],
-            "prefix": self.rpc.chain_params["prefix"]
-        })
+        op = []
+        for proposal_id in proposal_ids:
+            proposal = Proposal(proposal_id, peerplays_instance=self)
+            op.append(operations.Proposal_update(**{
+                "fee": {"amount": 0, "asset_id": "1.3.0"},
+                'fee_paying_account': account["id"],
+                'proposal': proposal["id"],
+                'active_approvals_to_add': [approver["id"]],
+                "prefix": self.rpc.chain_params["prefix"]
+            }))
         return self.finalizeOp(op, account["name"], "active")
 
-    def disapproveproposal(self, proposal_id, account=None, approver=None):
+    def disapproveproposal(self, proposal_ids, account=None, approver=None):
         """ Disapprove Proposal
 
-            :param str proposal_id: Id of the proposal
+            :param list proposal_ids: Id of the proposals
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
@@ -826,15 +831,19 @@ class PeerPlays(object):
         else:
             approver = Account(approver)
 
-        proposal = Proposal(proposal_id)
+        if not isinstance(proposal_ids, (list, set)):
+            proposal_ids = set(proposal_ids)
 
-        op = operations.Proposal_update(**{
-            "fee": {"amount": 0, "asset_id": "1.3.0"},
-            'fee_paying_account': account["id"],
-            'proposal': proposal["id"],
-            'active_approvals_to_remove': [approver["id"]],
-            "prefix": self.rpc.chain_params["prefix"]
-        })
+        op = []
+        for proposal_id in proposal_ids:
+            proposal = Proposal(proposal_id, peerplays_instance=self)
+            op.append(operations.Proposal_update(**{
+                "fee": {"amount": 0, "asset_id": "1.3.0"},
+                'fee_paying_account': account["id"],
+                'proposal': proposal["id"],
+                'active_approvals_to_remove': [approver["id"]],
+                "prefix": self.rpc.chain_params["prefix"]
+            }))
         return self.finalizeOp(op, account["name"], "active")
 
     def upgrade_account(self, account=None):
@@ -856,5 +865,176 @@ class PeerPlays(object):
         })
         return self.finalizeOp(op, account["name"], "active")
 
-    def sport_create():
-        pass
+    def sport_create(self, names, account=None):
+        """ Create a sport. This needs to be **proposed**.
+
+            :param list names: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param str account: (optional) the account to allow access
+                to (defaults to ``default_account``)
+        """
+        assert self.proposer, "'sport_create' needs to be proposed"
+        assert isinstance(names, list)
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account)
+        op = operations.Sport_create(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "name": names,
+            "prefix": self.rpc.chain_params["prefix"]
+        })
+        return self.finalizeOp(op, account["name"], "active")
+
+    def competitor_create(self, names, sport_id="0.0.0", account=None):
+        """ Create a competitor. This needs to be **proposed**.
+
+            :param list names: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param str sport_id: Sport ID to create the competitors for (defaults to *relative* id ``0.0.0``)
+            :param str account: (optional) the account to allow access
+                to (defaults to ``default_account``)
+        """
+        assert self.proposer, "'competitor_create' needs to be proposed"
+        assert isinstance(names, list)
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account)
+        op = operations.Competitor_create(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "name": names,
+            "sport_id": sport_id,
+            "prefix": self.rpc.chain_params["prefix"]
+        })
+        return self.finalizeOp(op, account["name"], "active")
+
+    def event_group_create(self, names, sport_id="0.0.0", account=None):
+        """ Create an event group. This needs to be **proposed**.
+
+            :param list names: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param str sport_id: Sport ID to create the competitors for (defaults to *relative* id ``0.0.0``)
+            :param str account: (optional) the account to allow access
+                to (defaults to ``default_account``)
+        """
+        assert self.proposer, "'event_group_create' needs to be proposed"
+        assert isinstance(names, list)
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account)
+        op = operations.Event_group_create(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "name": names,
+            "sport_id": sport_id,
+            "prefix": self.rpc.chain_params["prefix"]
+        })
+        return self.finalizeOp(op, account["name"], "active")
+
+    def event_create(
+        self,
+        season,
+        start_time,
+        competitors,
+        event_group_id="0.0.0",
+        account=None
+    ):
+        """ Create an event. This needs to be **proposed**.
+
+            :param list season: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param list competitors: List of (*relative*) ids of the competitors
+            :param str event_group_id: Event group ID to create the competitors for (defaults to *relative* id ``0.0.0``)
+            :param datetime start_time: Time of the start of the event
+            :param str account: (optional) the account to allow access
+                to (defaults to ``default_account``)
+        """
+        assert self.proposer, "'event_create' needs to be proposed"
+        assert isinstance(season, list)
+        assert isinstance(competitors, list)
+        assert isinstance(start_time, datetime), "start_time needs to be a `datetime.datetime`"
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account)
+        op = operations.Event_create(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "season": season,
+            "start_time": formatTime(start_time),
+            "event_group_id": event_group_id,
+            "competitors": competitors,
+            "prefix": self.rpc.chain_params["prefix"]
+        })
+        return self.finalizeOp(op, account["name"], "active")
+
+    def betting_market_group_create(self, type, margin=0, score=0, event_id="0.0.0", account=None):
+        """ Create an betting market. This needs to be **proposed**.
+
+            :param str type: One of ``moneyline``, ``spread``, ``overunder``
+            :param str event_id: Event ID to create the competitors for (defaults to *relative* id ``0.0.0``)
+            :param int margin: Margin for ``spread`` types
+            :param int score: Score for ``overunder`` types
+            :param str account: (optional) the account to allow access
+                to (defaults to ``default_account``)
+        """
+        assert self.proposer, "'betting_market_create' needs to be proposed"
+        assert type in ["moneyline", "spread", "overunder"], "invalid type"
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account)
+
+        if type == "moneyline":
+            options = [0, {}]
+        elif type == "spread":
+            options = [1, {"margin": margin}]
+        elif type == "overunder":
+            options = [2, {"score": score}]
+
+        op = operations.Betting_market_group_create(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "event_id": event_id,
+            "options": options,
+            "prefix": self.rpc.chain_params["prefix"]
+        })
+        return self.finalizeOp(op, account["name"], "active")
+
+    def betting_market_create(
+        self,
+        payout_condition,
+        asset,
+        group_id="0.0.0",
+        account=None
+    ):
+        """ Create an event group. This needs to be **proposed**.
+
+            :param list payout_condition: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param peerplays.asset.Asset asset: Asset to be used for this market
+            :param str group_id: Group ID to create the competitors for (defaults to *relative* id ``0.0.0``)
+            :param str account: (optional) the account to allow access
+                to (defaults to ``default_account``)
+        """
+        assert self.proposer, "'betting_market_create' needs to be proposed"
+        assert isinstance(payout_condition, list)
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account)
+        asset = Asset(asset)
+        op = operations.Betting_market_create(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "group_id": group_id,
+            "payout_condition": payout_condition,
+            "asset_id": asset["id"],
+            "prefix": self.rpc.chain_params["prefix"]
+        })
+        return self.finalizeOp(op, account["name"], "active")

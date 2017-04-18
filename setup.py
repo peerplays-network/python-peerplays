@@ -40,14 +40,14 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'peerplays = peerplays.cli.main:main',
+            'peerplays = peerplays.cli.cli:main',
         ],
     },
     install_requires=[
         "graphenelib>=0.5.0",
-        "scrypt==0.7.1",
-        "appdirs==1.4.0",
-        "pycrypto==2.6.1",
+        "scrypt",
+        "appdirs",
+        "pycrypto",
     ],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],

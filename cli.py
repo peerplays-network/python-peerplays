@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
 
-from peerplays.cli import main
+from peerplays.cli import cli
 
-main.main()
+cli.main()
