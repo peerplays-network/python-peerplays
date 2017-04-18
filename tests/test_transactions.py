@@ -22,9 +22,6 @@ expiration = "2016-04-06T08:29:27"
 
 class Testcases(unittest.TestCase):
 
-    def test_call_update(self):
-            pass
-
     def test_Transfer(self):
         pub = format(account.PrivateKey(wif).pubkey, prefix)
         from_account_id = "1.2.0"
@@ -154,6 +151,62 @@ class Testcases(unittest.TestCase):
                    "11f4e42562ada1d3fed8f8eb51dd58117e3a4024959c46955a0"
                    "0d2a7e7e8b40ae7204f4617913aaaf028248d43e8c3463b8776"
                    "0ca569007dba99a2c49de75bd69b3")
+        self.assertEqual(compare[:-130], txWire[:-130])
+
+    def test_proposal_update(self):
+        op = operations.Proposal_update(**{
+            'fee_paying_account': "1.2.1",
+            'proposal': "1.10.90",
+            'active_approvals_to_add': ["1.2.5"],
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+        })
+        ops = [Operation(op)]
+        tx = Signed_Transaction(ref_block_num=ref_block_num,
+                                ref_block_prefix=ref_block_prefix,
+                                expiration=expiration,
+                                operations=ops)
+        tx = tx.sign([wif], chain=prefix)
+        tx.verify([PrivateKey(wif).pubkey], prefix)
+        txWire = hexlify(bytes(tx)).decode("ascii")
+        compare = ("f68585abf4dce7c804570117000000000000000000015a01050000000"
+                   "000000001200b28528d1436564f4b4a9faf38b77c17d69ea85476076e"
+                   "bafebbad9733ac014411b044a7570ef103a518d2e17f7250e1cd8e31c"
+                   "f19272395c8fe9bbce0b4bfb4")
+        self.assertEqual(compare[:-130], txWire[:-130])
+
+    def test_create_proposal(self):
+        op = operations.Proposal_create(**{
+            "fee": {"amount": 0,
+                    "asset_id": "1.3.0"
+                    },
+            "fee_paying_account": "1.2.0",
+            "expiration_time": "1970-01-01T00:00:00",
+            "proposed_ops": [{
+                "op": [
+                    0, {"fee": {"amount": 0,
+                                "asset_id": "1.3.0"
+                                },
+                        "from": "1.2.0",
+                        "to": "1.2.0",
+                        "amount": {"amount": 0,
+                                   "asset_id": "1.3.0"
+                                   },
+                        "extensions": []}]}],
+            "extensions": []
+        })
+        ops = [Operation(op)]
+        tx = Signed_Transaction(ref_block_num=ref_block_num,
+                                ref_block_prefix=ref_block_prefix,
+                                expiration=expiration,
+                                operations=ops)
+        tx = tx.sign([wif], chain=prefix)
+        tx.verify([PrivateKey(wif).pubkey], prefix)
+        txWire = hexlify(bytes(tx)).decode("ascii")
+        compare = ("f68585abf4dce7c80457011600000000000000000000000000"
+                   "00010000000000000000000000000000000000000000000000"
+                   "00000001204baf7f11a7ff12337fc097ac6e82e7b68f82f02c"
+                   "c7e24231637c88a91ae5716674acec8a1a305073165c65e520"
+                   "a64769f5f62c0301ce21ab4f7c67a6801b4266")
         self.assertEqual(compare[:-130], txWire[:-130])
 
     def test_sport_create(self):
@@ -322,13 +375,19 @@ class Testcases(unittest.TestCase):
         self.assertEqual(compare[:-130], txWire[:-130])
 
     def compareConstructedTX(self):
+        op = operations.Proposal_update(**{
+            'fee_paying_account': "1.2.1",
+            'proposal': "1.10.90",
+            'active_approvals_to_add': ["1.2.5"],
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+        })
+        """
         op = operations.Betting_market_resolve(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "betting_market_id": "1.21.1",
             "resolution": "win",
             "prefix": prefix,
         })
-        """
         op = operations.Bet_cancel_operation(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "bettor_id": "1.2.1241",

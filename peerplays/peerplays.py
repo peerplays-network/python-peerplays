@@ -7,9 +7,9 @@ from datetime import datetime, timedelta
 from peerplaysapi.node import PeerPlaysNodeRPC
 from peerplaysbase.account import PrivateKey, PublicKey
 from peerplaysbase import transactions, operations
+from .asset import Asset
 from .account import Account
 from .amount import Amount
-from .asset import Asset
 from .witness import Witness
 from .committee import Committee
 from .storage import configStorage as config
@@ -36,6 +36,7 @@ class PeerPlays(object):
         :param array,dict,string keys: Predefine the wif keys to shortcut the wallet database *(optional)*
         :param bool offline: Boolean to prevent connecting to network (defaults to ``False``) *(optional)*
         :param str proposer: Propose a transaction using this proposer *(optional)*
+        :param int proposal_expiration: Expiration time (in seconds) for the proposal *(optional)*
         :param int expiration: Delay in seconds until transactions are supposed to expire *(optional)*
         :param bool bundle: Do not broadcast transactions right away, but allow to bundle operations *(optional)*
 
@@ -114,6 +115,7 @@ class PeerPlays(object):
         self.unsigned = bool(kwargs.get("unsigned", False))
         self.expiration = int(kwargs.get("expiration", 30))
         self.proposer = kwargs.get("proposer", None)
+        self.proposal_expiration = int(kwargs.get("proposal_expiration", 60 * 60 * 24))
         self.bundle = bool(kwargs.get("bundle", False))
 
         # Store config for access through other Classes
@@ -612,11 +614,14 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account)
+        account = Account(account, peerplays_instance=self)
         options = account["options"]
 
+        if not isinstance(witnesses, (list, set)):
+            witnesses = set(witnesses)
+
         for witness in witnesses:
-            witness = Witness(witness)
+            witness = Witness(witness, peerplays_instance=self)
             options["votes"].append(witness["vote_id"])
 
         options["votes"] = list(set(options["votes"]))
@@ -646,11 +651,14 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account)
+        account = Account(account, peerplays_instance=self)
         options = account["options"]
 
+        if not isinstance(witnesses, (list, set)):
+            witnesses = set(witnesses)
+
         for witness in witnesses:
-            witness = Witness(witness)
+            witness = Witness(witness, peerplays_instance=self)
             if witness["vote_id"] in options["votes"]:
                 options["votes"].remove(witness["vote_id"])
 
@@ -681,11 +689,14 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account)
+        account = Account(account, peerplays_instance=self)
         options = account["options"]
 
+        if not isinstance(committees, (list, set)):
+            committees = set(committees)
+
         for committee in committees:
-            committee = Committee(committee)
+            committee = Committee(committee, peerplays_instance=self)
             options["votes"].append(committee["vote_id"])
 
         options["votes"] = list(set(options["votes"]))
@@ -715,11 +726,14 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account)
+        account = Account(account, peerplays_instance=self)
         options = account["options"]
 
+        if not isinstance(committees, (list, set)):
+            committees = set(committees)
+
         for committee in committees:
-            committee = Committee(committee)
+            committee = Committee(committee, peerplays_instance=self)
             if committee["vote_id"] in options["votes"]:
                 options["votes"].remove(committee["vote_id"])
 
@@ -841,3 +855,6 @@ class PeerPlays(object):
             "prefix": self.rpc.chain_params["prefix"]
         })
         return self.finalizeOp(op, account["name"], "active")
+
+    def sport_create():
+        pass

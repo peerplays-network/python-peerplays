@@ -117,6 +117,77 @@ class Account_upgrade(GrapheneObject):
             ]))
 
 
+class Op_wrapper(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+                self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(OrderedDict([
+                ('op', Operation(kwargs["op"])),
+            ]))
+
+
+class Proposal_create(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+                self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            if "review_period_seconds" in kwargs:
+                review = Optional(Uint32(kwargs["review_period_seconds"]))
+            else:
+                review = Optional(None)
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('fee_paying_account', ObjectId(kwargs["fee_paying_account"], "account")),
+                ('expiration_time', PointInTime(kwargs["expiration_time"])),
+                ('proposed_ops',
+                    Array([Op_wrapper(o) for o in kwargs["proposed_ops"]])),
+                ('review_period_seconds', review),
+                ('extensions', Set([])),
+            ]))
+
+
+class Proposal_update(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+                self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+
+            for o in ['active_approvals_to_add',
+                      'active_approvals_to_remove',
+                      'owner_approvals_to_add',
+                      'owner_approvals_to_remove',
+                      'key_approvals_to_add',
+                      'key_approvals_to_remove']:
+                if o not in kwargs:
+                    kwargs[o] = []
+
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('fee_paying_account', ObjectId(kwargs["fee_paying_account"], "account")),
+                ('proposal', ObjectId(kwargs["proposal"], "proposal")),
+                ('active_approvals_to_add',
+                    Array([ObjectId(o, "account") for o in kwargs["active_approvals_to_add"]])),
+                ('active_approvals_to_remove',
+                    Array([ObjectId(o, "account") for o in kwargs["active_approvals_to_remove"]])),
+                ('owner_approvals_to_add',
+                    Array([ObjectId(o, "account") for o in kwargs["owner_approvals_to_add"]])),
+                ('owner_approvals_to_remove',
+                    Array([ObjectId(o, "account") for o in kwargs["owner_approvals_to_remove"]])),
+                ('key_approvals_to_add',
+                    Array([PublicKey(o) for o in kwargs["key_approvals_to_add"]])),
+                ('key_approvals_to_remove',
+                    Array([PublicKey(o) for o in kwargs["key_approvals_to_remove"]])),
+                ('extensions', Set([])),
+            ]))
+
+
 class Sport_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
