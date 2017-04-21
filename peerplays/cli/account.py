@@ -5,9 +5,11 @@ from pprint import pprint
 from prettytable import PrettyTable
 from peerplays.account import Account
 from peerplays.storage import configStorage as config
-from .ui import (
+from .decorators import (
     onlineChain,
     unlockWallet,
+)
+from .ui import (
     print_permissions,
     pprintOperation,
 )

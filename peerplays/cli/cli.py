@@ -29,11 +29,12 @@ from .ui import (
     get_terminal,
     pprintOperation,
     print_version,
+)
+from .decorators import (
     onlineChain,
     offlineChain,
     unlockWallet
 )
-from peerplays.exceptions import AccountDoesNotExistsException
 from click_datetime import Datetime
 from datetime import datetime
 from .main import main
@@ -42,6 +43,8 @@ from . import (
     info,
     proposal,
     wallet,
+    witness,
+    committee
 )
 
 log = logging.getLogger(__name__)

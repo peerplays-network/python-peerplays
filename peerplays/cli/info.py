@@ -7,7 +7,7 @@ from peerplays.block import Block
 from peerplays.account import Account
 from peerplays.asset import Asset
 from peerplays.storage import configStorage as config
-from .ui import (
+from .decorators import (
     onlineChain,
     unlockWallet
 )

@@ -3,7 +3,7 @@ from peerplays.storage import configStorage as config
 from peerplays.account import Account
 from pprint import pprint
 from prettytable import PrettyTable
-from .ui import (
+from .decorators import (
     onlineChain,
     offlineChain,
     unlockWallet
