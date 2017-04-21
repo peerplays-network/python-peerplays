@@ -26,6 +26,7 @@ __all__ = [
     "utils",
     "wallet",
     "witness",
+    "notify",
 ]
 base58.known_prefixes.append("PPY")
 base58.known_prefixes.append("PPY1")

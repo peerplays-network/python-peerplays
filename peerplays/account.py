@@ -146,3 +146,48 @@ class Account(dict):
 
     def upgrade(self):
         return self.peerplays.upgrade_account(account=self)
+
+
+class AccountUpdate(dict):
+    """ This purpose of this class is to keep track of account updates
+        as they are pushed through by :class:`peerplays.notify.Notify`.
+
+        Instances of this class are dictionaries and take the following
+        form:
+
+        ... code-block: js
+
+            {'id': '2.6.29',
+             'lifetime_fees_paid': '44261516129',
+             'most_recent_op': '2.9.0',
+             'owner': '1.2.29',
+             'pending_fees': 0,
+             'pending_vested_fees': 16310,
+             'total_core_in_orders': '6788845277634',
+             'total_ops': 0}
+
+    """
+
+    def __init__(
+        self,
+        data,
+        peerplays_instance=None
+    ):
+        self.peerplays = peerplays_instance or shared_peerplays_instance()
+
+        if isinstance(data, dict):
+            super(AccountUpdate, self).__init__(data)
+        else:
+            account = Account(data, peerplays_instance=self.peerplays)
+            update = self.peerplays.rpc.get_objects([
+                "2.6.%s" % (account["id"].split(".")[2])
+            ])[0]
+            super(AccountUpdate, self).__init__(update)
+
+    @property
+    def account(self):
+        """ In oder to obtain the actual
+            :class:`peerplays.account.Account` from this class, you can
+            use the ``account`` attribute.
+        """
+        return Account(self["owner"])
