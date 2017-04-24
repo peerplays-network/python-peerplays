@@ -15,6 +15,7 @@ full-featured wallet (to replace the cli-wallet).
 
 .. toctree::
 
+   howto-build-peerplays.rst
    howto-trusted-node
    ../rpc
    howto-json-rpc

@@ -848,6 +848,7 @@ class PeerPlays(object):
 
     def upgrade_account(self, account=None):
         """ Upgrade an account to Lifetime membership
+
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
