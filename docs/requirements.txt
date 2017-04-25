@@ -1,5 +1,0 @@
-graphenelib
-peerplays
-autobahn>=0.14
-pycrypto==2.6.1
-appdirs==1.4.0
