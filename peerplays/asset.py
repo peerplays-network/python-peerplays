@@ -80,7 +80,7 @@ class Asset(dict):
 
     @property
     def is_bitasset(self):
-        """ Is the asset a :doc:`mpa`?
+        """ Is the asset a market pegged asset
         """
         return ("bitasset_data_id" in self)
 

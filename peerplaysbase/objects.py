@@ -6,7 +6,7 @@ from graphenebase.types import (
     Array, PointInTime, Signature, Bool,
     Set, Fixed_array, Optional, Static_variant,
     Map, Id, VoteId,
-    ObjectId as GPHObjectId
+    ObjectId as GPHObjectId,
 )
 from graphenebase.objects import GrapheneObject, isArgsThisClass
 from .chains import known_chains
@@ -20,6 +20,7 @@ default_prefix = "PPY"
 class ObjectId(GPHObjectId):
     """ Encodes object/protocol ids
     """
+    # Overloading to get local obect_type
     def __init__(self, object_str, type_verify=None):
         if len(object_str.split(".")) == 3:
             space, type, id = object_str.split(".")
@@ -163,3 +164,72 @@ class AccountOptions(GrapheneObject):
                 ('votes', Array([VoteId(o) for o in kwargs["votes"]])),
                 ('extensions', Set([])),
             ]))
+
+
+class Moneyline_market_options(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            super().__init__(OrderedDict([]))
+
+
+class Spread_market_options(GrapheneObject):
+    def __init__(self, kwargs):
+        super().__init__(OrderedDict([
+            ('margin', Uint32(kwargs["margin"])),
+        ]))
+
+
+class Over_under_market_options(GrapheneObject):
+    def __init__(self, kwargs):
+        super().__init__(OrderedDict([
+            ('score', Uint32(kwargs["score"])),
+        ]))
+
+
+class BettingMarketOptions(Static_variant):
+    def __init__(self, o):
+        id = o[0]
+        if id == 0:
+            data = Moneyline_market_options(o[1])
+        elif id == 1:
+            data = Spread_market_options(o[1])
+        elif id == 2:
+            data = Over_under_market_options(o[1])
+        else:
+            raise Exception("Unknown Betting Market Option")
+        super().__init__(data, id)
+
+
+class Enum(Uint8):
+    def __init__(self, selection):
+        assert selection in self.options.keys() or \
+            selection in self.options.values(),\
+            "Options are %s. Given '%s'" % (
+                str(list(self.options.keys())),
+                selection)
+        if selection in self.options.keys():
+            super(Enum, self).__init__(self.options[selection])
+        else:
+            super(Enum, self).__init__(selection)
+
+    def __str__(self):
+        for k, v in self.options.items():
+            if v == self.data:
+                return k
+
+
+class BetType(Enum):
+    options = {
+        "back": 0,
+        "lay": 1
+    }
+
+
+class BettingMarketResolution(Enum):
+    options = {
+        "win": 0,
+        "not_win": 1,
+        "cancel": 2,
+    }

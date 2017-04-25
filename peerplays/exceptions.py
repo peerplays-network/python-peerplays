@@ -41,6 +41,12 @@ class InvalidWifError(Exception):
     pass
 
 
+class ProposalDoesNotExistException(Exception):
+    """ The proposal does not exist
+    """
+    pass
+
+
 class BlockDoesNotExistsException(Exception):
     """ The block does not exist
     """
@@ -74,5 +80,47 @@ class CommitteeMemberDoesNotExistsException(Exception):
 
 class VestingBalanceDoesNotExistsException(Exception):
     """ Vesting Balance does not exist
+    """
+    pass
+
+
+class BetDoesNotExistException(Exception):
+    """ This bet does not exist
+    """
+    pass
+
+
+class BettingMarketDoesNotExistException(Exception):
+    """ Betting market does not exist
+    """
+    pass
+
+
+class BettingMarketGroupDoesNotExistException(Exception):
+    """ Betting Market Group does not exist
+    """
+    pass
+
+
+class EventDoesNotExistException(Exception):
+    """ This event does not exist
+    """
+    pass
+
+
+class EventGroupDoesNotExistException(Exception):
+    """ This event group does not exist
+    """
+    pass
+
+
+class CompetitorDoesNotExistException(Exception):
+    """ Competitor does not exist
+    """
+    pass
+
+
+class SportDoesNotExistException(Exception):
+    """ Sport does not exist
     """
     pass

@@ -45,6 +45,16 @@ operations["blind_transfer"] = 40
 operations["transfer_from_blind"] = 41
 operations["asset_settle_cancel"] = 42
 operations["asset_claim_fees"] = 43
+operations["fba_distribute"] = 44
+operations["sport_create"] = 45
+operations["competitor_create"] = 46
+operations["event_group_create"] = 47
+operations["event_create"] = 48
+operations["betting_market_group_create"] = 49
+operations["betting_market_create"] = 50
+operations["bet_place"] = 51
+operations["betting_market_resolve"] = 52
+operations["bet_cancel"] = 53
 
 
 def getOperationNameForId(i):
