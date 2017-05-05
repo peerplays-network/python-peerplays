@@ -374,27 +374,57 @@ class Testcases(unittest.TestCase):
                    "55e0")
         self.assertEqual(compare[:-130], txWire[:-130])
 
-    def compareConstructedTX(self):
-        op = operations.Proposal_update(**{
-            'fee_paying_account': "1.2.1",
-            'proposal': "1.10.90",
-            'active_approvals_to_add': ["1.2.5"],
-            "fee": {"amount": 0, "asset_id": "1.3.0"},
-        })
-        """
+    def test_betting_market_resolve(self):
         op = operations.Betting_market_resolve(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "betting_market_id": "1.21.1",
             "resolution": "win",
             "prefix": prefix,
         })
-        op = operations.Bet_cancel_operation(**{
+        ops = [Operation(op)]
+        tx = Signed_Transaction(ref_block_num=ref_block_num,
+                                ref_block_prefix=ref_block_prefix,
+                                expiration=expiration,
+                                operations=ops)
+        tx = tx.sign([wif], chain=prefix)
+        tx.verify([PrivateKey(wif).pubkey], prefix)
+        txWire = hexlify(bytes(tx)).decode("ascii")
+        compare = ("f68585abf4dce7c8045701340000000000000000000100"
+                   "0000011f7f322e84da5986c2c43fa988fcea1ea858a5a4"
+                   "535c639dd244a55df9481c940c13084179c5e939ac5fa4"
+                   "7beea1d8fe63568b751c51c3e22d9e474425cc7f45a2")
+        self.assertEqual(compare[:-130], txWire[:-130])
+
+    def test_bet_cancel(self):
+        # FIXME: Bet cancel does not serialize properly
+        op = operations.Bet_cancel(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "bettor_id": "1.2.1241",
-            "bet_to_cancel": "1.22.10",
+            "bettor_id": "1.2.5555",
+            "bet_to_cancel": "1.22.1111",
             "prefix": prefix,
         })
-        """
+        ops = [Operation(op)]
+        tx = Signed_Transaction(ref_block_num=ref_block_num,
+                                ref_block_prefix=ref_block_prefix,
+                                expiration=expiration,
+                                operations=ops)
+        tx = tx.sign([wif], chain=prefix)
+        tx.verify([PrivateKey(wif).pubkey], prefix)
+        txWire = hexlify(bytes(tx)).decode("ascii")
+        compare = (""
+                   ""
+                   ""
+                   "")
+        self.assertEqual(compare[:-130], txWire[:-130])
+
+    def compareConstructedTX(self):
+        # FIXME: Bet cancel does not serialize properly
+        op = operations.Bet_cancel(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "bettor_id": "1.2.5555",
+            "bet_to_cancel": "1.22.1111",
+            "prefix": prefix,
+        })
         ops = [Operation(op)]
         tx = Signed_Transaction(
             ref_block_num=ref_block_num,

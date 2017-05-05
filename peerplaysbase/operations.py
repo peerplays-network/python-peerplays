@@ -28,7 +28,7 @@ default_prefix = "PPY"
 class Transfer(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
-                self.data = args[0].data
+            self.data = args[0].data
         else:
             prefix = kwargs.get("prefix", default_prefix)
 
@@ -52,7 +52,7 @@ class Account_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
         # Allow for overwrite of prefix
         if isArgsThisClass(self, args):
-                self.data = args[0].data
+            self.data = args[0].data
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
@@ -75,7 +75,7 @@ class Account_update(GrapheneObject):
     def __init__(self, *args, **kwargs):
         # Allow for overwrite of prefix
         if isArgsThisClass(self, args):
-                self.data = args[0].data
+            self.data = args[0].data
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
@@ -105,7 +105,7 @@ class Account_update(GrapheneObject):
 class Account_upgrade(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
-                self.data = args[0].data
+            self.data = args[0].data
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
@@ -120,7 +120,7 @@ class Account_upgrade(GrapheneObject):
 class Op_wrapper(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
-                self.data = args[0].data
+            self.data = args[0].data
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
@@ -132,7 +132,7 @@ class Op_wrapper(GrapheneObject):
 class Proposal_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
-                self.data = args[0].data
+            self.data = args[0].data
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
@@ -154,7 +154,7 @@ class Proposal_create(GrapheneObject):
 class Proposal_update(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
-                self.data = args[0].data
+            self.data = args[0].data
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
@@ -191,7 +191,7 @@ class Proposal_update(GrapheneObject):
 class Sport_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
-                self.data = args[0].data
+            self.data = args[0].data
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
@@ -215,7 +215,7 @@ class Sport_create(GrapheneObject):
 class Competitor_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
-                self.data = args[0].data
+            self.data = args[0].data
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
@@ -240,7 +240,7 @@ class Competitor_create(GrapheneObject):
 class Event_group_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
-                self.data = args[0].data
+            self.data = args[0].data
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
@@ -265,7 +265,7 @@ class Event_group_create(GrapheneObject):
 class Event_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
-                self.data = args[0].data
+            self.data = args[0].data
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
@@ -310,7 +310,7 @@ class Event_create(GrapheneObject):
 class Betting_market_group_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
-                self.data = args[0].data
+            self.data = args[0].data
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
@@ -325,7 +325,7 @@ class Betting_market_group_create(GrapheneObject):
 class Betting_market_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
-                self.data = args[0].data
+            self.data = args[0].data
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
@@ -351,7 +351,7 @@ class Betting_market_create(GrapheneObject):
 class Bet_place(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
-                self.data = args[0].data
+            self.data = args[0].data
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
@@ -370,7 +370,7 @@ class Bet_place(GrapheneObject):
 class Betting_market_resolve(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
-                self.data = args[0].data
+            self.data = args[0].data
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
@@ -382,13 +382,17 @@ class Betting_market_resolve(GrapheneObject):
             ]))
 
 
-class Bet_cancel_operation(GrapheneObject):
+class Bet_cancel(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
-                self.data = args[0].data
+            self.data = args[0].data
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
+
+            # FIXME: this serialization does not work properly yet
+            raise NotImplementedError
+
             super().__init__(OrderedDict([
                 ('fee', Asset(kwargs["fee"])),
                 ('bettor_id', ObjectId(kwargs["bettor_id"], "account")),

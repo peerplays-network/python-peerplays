@@ -1039,3 +1039,28 @@ class PeerPlays(object):
             "prefix": self.rpc.chain_params["prefix"]
         })
         return self.finalizeOp(op, account["name"], "active")
+
+    def resolve_betting_market(self, market_id, result, account=None):
+        """ Create an betting market. This needs to be **proposed**.
+
+            :param str market_id: Market ID to resolve
+            :param int result: Result of the market (``win``, ``not_win``, or ``cancel``)
+            :param str account: (optional) the account to allow access
+                to (defaults to ``default_account``)
+        """
+        assert self.proposer, "'betting_market_create' needs to be proposed"
+        assert result in ["win", "not_win", "cancel"], "invalid result"
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account)
+
+        op = operations.Betting_market_resolve(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "betting_market_id": market_id,
+            "resolution": result,
+            "prefix": self.rpc.chain_params["prefix"]
+        })
+        return self.finalizeOp(op, account["name"], "active")
