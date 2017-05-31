@@ -18,6 +18,7 @@ wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
 ref_block_num = 34294
 ref_block_prefix = 3707022213
 expiration = "2016-04-06T08:29:27"
+GRAPHENE_BETTING_ODDS_PRECISION = 10000
 
 
 class Testcases(unittest.TestCase):
@@ -352,8 +353,8 @@ class Testcases(unittest.TestCase):
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "bettor_id": "1.2.1241",
             "betting_market_id": "1.21.1",
-            "amount_to_bet": 100000,
-            "amount_to_win": 20000,
+            "amount_to_bet": {"amount": 1000, "asset_id": "1.3.1"},
+            "backer_multiplier": 2 * GRAPHENE_BETTING_ODDS_PRECISION,
             "amount_reserved_for_fees": 100000,
             "back_or_lay": "back",
             "prefix": prefix,
@@ -367,11 +368,10 @@ class Testcases(unittest.TestCase):
         tx.verify([PrivateKey(wif).pubkey], prefix)
         txWire = hexlify(bytes(tx)).decode("ascii")
         compare = ("f68585abf4dce7c804570133000000000000000000d909"
-                   "01a086010000000000204e000000000000a08601000000"
-                   "0000000000011f0fcb636b68993dde7b680f9b34ea375e"
-                   "2790b1b6a43621e2048712f21d2868fd553851b5254b5e"
-                   "a2d4995e535813a4d8f76b18bb62ad2722a4b2bb83558c"
-                   "55e0")
+                   "01e80300000000000001204e0000a08601000000000000"
+                   "0000011f60a68b54f4c2f413ec5451e1c306a2f4a5e857"
+                   "b1a4f2832740de775c98b46753797606a7d179d947a075"
+                   "0ca0d1a75d6b3d405c322ef3db06e0157eff70368e20")
         self.assertEqual(compare[:-130], txWire[:-130])
 
     def test_betting_market_resolve(self):
