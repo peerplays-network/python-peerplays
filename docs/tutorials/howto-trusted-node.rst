@@ -37,7 +37,7 @@ In the following, we will setup and use the following network:::
 * P2P network:
   The PeerPlays client uses a peer-to-peer network to connect and broadcasts
   transactions there. A block producing full node will eventually catch your
-  transcaction and validates it by adding it into a new block.
+  transcaction and validate it by adding it into a new block.
 * Trusted Full Node:
   We will use a Full node to connect to the network directly. We call it
   *trusted* since it is supposed to be under our control.
@@ -49,11 +49,11 @@ In the following, we will setup and use the following network:::
   node is supposed to never enter an invalid fork.
 * API:
   Since we have a delayed full node that we can fully trust, we will interface
-  with this node to query the blockchain and receive notifications from it one
+  with this node to query the blockchain and receive notifications from it once
   balance changes.
 
 The delayed full node should be in the same *local* network as the trusted full
-node is in the same network and has internet access. Hence we will work with
+node, however only the trusted full node requires public internet access. Hence we will work with
 the following IPs:
 
 * Trusted Full Node:
@@ -64,14 +64,14 @@ the following IPs:
    * extern: *no* internet access required
    * intern: `192.168.0.101`
 
-Let's go into more detail how to set these up.
+Let's go into more detail on how to set these up.
 
 Trusted Full Node
 _________________
 
-For the trusted full node, the default settings can be used.  For later, we
+For the trusted full node, the default settings can be used.  Later, we
 will need to open the RPC port and listen to an IP address to connect the
-delayed full node to.::
+delayed full node to::
 
     ./programs/witness_node/witness_node --rpc-endpoint="192.168.0.100:8090"
 
@@ -86,12 +86,12 @@ from the trusted full node and the number of blocks that should be delayed.  We
 also need to open the RPC/Websocket port (to the local network!) so that we can
 interface using RPC-JSON calls.
 
-For our example and for 10 blocks delaye (i.e. 30 seconds for 3 second block
+For our example and for 10 blocks delayed (i.e. 30 seconds for 3 second block
 intervals), we need:::
 
     ./programs/delayed_node/delayed_node --trusted-node="192.168.0.100:8090" --rpc-endpoint="192.168.0.101:8090"
 
-We could now connect via RPC:
+We can now connect via RPC:
 
 * `192.168.0.100:8090` : The trusted full node exposed to the internet
 * `192.168.0.101:8090` : The delayed full node not exposed to the internet

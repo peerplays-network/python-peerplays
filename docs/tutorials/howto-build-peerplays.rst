@@ -52,7 +52,7 @@ and compile with ``make``:
 
     cd peerplays
     export CC=gcc-5 CXX=g++-5
-    cmake -DBOOST_ROOT="$BOOST_ROOT" -DCMAKE_BUILD_TYPE=Release .
+    cmake -DBOOST_ROOT="$BOOST_ROOT" -DCMAKE_BUILD_TYPE=Debug .
     make 
 
 Note that the environmental variable ``$BOOST_ROOT`` should point to your

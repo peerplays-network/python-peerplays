@@ -89,6 +89,14 @@ General
    contribute
    support
 
+Command Line Tool
+-----------------
+
+.. toctree::
+   :maxdepth: 1
+
+   cli
+
 Python-PeerPlays Libraries
 --------------------------
 
@@ -143,9 +151,9 @@ Tutorials
 ---------
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   tutorials/howto-exchanges
+   tutorials/index
 
 Indices and tables
 ==================

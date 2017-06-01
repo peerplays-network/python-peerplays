@@ -1,15 +1,17 @@
-#!/usr/bin/env python
-
-import codecs
+#!/usr/bin/env python3
 
 from setuptools import setup
+
+# Work around mbcs bug in distutils.
+# http://bugs.python.org/issue10945
+import codecs
 try:
     codecs.lookup('mbcs')
 except LookupError:
     ascii = codecs.lookup('ascii')
     codecs.register(lambda name, enc=ascii: {True: enc}.get(name == 'mbcs'))
 
-VERSION = '0.0.3'
+VERSION = '0.0.4'
 
 setup(
     name='peerplays',
@@ -44,7 +46,7 @@ setup(
         ],
     },
     install_requires=[
-        "graphenelib>=0.5.0",
+        "graphenelib>=0.5.2",
         "scrypt",
         "appdirs",
         "pycrypto",

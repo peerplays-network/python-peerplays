@@ -12,7 +12,7 @@ ppy = PeerPlays(
     # We want to bundle many operations into a single transaction
     bundle=True,
 )
-ppy.wallet.unlock("posaune")
+ppy.wallet.unlock("")
 
 ppy.sport_create([          # relative id 0.0.0
     ["de", "Fussball"],
