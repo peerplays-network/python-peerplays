@@ -275,4 +275,4 @@ def newaccount(ctx, accountname, account, password):
     type=str)
 @unlockWallet
 def upgrade(ctx, account):
-    pprint(ctx.bitshares.upgrade_account(account))
+    pprint(ctx.peerplays.upgrade_account(account))

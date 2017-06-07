@@ -7,7 +7,7 @@ Downloading the sources
 
 The sources can be downloaded from::
 
-    FIXME
+    https://github.com/pbsa/peerplays
 
 Dependencies
 #############
