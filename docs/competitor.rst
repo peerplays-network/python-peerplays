@@ -1,5 +1,5 @@
 Competitor
 ~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: peerplays.competitor.Competitor
+.. automodule:: peerplays.competitor
    :members:

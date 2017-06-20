@@ -1,5 +1,5 @@
 Betting Market Group
 ~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: peerplays.bettingmarketgroup.BettingMarketGroup
+.. automodule:: peerplays.bettingmarketgroup
    :members:

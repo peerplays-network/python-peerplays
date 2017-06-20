@@ -45,5 +45,5 @@ A private key can be added by using the
 API
 ---
 
-.. autoclass:: peerplays.wallet.Wallet
+.. automodule:: peerplays.wallet
    :members:

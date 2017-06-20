@@ -1,5 +1,5 @@
 Proposal
 ~~~~~~~~
 
-.. autoclass:: peerplays.proposal.Proposal
+.. automodule:: peerplays.proposal
    :members:

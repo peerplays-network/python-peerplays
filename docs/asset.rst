@@ -1,5 +1,5 @@
 Asset
 ~~~~~~
 
-.. autoclass:: peerplays.asset.Asset
+.. automodule:: peerplays.asset
    :members:

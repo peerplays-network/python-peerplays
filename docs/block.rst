@@ -9,5 +9,5 @@ Easily read data in a Block
    from pprint import pprint
    pprint(Block(1))
 
-.. autoclass:: peerplays.block.Block
+.. automodule:: peerplays.block
    :members:

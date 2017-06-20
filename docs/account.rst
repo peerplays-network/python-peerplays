@@ -10,8 +10,5 @@ Obtaining data of an account.
    print(account)
    print(account.balances)
 
-.. autoclass:: peerplays.account.Account
-   :members:
-
-.. autoclass:: peerplays.account.AccountUpdate
+.. automodule:: peerplays.account
    :members:

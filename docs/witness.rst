@@ -8,8 +8,5 @@ Read data about a witness
    from peerplays.witness import Witness
    Witness("chainsquad.com")
 
-.. autoclass:: peerplays.witness.Witness
-   :members:
-
-.. autoclass:: peerplays.witness.Witnesses
+.. automodule:: peerplays.witness
    :members:

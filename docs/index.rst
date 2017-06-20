@@ -118,7 +118,7 @@ General Classes
    proposal
    configuration
 
-Gaming/Tournament specific classes
+Gaming/Tournament specific modules
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. toctree::
