@@ -346,7 +346,7 @@ class PeerPlays(object):
             active_accounts_authority.append([addaccount["id"], 1])
 
         # voting account
-        voting_account = Account(proxy_account or "proxy-to-self")
+        voting_account = Account(proxy_account or "proxy-to-self", peerplays_instance=self)
 
         op = {
             "fee": {"amount": 0, "asset_id": "1.3.0"},
