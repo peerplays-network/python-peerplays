@@ -29,3 +29,23 @@ class Proposal(dict):
         if not any(proposal):
             raise ProposalDoesNotExistException
         super(Proposal, self).__init__(proposal[0])
+
+
+class Proposals(list):
+    """ Obtain a list of pending proposals for an account
+
+        :param str account: Account name
+        :param peerplays peerplays_instance: PeerPlays() instance to use when accesing a RPC
+    """
+    def __init__(self, account, peerplays_instance=None):
+        self.peerplays = peerplays_instance or shared_peerplays_instance()
+
+        account = Account(account)
+        proposals = self.peerplays.rpc.get_proposed_transactions(account["id"])
+
+        super(Proposals, self).__init__(
+            [
+                Proposal(x, peerplays_instance=self.peerplays)
+                for x in proposals
+            ]
+        )
