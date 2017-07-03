@@ -1,4 +1,5 @@
 import datetime
+from getpass import getpass
 from pprint import pprint
 from peerplays import PeerPlays
 
@@ -12,7 +13,7 @@ ppy = PeerPlays(
     # We want to bundle many operations into a single transaction
     bundle=True,
 )
-ppy.wallet.unlock("")
+ppy.wallet.unlock(getpass())
 
 ppy.sport_create([          # relative id 0.0.0
     ["de", "Fussball"],
