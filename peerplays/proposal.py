@@ -17,6 +17,7 @@ class Proposal(dict):
         id,
         peerplays_instance=None,
     ):
+        self.peerplays = peerplays_instance or shared_peerplays_instance()
         if isinstance(id, str):
             self.id = id
             self.refresh()
@@ -25,8 +26,6 @@ class Proposal(dict):
             a, b, c = self.id.split(".")
             assert int(a) == 1 and int(b) == 10, "Valid proposal ids are 1.10.x"
             super(Proposal, self).__init__(id)
-
-        self.peerplays = peerplays_instance or shared_peerplays_instance()
 
     def refresh(self):
         a, b, c = self.id.split(".")
