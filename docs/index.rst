@@ -125,7 +125,6 @@ Gaming/Tournament specific modules
    :maxdepth: 1
 
    sport
-   competitor
    eventgroup
    event
    bettingmarketgroup

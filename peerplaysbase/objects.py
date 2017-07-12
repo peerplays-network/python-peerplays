@@ -166,70 +166,32 @@ class AccountOptions(GrapheneObject):
             ]))
 
 
-class Moneyline_market_options(GrapheneObject):
-    def __init__(self, *args, **kwargs):
-        if isArgsThisClass(self, args):
-            self.data = args[0].data
-        else:
-            super().__init__(OrderedDict([]))
-
-
-class Spread_market_options(GrapheneObject):
-    def __init__(self, kwargs):
-        super().__init__(OrderedDict([
-            ('margin', Uint32(kwargs["margin"])),
-        ]))
-
-
-class Over_under_market_options(GrapheneObject):
-    def __init__(self, kwargs):
-        super().__init__(OrderedDict([
-            ('score', Uint32(kwargs["score"])),
-        ]))
-
-
-class BettingMarketOptions(Static_variant):
-    def __init__(self, o):
-        id = o[0]
-        if id == 0:
-            data = Moneyline_market_options(o[1])
-        elif id == 1:
-            data = Spread_market_options(o[1])
-        elif id == 2:
-            data = Over_under_market_options(o[1])
-        else:
-            raise Exception("Unknown Betting Market Option")
-        super().__init__(data, id)
-
-
-class Enum(Uint8):
+class Enum(Uint64):
     def __init__(self, selection):
-        assert selection in self.options.keys() or \
-            selection in self.options.values(),\
+        assert selection in self.options or \
+            isinstance(selection, int) and len(self.options) < selection, \
             "Options are %s. Given '%s'" % (
-                str(list(self.options.keys())),
-                selection)
-        if selection in self.options.keys():
-            super(Enum, self).__init__(self.options[selection])
+                self.options, selection)
+        if selection in self.options:
+            super(Enum, self).__init__(self.options.index(selection))
         else:
             super(Enum, self).__init__(selection)
 
     def __str__(self):
-        for k, v in self.options.items():
-            if v == self.data:
-                return k
+        return str(self.options[self.data])
 
 
 class BetType(Enum):
-    options = {
-        "back": 0,
-        "lay": 1
-    }
+    options = [
+        "back",
+        "lay",
+    ]
 
 
 class BettingMarketResolution(Enum):
-    options = {
-        "win": 0,
-        "not_win": 1,
-        "cancel": 2,
-    }
+    options = [
+        "win",
+        "not_win",
+        "cancel",
+        "BETTING_MARKET_RESOLUTION_COUNT",
+    ]

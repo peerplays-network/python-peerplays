@@ -1,11 +1,10 @@
 #: Operation ids
 operations = {}
 operations["transfer"] = 0
-operations["transfer"] = 0
 operations["limit_order_create"] = 1
 operations["limit_order_cancel"] = 2
 operations["call_order_update"] = 3
-operations["fill_order"] = 4
+operations["fill_order"] = 4  # VIRTUAL
 operations["account_create"] = 5
 operations["account_update"] = 6
 operations["account_whitelist"] = 7
@@ -43,18 +42,24 @@ operations["override_transfer"] = 38
 operations["transfer_to_blind"] = 39
 operations["blind_transfer"] = 40
 operations["transfer_from_blind"] = 41
-operations["asset_settle_cancel"] = 42
+operations["asset_settle_cancel"] = 42  # VIRTUAL
 operations["asset_claim_fees"] = 43
-operations["fba_distribute"] = 44
-operations["sport_create"] = 45
-operations["competitor_create"] = 46
-operations["event_group_create"] = 47
-operations["event_create"] = 48
-operations["betting_market_group_create"] = 49
-operations["betting_market_create"] = 50
-operations["bet_place"] = 51
-operations["betting_market_resolve"] = 52
-operations["bet_cancel"] = 53
+operations["fba_distribute"] = 44  # VIRTUAL
+operations["asset_update_dividend"] = 45
+operations["asset_dividend_distribution"] = 46  # // VIRTUAL
+operations["sport_create"] = 47
+operations["event_group_create"] = 48
+operations["event_create"] = 49
+operations["betting_market_rules_create"] = 50
+operations["betting_market_group_create"] = 51
+operations["betting_market_create"] = 52
+operations["bet_place"] = 53
+operations["betting_market_group_resolve"] = 54
+operations["betting_market_group_resolved"] = 55  # // VIRTUAL
+operations["betting_market_group_freeze"] = 56
+operations["bet_matched"] = 57  # // VIRTUAL
+operations["bet_cancel"] = 58
+operations["bet_canceled_operation"] = 59  # // VIRTUAL
 
 
 def getOperationNameForId(i):
