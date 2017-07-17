@@ -264,6 +264,16 @@ class Event_create(GrapheneObject):
                 [String(e[0]), String(e[1])]
                 for e in kwargs.get("season", [])
             ])
+            # Sort name by countrycode
+            kwargs["name"] = sorted(
+                kwargs.get("name", []),
+                key=lambda x: repr(x[0]),
+                reverse=False,
+            )
+            name = Map([
+                [String(e[0]), String(e[1])]
+                for e in kwargs.get("name", [])
+            ])
             if "start_time" in kwargs:
                 start_time = Optional(PointInTime(kwargs["start_time"]))
             else:

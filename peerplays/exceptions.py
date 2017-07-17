@@ -114,12 +114,6 @@ class EventGroupDoesNotExistException(Exception):
     pass
 
 
-class CompetitorDoesNotExistException(Exception):
-    """ Competitor does not exist
-    """
-    pass
-
-
 class SportDoesNotExistException(Exception):
     """ Sport does not exist
     """

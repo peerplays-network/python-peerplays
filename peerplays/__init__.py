@@ -12,7 +12,6 @@ __all__ = [
     "block",
     "blockchain",
     "committee",
-    "competitor",
     "event",
     "eventgroup",
     "exceptions",
