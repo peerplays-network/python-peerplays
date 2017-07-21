@@ -13,7 +13,7 @@ import unittest
 from pprint import pprint
 from binascii import hexlify
 
-prefix = "PPY1"
+prefix = "PPY"
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
 ref_block_num = 34294
 ref_block_prefix = 3707022213
@@ -246,7 +246,7 @@ class Testcases(unittest.TestCase):
         tx = tx.sign([wif], chain=prefix)
         tx.verify([PrivateKey(wif).pubkey], prefix)
         txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c804570130000000000000000000020265"
+        compare = ("f68585abf4dce7c804570131000000000000000000020265"
                    "6e034e484c077a685f48616e7312e59c8be5aeb6e586b0e7"
                    "9083e881afe79b9fd9040000000000010000011f2e739264"
                    "8b843f756c8773a984cb2b218a39558cb7415bf7abc6168a"
@@ -270,7 +270,7 @@ class Testcases(unittest.TestCase):
         tx = tx.sign([wif], chain=prefix)
         tx.verify([PrivateKey(wif).pubkey], prefix)
         txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c8045701310000000000000000000001026"
+        compare = ("f68585abf4dce7c8045701330000000000000000000001026"
                    "56e07323031362d313701197bdb58d9040000000000010000"
                    "012001ef3b40d64a3e82c0b4b35586c708c2d8521918ec4bb"
                    "bc9db7ed395c5a619a953d59f1bc8cc7efa19d12acd69a6f5"
@@ -280,8 +280,8 @@ class Testcases(unittest.TestCase):
     def test_betting_market_rules_create(self):
         op = operations.Betting_market_rules_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "name": [["en", "NHL rules"], ["zh_Hans", "國家冰球聯盟 rules"]],
-            "description": [["en", "NHL description"], ["zh_Hans", "國家冰球聯盟 description"]],
+            "name": [["en", "NHL Rules v1.0"]],
+            "description": [["en", "The winner will be the team with the most points at the end of the game.  The team with fewer points will not be the winner."]],
             "prefix": prefix,
         })
         ops = [Operation(op)]
@@ -292,14 +292,16 @@ class Testcases(unittest.TestCase):
         tx = tx.sign([wif], chain=prefix)
         tx.verify([PrivateKey(wif).pubkey], prefix)
         txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c8045701320000000000000000000202656"
-                   "e094e484c2072756c6573077a685f48616e7318e59c8be5ae"
-                   "b6e586b0e79083e881afe79b9f2072756c65730202656e0f4"
-                   "e484c206465736372697074696f6e077a685f48616e731ee5"
-                   "9c8be5aeb6e586b0e79083e881afe79b9f206465736372697"
-                   "074696f6e0000011f795655ab49480513d8895f82f26160b6"
-                   "51f5f11aea2a5fd9022d31138c18662607f74149b1f28432a"
-                   "62787c97ad3986b53de207ac35e91de7b094455b7625d76")
+        compare = ("f68585abf4dce7c8045701350000000000000000000102656"
+                   "e0e4e484c2052756c65732076312e300102656e7c54686520"
+                   "77696e6e65722077696c6c20626520746865207465616d207"
+                   "769746820746865206d6f737420706f696e74732061742074"
+                   "686520656e64206f66207468652067616d652e20205468652"
+                   "07465616d207769746820666577657220706f696e74732077"
+                   "696c6c206e6f74206265207468652077696e6e65722e00000"
+                   "1204ae5e65355fe4f364de07f09b1858a560d8e4549c1228b"
+                   "ac9a31815063d7c1531b374a668a385cfe2154e0d4c1d42de"
+                   "0afe8fe3a56fef5b0d4e1f6fd660f8954")
         self.assertEqual(compare[:-130], txWire[:-130])
 
     #####################
@@ -320,7 +322,7 @@ class Testcases(unittest.TestCase):
         tx = tx.sign([wif], chain=prefix)
         tx.verify([PrivateKey(wif).pubkey], prefix)
         txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c8045701330000000000000000000202646"
+        compare = ("f68585abf4dce7c8045701370000000000000000000202646"
                    "5084675c39f62616c6c02656e08466f6f7462616c6cd90400"
                    "00000000010b000000000016017c0000011f2603de0504424"
                    "dfab0b120e4a258ffe15ee5be333ce8e1404986ea10f1d28e"
@@ -343,7 +345,7 @@ class Testcases(unittest.TestCase):
         tx = tx.sign([wif], chain=prefix)
         tx.verify([PrivateKey(wif).pubkey], prefix)
         txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c804570134000000000000000000d904"
+        compare = ("f68585abf4dce7c804570138000000000000000000d904"
                    "0000000000010202656e0a466f6f203d3d20426172077a"
                    "685f48616e730a466f6f203d3d204261720000011f294a"
                    "2cf8976fe5def4365aa671ca65131a6177789c3c21549f"
@@ -369,7 +371,7 @@ class Testcases(unittest.TestCase):
         tx = tx.sign([wif], chain=prefix)
         tx.verify([PrivateKey(wif).pubkey], prefix)
         txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c80457013600000000000000000080080"
+        compare = ("f68585abf4dce7c80457013a00000000000000000080080"
                    "28002020000000000000081020200000000000000000001"
                    "1f734163cbe9ae3a81bffcf81d94bf71890f744f99e5184"
                    "1ad7c46063cd661b0717eaaa6415890a56e731c1dd38e96"
@@ -391,7 +393,7 @@ class Testcases(unittest.TestCase):
         tx = tx.sign([wif], chain=prefix)
         tx.verify([PrivateKey(wif).pubkey], prefix)
         txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c8045701380000000000000000008008"
+        compare = ("f68585abf4dce7c80457013c0000000000000000008008"
                    "00000001202b5b29f8307788bc8975ef72c46a848ccb6c"
                    "643f88e1809ca700fc7a9ac5bd6204b95e2648339857e6"
                    "9bdb2899e56a9c71dcb3fa5ba3a6baf3d4e225dc5da507")
@@ -416,7 +418,7 @@ class Testcases(unittest.TestCase):
         tx = tx.sign([wif], chain=prefix)
         tx.verify([PrivateKey(wif).pubkey], prefix)
         txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c804570135000000000000000000d909"
+        compare = ("f68585abf4dce7c804570139000000000000000000d909"
                    "01e80300000000000001204e0000a08601000000000000"
                    "000000000000000000011f6436844f2f4d317176e064e6"
                    "4f32d558420ac191193b4425bf215bdb97de807e77743a"
@@ -425,7 +427,6 @@ class Testcases(unittest.TestCase):
         self.assertEqual(compare[:-130], txWire[:-130])
 
     def test_bet_cancel(self):
-        # FIXME: Bet cancel does not serialize properly
         op = operations.Bet_cancel(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "bettor_id": "1.2.5555",
@@ -440,17 +441,17 @@ class Testcases(unittest.TestCase):
         tx = tx.sign([wif], chain=prefix)
         tx.verify([PrivateKey(wif).pubkey], prefix)
         txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = (""
-                   ""
-                   ""
-                   "")
+        compare = ("f68585abf4dce7c80457013f000000000000000000b32bd70800"
+                   "0001201d84eb0e1b0e4490119bd1cc17f7ab0a648ac00c50a36e"
+                   "f3b0d7e12012c8ed0f78c7acad5701d9a0df58e38e33d896bad5"
+                   "fc68a0f59f2f9b591062a194049518")
         self.assertEqual(compare[:-130], txWire[:-130])
 
     def compareConstructedTX(self):
-        op = operations.Bet_cancel(**{
-            "fee": {"amount": 22, "asset_id": "1.3.0"},
-            "bettor_id": "1.2.0",
-            "bet_to_cancel": "1.22.0",
+        op = operations.Betting_market_rules_create(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "name": [["en", "NHL Rules v1.0"]],
+            "description": [["en", "The winner will be the team with the most points at the end of the game.  The team with fewer points will not be the winner."]],
             "prefix": prefix,
         })
         ops = [Operation(op)]

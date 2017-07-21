@@ -296,6 +296,7 @@ class Betting_market_rules_create(GrapheneObject):
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
+
             # Sort names by countrycode
             kwargs["name"] = sorted(
                 kwargs["name"],
@@ -440,7 +441,7 @@ class Bet_cancel(GrapheneObject):
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
             super().__init__(OrderedDict([
-#                ('fee', Asset(kwargs["fee"])),
+                ('fee', Asset(kwargs["fee"])),
                 ('bettor_id', ObjectId(kwargs["bettor_id"], "account")),
                 ('bet_to_cancel', ObjectId(kwargs["bet_to_cancel"], "bet")),
                 ('extensions', Set([])),

@@ -218,7 +218,7 @@ class Configuration(DataDir):
 
     #: Default configuration
     config_defaults = {
-        "node": "wss://ppy-node.bitshares.eu",
+        "node": "wss://peerplays-dev.blocktrades.info/ws",
         "rpcpassword": "",
         "rpcuser": "",
     }
