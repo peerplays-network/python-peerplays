@@ -9,13 +9,12 @@ ppy = PeerPlays(
     # Proposal needs to be approve within 1 hour
     proposal_expiration=60 * 2,
     # For testing, set this to true
-    nobroadcast=True,
+    nobroadcast=False,
     # We want to bundle many operations into a single transaction
     bundle=True,
 )
 ppy.wallet.unlock(getpass())
 
-"""
 ppy.sport_create([          # relative id 0.0.0
     ["de", "Fussball"],
     ["en", "Soccer"],
@@ -32,13 +31,11 @@ ppy.event_create(           # relative id 0.0.2
     datetime.datetime(2016, 1, 1, 0, 0, 0),  # start_time
     event_group_id="0.0.3"   # event group
 )
-"""
 
 ppy.betting_market_rules_create(    # relative id 0.0.3
     [["en", "NHL Rules v1.0"]],
-    [["en", "The winner will be the team with the most points at the end of the game.  The team with fewer points will not be the winner."]]
+    [["en", "The winner will be the team with the most points at the end of the game.  The team with fewer points will not be the winner."]],
 )
-"""
 
 ppy.betting_market_group_create(  # relative id 0.0.4
     [["de", "Meine Market Group"], ["en", "My betting market group",]],
@@ -55,7 +52,6 @@ ppy.betting_market_create(
     [["de", "Nuernberg gewinnt"], ["en", "Nuremberg wins"]],
     group_id="0.0.4",
 )
-"""
 
 # Broadcast the whole transaction
 pprint(

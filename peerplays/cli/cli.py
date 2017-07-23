@@ -116,7 +116,6 @@ def sign(ctx, filename):
     'filename',
     required=False,
     type=click.File('r'))
-@unlockWallet
 def broadcast(ctx, filename):
     if filename:
         tx = filename.read()

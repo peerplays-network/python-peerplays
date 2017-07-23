@@ -455,6 +455,12 @@ class Testcases(unittest.TestCase):
             "prefix": prefix,
         })
         ops = [Operation(op)]
+
+        """
+        from peerplays import PeerPlays
+        ppy = PeerPlays()
+        ops = transactions.addRequiredFees(ppy.rpc, ops)
+        """
         tx = Signed_Transaction(
             ref_block_num=ref_block_num,
             ref_block_prefix=ref_block_prefix,
