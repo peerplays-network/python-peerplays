@@ -1,8 +1,8 @@
 Exceptions
 ~~~~~~~~~~
 
-.. autoclass:: peerplays.exceptions
+.. automodule:: peerplays.exceptions
    :members:
 
-.. autoclass:: peerplaysapi.exceptions
+.. automodule:: peerplaysapi.exceptions
    :members:

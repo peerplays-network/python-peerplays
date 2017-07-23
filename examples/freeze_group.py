@@ -14,9 +14,8 @@ ppy = PeerPlays(
 )
 ppy.wallet.unlock("")
 
-ppy.betting_market_resolve(
-    "1.20.0",
-    [["1.21.257", "win"], ["1.21.258", "not_win"], ["1.21.259", "cancel"]]
+ppy.betting_market_group_freeze(
+    "1.20.0", True
 )
 
 # Broadcast the whole transaction

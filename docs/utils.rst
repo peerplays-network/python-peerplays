@@ -1,5 +1,5 @@
 Utilities
 ~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: peerplays.utils
+.. automodule:: peerplays.utils
    :members:

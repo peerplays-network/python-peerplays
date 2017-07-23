@@ -29,5 +29,5 @@ Monitor for new blocks ..
    for operations in chain.ops():
        print(operations)
 
-.. autoclass:: peerplays.blockchain.Blockchain
+.. automodule:: peerplays.blockchain
    :members:

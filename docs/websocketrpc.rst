@@ -7,5 +7,5 @@ websockets.
 
 Defintion
 =========
-.. autoclass:: peerplaysapi.node.PeerPlaysNodeRPC
-    :members: rpcexec, __getattr__
+.. automodule:: peerplaysapi.node
+    :members:

@@ -1,5 +1,5 @@
 Betting Market
 ~~~~~~~~~~~~~~
 
-.. autoclass:: peerplays.bettingmarket.BettingMarket
+.. automodule:: peerplays.bettingmarket
    :members:

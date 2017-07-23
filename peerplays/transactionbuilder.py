@@ -97,13 +97,13 @@ class TransactionBuilder(dict):
         ops = transactions.addRequiredFees(self.peerplays.rpc, ops)
         expiration = transactions.formatTimeFromNow(self.peerplays.expiration)
         ref_block_num, ref_block_prefix = transactions.getBlockParams(self.peerplays.rpc)
-        tx = Signed_Transaction(
+        self.tx = Signed_Transaction(
             ref_block_num=ref_block_num,
             ref_block_prefix=ref_block_prefix,
             expiration=expiration,
             operations=ops
         )
-        super(TransactionBuilder, self).__init__(tx.json())
+        super(TransactionBuilder, self).__init__(self.tx.json())
 
     def sign(self):
         """ Sign a provided transaction witht he provided key(s)
@@ -156,7 +156,8 @@ class TransactionBuilder(dict):
 
             :param tx tx: Signed transaction to broadcast
         """
-        self.sign()
+        if not "signatures" in self or not self["signatures"]:
+            self.sign()
 
         if self.peerplays.nobroadcast:
             log.warning("Not broadcasting anything!")

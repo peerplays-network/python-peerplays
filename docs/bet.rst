@@ -1,5 +1,5 @@
 Bet
 ~~~~~~~
 
-.. autoclass:: peerplays.bet.Bet
+.. automodule:: peerplays.bet
    :members:

@@ -23,7 +23,7 @@ node.
 
 Defintion
 =========
-.. autoclass:: peerplaysapi.websocket.PeerPlaysWebsocket
+.. automodule:: peerplaysapi.websocket
     :members:
     :undoc-members:
     :private-members:

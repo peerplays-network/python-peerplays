@@ -17,10 +17,15 @@ class Proposal(dict):
         id,
         peerplays_instance=None,
     ):
-        self.id = id
-
         self.peerplays = peerplays_instance or shared_peerplays_instance()
-        self.refresh()
+        if isinstance(id, str):
+            self.id = id
+            self.refresh()
+        elif isinstance(id, dict) and "id" in id:
+            self.id = id["id"]
+            a, b, c = self.id.split(".")
+            assert int(a) == 1 and int(b) == 10, "Valid proposal ids are 1.10.x"
+            super(Proposal, self).__init__(id)
 
     def refresh(self):
         a, b, c = self.id.split(".")

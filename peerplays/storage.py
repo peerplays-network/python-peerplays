@@ -27,8 +27,8 @@ class DataDir(object):
 
         **Windows:**
 
-         * `C:\Documents and Settings\<User>\Application Data\Local Settings\<AppAuthor>\<AppName>`
-         * `C:\Documents and Settings\<User>\Application Data\<AppAuthor>\<AppName>`
+         * `C:\\Documents and Settings\\<User>\\Application Data\\Local Settings\\<AppAuthor>\\<AppName>`
+         * `C:\\Documents and Settings\\<User>\\Application Data\\<AppAuthor>\\<AppName>`
 
         **Linux:**
 
@@ -218,7 +218,7 @@ class Configuration(DataDir):
 
     #: Default configuration
     config_defaults = {
-        "node": "wss://ppy-node.bitshares.eu",
+        "node": "wss://peerplays-dev.blocktrades.info/ws",
         "rpcpassword": "",
         "rpcuser": "",
     }

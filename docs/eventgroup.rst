@@ -1,5 +1,5 @@
 Event Group
 ~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: peerplays.eventgroup.EventGroup
+.. automodule:: peerplays.eventgroup
    :members:

@@ -18,5 +18,5 @@ To build your own transactions and sign them
    tx.sign()
    tx.broadcast()
 
-.. autoclass:: peerplays.transactionbuilder.TransactionBuilder
+.. automodule:: peerplays.transactionbuilder
    :members:

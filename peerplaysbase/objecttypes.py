@@ -1,26 +1,31 @@
-#: Object types for object ids
-object_type = {}
-object_type["null"] = 0
-object_type["base"] = 1
-object_type["account"] = 2
-object_type["asset"] = 3
-object_type["force_settlement"] = 4
-object_type["committee_member"] = 5
-object_type["witness"] = 6
-object_type["limit_order"] = 7
-object_type["call_order"] = 8
-object_type["custom"] = 9
-object_type["proposal"] = 10
-object_type["operation_history"] = 11
-object_type["withdraw_permission"] = 12
-object_type["vesting_balance"] = 13
-object_type["worker"] = 14
-object_type["balance"] = 15
-object_type["sport"] = 16
-object_type["competitor"] = 17
-object_type["event_group"] = 18
-object_type["event"] = 19
-object_type["betting_market_group"] = 20
-object_type["betting_market"] = 21
-object_type["bet"] = 22
-object_type["OBJECT_TYPE_COUNT"] = 23
+ts = [
+    "null",
+    "base",
+    "account",
+    "asset",
+    "force_settlement",
+    "committee_member",
+    "witness",
+    "limit_order",
+    "call_order",
+    "custom",
+    "proposal",
+    "operation_history",
+    "withdraw_permission",
+    "vesting_balance",
+    "worker",
+    "balance",
+    "sport",
+    "event_group",
+    "event",
+    "betting_market_rules",
+    "betting_market_group",
+    "betting_market",
+    "bet",
+    "tournament",
+    "tournament_details",
+    "match",
+    "game",
+]
+
+object_type = {k: ts.index(k) for k in ts}

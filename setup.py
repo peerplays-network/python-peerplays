@@ -11,7 +11,7 @@ except LookupError:
     ascii = codecs.lookup('ascii')
     codecs.register(lambda name, enc=ascii: {True: enc}.get(name == 'mbcs'))
 
-VERSION = '0.1.0'
+VERSION = '0.1.1'
 
 setup(
     name='peerplays',
@@ -50,6 +50,7 @@ setup(
         "scrypt",
         "appdirs",
         "pycrypto",
+        "click-datetime"
     ],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],

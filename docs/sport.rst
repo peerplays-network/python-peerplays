@@ -1,5 +1,5 @@
 Sport
 ~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: peerplays.sport.Sport
+.. automodule:: peerplays.sport
    :members:

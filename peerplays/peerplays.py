@@ -888,35 +888,11 @@ class PeerPlays(object):
         })
         return self.finalizeOp(op, account["name"], "active")
 
-    def competitor_create(self, names, sport_id="0.0.0", account=None):
-        """ Create a competitor. This needs to be **proposed**.
-
-            :param list names: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
-            :param str sport_id: Sport ID to create the competitors for (defaults to *relative* id ``0.0.0``)
-            :param str account: (optional) the account to allow access
-                to (defaults to ``default_account``)
-        """
-        assert self.proposer, "'competitor_create' needs to be proposed"
-        assert isinstance(names, list)
-        if not account:
-            if "default_account" in config:
-                account = config["default_account"]
-        if not account:
-            raise ValueError("You need to provide an account")
-        account = Account(account)
-        op = operations.Competitor_create(**{
-            "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "name": names,
-            "sport_id": sport_id,
-            "prefix": self.rpc.chain_params["prefix"]
-        })
-        return self.finalizeOp(op, account["name"], "active")
-
     def event_group_create(self, names, sport_id="0.0.0", account=None):
         """ Create an event group. This needs to be **proposed**.
 
             :param list names: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
-            :param str sport_id: Sport ID to create the competitors for (defaults to *relative* id ``0.0.0``)
+            :param str sport_id: Sport ID to create the event group for (defaults to *relative* id ``0.0.0``)
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
@@ -938,24 +914,23 @@ class PeerPlays(object):
 
     def event_create(
         self,
+        name,
         season,
         start_time,
-        competitors,
         event_group_id="0.0.0",
         account=None
     ):
         """ Create an event. This needs to be **proposed**.
 
-            :param list season: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
-            :param list competitors: List of (*relative*) ids of the competitors
-            :param str event_group_id: Event group ID to create the competitors for (defaults to *relative* id ``0.0.0``)
+            :param list name: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param list season: Internationalized season, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param str event_group_id: Event group ID to create the event for (defaults to *relative* id ``0.0.0``)
             :param datetime start_time: Time of the start of the event
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
         assert self.proposer, "'event_create' needs to be proposed"
         assert isinstance(season, list)
-        assert isinstance(competitors, list)
         assert isinstance(start_time, datetime), "start_time needs to be a `datetime.datetime`"
         if not account:
             if "default_account" in config:
@@ -965,44 +940,98 @@ class PeerPlays(object):
         account = Account(account)
         op = operations.Event_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "name": name,
             "season": season,
             "start_time": formatTime(start_time),
             "event_group_id": event_group_id,
-            "competitors": competitors,
             "prefix": self.rpc.chain_params["prefix"]
         })
         return self.finalizeOp(op, account["name"], "active")
 
-    def betting_market_group_create(self, type, margin=0, score=0, event_id="0.0.0", account=None):
-        """ Create an betting market. This needs to be **proposed**.
+    def betting_market_rules_create(self, names, descriptions, account=None):
+        """ Create betting market rules
 
-            :param str type: One of ``moneyline``, ``spread``, ``overunder``
-            :param str event_id: Event ID to create the competitors for (defaults to *relative* id ``0.0.0``)
-            :param int margin: Margin for ``spread`` types
-            :param int score: Score for ``overunder`` types
+            :param list names: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param list descriptions: Internationalized descriptions, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
+
         """
-        assert self.proposer, "'betting_market_create' needs to be proposed"
-        assert type in ["moneyline", "spread", "overunder"], "invalid type"
+        assert self.proposer, "'betting_market_rules_create' needs to be proposed"
+        assert isinstance(names, list)
+        assert isinstance(descriptions, list)
         if not account:
             if "default_account" in config:
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
         account = Account(account)
+        op = operations.Betting_market_rules_create(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "name": names,
+            "description": descriptions,
+            "prefix": self.rpc.chain_params["prefix"]
+        })
+        return self.finalizeOp(op, account["name"], "active")
 
-        if type == "moneyline":
-            options = [0, {}]
-        elif type == "spread":
-            options = [1, {"margin": margin}]
-        elif type == "overunder":
-            options = [2, {"score": score}]
+    def betting_market_group_create(
+        self,
+        description,
+        event_id="0.0.0",
+        rules_id="0.0.0",
+        asset=None,
+        account=None
+    ):
+        """ Create an betting market. This needs to be **proposed**.
 
+            :param list description: Internationalized list of descriptions
+            :param str event_id: Event ID to create this for (defaults to *relative* id ``0.0.0``)
+            :param str rule_id: Rule ID to create this with (defaults to *relative* id ``0.0.0``)
+            :param peerplays.asset.Asset asset: Asset to be used for this market
+            :param str account: (optional) the account to allow access
+                to (defaults to ``default_account``)
+        """
+        assert self.proposer, "'betting_market_create' needs to be proposed"
+        if not asset:
+            asset = self.rpc.chain_params["core_symbol"]
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account, peerplays_instance=self)
+        asset = Asset(asset, peerplays_instance=self)
         op = operations.Betting_market_group_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "description": description,
             "event_id": event_id,
-            "options": options,
+            "rules_id": rules_id,
+            "asset_id": asset["id"],
+            "prefix": self.rpc.chain_params["prefix"]
+        })
+        return self.finalizeOp(op, account["name"], "active")
+
+    def betting_market_group_freeze(self, betting_market_group_id, freeze=True, account=None):
+        """ Freeze a betting market group. This needs to be **proposed**.
+
+            :param str betting_market_group_id: Market Group ID to resolve
+            :param bool freeze: Freeze group if ``True``
+            :param str account: (optional) the account to allow access
+                to (defaults to ``default_account``)
+
+        """
+        assert self.proposer, "'betting_market_create' needs to be proposed"
+        assert isinstance(freeze, bool)
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account)
+        op = operations.Betting_market_group_freeze(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "betting_market_group_id": betting_market_group_id,
+            "freeze": freeze,
             "prefix": self.rpc.chain_params["prefix"]
         })
         return self.finalizeOp(op, account["name"], "active")
@@ -1010,15 +1039,13 @@ class PeerPlays(object):
     def betting_market_create(
         self,
         payout_condition,
-        asset,
         group_id="0.0.0",
         account=None
     ):
         """ Create an event group. This needs to be **proposed**.
 
             :param list payout_condition: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
-            :param peerplays.asset.Asset asset: Asset to be used for this market
-            :param str group_id: Group ID to create the competitors for (defaults to *relative* id ``0.0.0``)
+            :param str group_id: Group ID to create the market for (defaults to *relative* id ``0.0.0``)
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
@@ -1030,37 +1057,43 @@ class PeerPlays(object):
         if not account:
             raise ValueError("You need to provide an account")
         account = Account(account)
-        asset = Asset(asset)
         op = operations.Betting_market_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "group_id": group_id,
             "payout_condition": payout_condition,
-            "asset_id": asset["id"],
             "prefix": self.rpc.chain_params["prefix"]
         })
         return self.finalizeOp(op, account["name"], "active")
 
-    def resolve_betting_market(self, market_id, result, account=None):
+    def betting_market_resolve(self, betting_market_group_id, results, account=None):
         """ Create an betting market. This needs to be **proposed**.
 
-            :param str market_id: Market ID to resolve
-            :param int result: Result of the market (``win``, ``not_win``, or ``cancel``)
+            :param str betting_market_group_id: Market Group ID to resolve
+            :param list results: Array of Result of the market (``win``, ``not_win``, or ``cancel``)
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
+
+            Results take the form:::
+
+                [
+                   ["1.21.257", "win"],
+                   ["1.21.258", "not_win"],
+                   ["1.21.259", "cancel"],
+               ]
+
         """
         assert self.proposer, "'betting_market_create' needs to be proposed"
-        assert result in ["win", "not_win", "cancel"], "invalid result"
+        assert isinstance(results, (list, set))
         if not account:
             if "default_account" in config:
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
         account = Account(account)
-
-        op = operations.Betting_market_resolve(**{
+        op = operations.Betting_market_group_resolve(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "betting_market_id": market_id,
-            "resolution": result,
+            "betting_market_group_id": betting_market_group_id,
+            "resolutions": results,
             "prefix": self.rpc.chain_params["prefix"]
         })
         return self.finalizeOp(op, account["name"], "active")

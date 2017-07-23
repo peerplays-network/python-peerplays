@@ -15,5 +15,5 @@ For the sake of easier handling of Assets on the blockchain
    a += b
    a /= 2.0
 
-.. autoclass:: peerplays.amount.Amount
+.. automodule:: peerplays.amount
    :members:
