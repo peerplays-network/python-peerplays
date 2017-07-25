@@ -35,10 +35,9 @@ You need to download the Boost tarball for Boost 1.60.0.
 .. code-block:: sh
 
     export BOOST_ROOT=$HOME/opt/boost_1.60.0
-    wget -c 'http://sourceforge.net/projects/boost/files/boost/1.60.0/boost_1.60.0.tar.bz2/download'\
-         -O boost_1.60.0.tar.bz2
-    tar xjf boost_1.60.0.tar.bz2
-    cd boost_1.60.0/
+    curl -O -J -L "https://downloads.sourceforge.net/project/boost/boost/1.60.0/boost_1_60_0.tar.bz2?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fboost%2Ffiles%2Fboost%2F1.60.0%2F&ts=1495492753&use_mirror=superb-dca2"
+    tar xjf boost_1_60_0.tar.bz2
+    cd boost_1_60_0/
     ./bootstrap.sh "--prefix=$BOOST_ROOT"
     ./b2 install
 
