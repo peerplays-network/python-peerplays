@@ -211,6 +211,34 @@ class Sport_create(GrapheneObject):
             ]))
 
 
+class Sport_update(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            if "new_name" in kwargs:
+                # Sort names by countrycode
+                kwargs["new_name"] = sorted(
+                    kwargs["new_name"],
+                    key=lambda x: repr(x[0]),
+                    reverse=False,
+                )
+                name = Optional(Map([
+                    [String(e[0]), String(e[1])]
+                    for e in kwargs["new_name"]
+                ]))
+            else:
+                name = Optional(None)
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('sport_id', FullObjectId(kwargs["sport_id"])),
+                ('new_name', name),
+                ('extensions', Set([])),
+            ]))
+
+
 class Event_group_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
@@ -232,6 +260,35 @@ class Event_group_create(GrapheneObject):
                 ('fee', Asset(kwargs["fee"])),
                 ('name', name),
                 ('sport_id', FullObjectId(kwargs["sport_id"])),
+                ('extensions', Set([])),
+            ]))
+
+
+class Event_group_update(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            if "new_name" in kwargs:
+                # Sort names by countrycode
+                kwargs["new_name"] = sorted(
+                    kwargs["new_name"],
+                    key=lambda x: repr(x[0]),
+                    reverse=False,
+                )
+                name = Optional(Map([
+                    [String(e[0]), String(e[1])]
+                    for e in kwargs["new_name"]
+                ]))
+            else:
+                name = Optional(None)
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('event_group_id', FullObjectId(kwargs["event_group_id"])),
+                ('new_sport_id', FullObjectId(kwargs["new_sport_id"])),
+                ('new_name', name),
                 ('extensions', Set([])),
             ]))
 
@@ -289,6 +346,72 @@ class Event_create(GrapheneObject):
             ]))
 
 
+class Event_update(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+
+            if "new_name" in kwargs:
+                # Sort names by countrycode
+                kwargs["new_name"] = sorted(
+                    kwargs.get("new_name", []),
+                    key=lambda x: repr(x[0]),
+                    reverse=False,
+                )
+                name = Optional(Map([
+                    [String(e[0]), String(e[1])]
+                    for e in kwargs.get("new_name", [])
+                ]))
+            else:
+                name = Optional(None)
+
+            if "new_season" in kwargs:
+                # Sort season by countrycode
+                kwargs["new_season"] = sorted(
+                    kwargs.get("new_season", []),
+                    key=lambda x: repr(x[0]),
+                    reverse=False,
+                )
+                season = Optional(Map([
+                    [String(e[0]), String(e[1])]
+                    for e in kwargs.get("new_season", [])
+                ]))
+            else:
+                season = Optional(None)
+
+            if "new_name" in kwargs:
+                # Sort name by countrycode
+                kwargs["new_name"] = sorted(
+                    kwargs.get("new_name", []),
+                    key=lambda x: repr(x[0]),
+                    reverse=False,
+                )
+                name = Optional(Map([
+                    [String(e[0]), String(e[1])]
+                    for e in kwargs.get("new_name", [])
+                ]))
+            else:
+                name = Optional(None)
+
+            if "new_start_time" in kwargs:
+                start_time = Optional(PointInTime(kwargs["new_start_time"]))
+            else:
+                start_time = Optional(None)
+
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('event_id', FullObjectId(kwargs["event_id"])),
+                ('new_name', name),
+                ('new_season', season),
+                ('new_start_time', start_time),
+                ('new_event_group_id', Optional(FullObjectId(kwargs["event_group_id"]))),
+                ('extensions', Set([])),
+            ]))
+
+
 class Betting_market_rules_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
@@ -325,6 +448,51 @@ class Betting_market_rules_create(GrapheneObject):
             ]))
 
 
+class Betting_market_rules_update(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+
+            if "new_name" in kwargs:
+                # Sort names by countrycode
+                kwargs["new_name"] = sorted(
+                    kwargs["new_name"],
+                    key=lambda x: repr(x[0]),
+                    reverse=False,
+                )
+                name = Optional(Map([
+                    [String(e[0]), String(e[1])]
+                    for e in kwargs["new_name"]
+                ]))
+            else:
+                name = Optional(None)
+
+            # Sort description by countrycode
+            if "new_description" in kwargs:
+                kwargs["new_description"] = sorted(
+                    kwargs["new_description"],
+                    key=lambda x: repr(x[0]),
+                    reverse=False,
+                )
+                description = Optional(Map([
+                    [String(e[0]), String(e[1])]
+                    for e in kwargs["new_description"]
+                ]))
+            else:
+                description = Optional(None)
+
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('betting_market_rules_id', FullObjectId(kwargs["betting_market_rules_id"])),
+                ('new_name', name),
+                ('new_description', description),
+                ('extensions', Set([])),
+            ]))
+
+
 class Betting_market_group_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
@@ -352,6 +520,39 @@ class Betting_market_group_create(GrapheneObject):
             ]))
 
 
+class Betting_market_group_update(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+
+            if "new_description" in kwargs:
+                # Sort description by countrycode
+                kwargs["new_description"] = sorted(
+                    kwargs["new_description"],
+                    key=lambda x: repr(x[0]),
+                    reverse=False,
+                )
+                description = Optional(Map([
+                    [String(e[0]), String(e[1])]
+                    for e in kwargs["new_description"]
+                ]))
+            else:
+                description = Optional(None)
+
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('betting_market_group_id', FullObjectId(kwargs["betting_market_group_id"])),
+                ('new_description', description),
+                ('new_event_id', Optional(FullObjectId(kwargs["event_id"]))),
+                ('new_rules_id', Optional(FullObjectId(kwargs["rules_id"]))),
+                ('freeze', Optional(Bool(bool(kwargs["freeze"])))),
+                ('extensions', Set([])),
+            ]))
+
+
 class Betting_market_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
@@ -369,10 +570,67 @@ class Betting_market_create(GrapheneObject):
                 [String(e[0]), String(e[1])]
                 for e in kwargs.get("payout_condition", [])
             ])
+            # Sort description by countrycode
+            kwargs["description"] = sorted(
+                kwargs["description"],
+                key=lambda x: repr(x[0]),
+                reverse=False,
+            )
+            description = Map([
+                [String(e[0]), String(e[1])]
+                for e in kwargs["description"]
+            ])
+
             super().__init__(OrderedDict([
                 ('fee', Asset(kwargs["fee"])),
                 ('group_id', FullObjectId(kwargs["group_id"])),
+                ('description', description),
                 ('payout_condition', payout_condition),
+                ('extensions', Set([])),
+            ]))
+
+
+class Betting_market_update(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            # Sort names by countrycode
+            if "new_payout_condition" in kwargs:
+                kwargs["new_payout_condition"] = sorted(
+                    kwargs.get("new_payout_condition", []),
+                    key=lambda x: repr(x[0]),
+                    reverse=False,
+                )
+                payout_condition = Optional(Map([
+                    [String(e[0]), String(e[1])]
+                    for e in kwargs.get("new_payout_condition", [])
+                ]))
+            else:
+                payout_condition = Optional(None)
+
+            if "new_description" in kwargs:
+                # Sort description by countrycode
+                kwargs["new_description"] = sorted(
+                    kwargs["new_description"],
+                    key=lambda x: repr(x[0]),
+                    reverse=False,
+                )
+                description = Optional(Map([
+                    [String(e[0]), String(e[1])]
+                    for e in kwargs["new_description"]
+                ]))
+            else:
+                description = Optional(None)
+
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('betting_market_id', FullObjectId(kwargs["betting_market_id"])),
+                ('new_group_id', Optional(FullObjectId(kwargs["group_id"]))),
+                ('new_description', description),
+                ('new_payout_condition', payout_condition),
                 ('extensions', Set([])),
             ]))
 

@@ -447,6 +447,29 @@ class Testcases(unittest.TestCase):
                    "fc68a0f59f2f9b591062a194049518")
         self.assertEqual(compare[:-130], txWire[:-130])
 
+    # Mising
+    def test_sport_update(self):
+        op = operations.Sport_update(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "sport_id": "1.0.1241",
+            "name": [["en", "Football"], ["de", "Fußball"]],
+            "prefix": prefix,
+        })
+        ops = [Operation(op)]
+        tx = Signed_Transaction(ref_block_num=ref_block_num,
+                                ref_block_prefix=ref_block_prefix,
+                                expiration=expiration,
+                                operations=ops)
+        tx = tx.sign([wif], chain=prefix)
+        tx.verify([PrivateKey(wif).pubkey], prefix)
+        txWire = hexlify(bytes(tx)).decode("ascii")
+        compare = ("f68585abf4dce7c80457012f000000000000000000020264650"
+                   "84675c39f62616c6c02656e08466f6f7462616c6c0000011f73"
+                   "9bf27286518931950b40ee739e34972bda63a44e3a7901e6686"
+                   "7b505f8122f2c9a47df242aad5e3630a5add2ea3aea8e62a92b"
+                   "8f2247c05033e8f40eb1836e")
+        self.assertEqual(compare[:-130], txWire[:-130])
+
     def compareConstructedTX(self):
         op = operations.Betting_market_rules_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
