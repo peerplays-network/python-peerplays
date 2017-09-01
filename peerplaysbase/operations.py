@@ -233,7 +233,7 @@ class Sport_update(GrapheneObject):
                 name = Optional(None)
             super().__init__(OrderedDict([
                 ('fee', Asset(kwargs["fee"])),
-                ('sport_id', FullObjectId(kwargs["sport_id"])),
+                ('sport_id', ObjectId(kwargs["sport_id"], "sport")),
                 ('new_name', name),
                 ('extensions', Set([])),
             ]))
@@ -284,11 +284,17 @@ class Event_group_update(GrapheneObject):
                 ]))
             else:
                 name = Optional(None)
+
+            if "new_sport_id" in kwargs:
+                new_sport_id = Optional(FullObjectId(kwargs["new_sport_id"]))
+            else:
+                new_sport_id = Optional(None)
+
             super().__init__(OrderedDict([
                 ('fee', Asset(kwargs["fee"])),
-                ('event_group_id', FullObjectId(kwargs["event_group_id"])),
-                ('new_sport_id', FullObjectId(kwargs["new_sport_id"])),
+                ('new_sport_id', new_sport_id),
                 ('new_name', name),
+                ('event_group_id', ObjectId(kwargs["event_group_id"], "event_group")),
                 ('extensions', Set([])),
             ]))
 
@@ -401,13 +407,24 @@ class Event_update(GrapheneObject):
             else:
                 start_time = Optional(None)
 
+            if "is_live_market" in kwargs:
+                is_live_market = Optional(Bool(kwargs["is_live_market"]))
+            else:
+                is_live_market = Optional(None)
+
+            if "new_event_group_id" in kwargs:
+                new_event_group_id = Optional(FullObjectId(kwargs["new_event_group_id"]))
+            else:
+                new_event_group_id = Optional(None)
+
             super().__init__(OrderedDict([
                 ('fee', Asset(kwargs["fee"])),
-                ('event_id', FullObjectId(kwargs["event_id"])),
+                ('event_id', ObjectId(kwargs["event_id"], "event")),
+                ('new_event_group_id', new_event_group_id),
                 ('new_name', name),
                 ('new_season', season),
                 ('new_start_time', start_time),
-                ('new_event_group_id', Optional(FullObjectId(kwargs["event_group_id"]))),
+                ('is_live_market', is_live_market),
                 ('extensions', Set([])),
             ]))
 
@@ -486,10 +503,10 @@ class Betting_market_rules_update(GrapheneObject):
 
             super().__init__(OrderedDict([
                 ('fee', Asset(kwargs["fee"])),
-                ('betting_market_rules_id', FullObjectId(kwargs["betting_market_rules_id"])),
                 ('new_name', name),
                 ('new_description', description),
                 ('extensions', Set([])),
+                ('betting_market_rules_id', ObjectId(kwargs["betting_market_rules_id"], "betting_market_rules")),
             ]))
 
 
@@ -542,13 +559,32 @@ class Betting_market_group_update(GrapheneObject):
             else:
                 description = Optional(None)
 
+            if "freeze" in kwargs:
+                freeze = Optional(Bool(kwargs["freeze"]))
+            else:
+                freeze = Optional(None)
+
+            if "delay_bets" in kwargs:
+                delay_bets = Optional(Bool(kwargs["delay_bets"]))
+            else:
+                delay_bets = Optional(None)
+
+            if "new_event_id" in kwargs:
+                new_event_id = Optional(FullObjectId(kwargs["new_event_id"]))
+            else:
+                new_event_id = Optional(None)
+            if "new_rules_id" in kwargs:
+                new_rules_id = Optional(FullObjectId(kwargs["new_rules_id"]))
+            else:
+                new_rules_id = Optional(None)
+
             super().__init__(OrderedDict([
                 ('fee', Asset(kwargs["fee"])),
-                ('betting_market_group_id', FullObjectId(kwargs["betting_market_group_id"])),
+                ('betting_market_group_id', ObjectId(kwargs["betting_market_group_id"], "betting_market_group")),
                 ('new_description', description),
-                ('new_event_id', Optional(FullObjectId(kwargs["event_id"]))),
-                ('new_rules_id', Optional(FullObjectId(kwargs["rules_id"]))),
-                ('freeze', Optional(Bool(bool(kwargs["freeze"])))),
+                ('new_rules_id', new_rules_id),
+                ('freeze', freeze),
+                ('delay_bets', delay_bets),
                 ('extensions', Set([])),
             ]))
 
@@ -627,8 +663,8 @@ class Betting_market_update(GrapheneObject):
 
             super().__init__(OrderedDict([
                 ('fee', Asset(kwargs["fee"])),
-                ('betting_market_id', FullObjectId(kwargs["betting_market_id"])),
-                ('new_group_id', Optional(FullObjectId(kwargs["group_id"]))),
+                ('betting_market_id', ObjectId(kwargs["betting_market_id"], "betting_market")),
+                ('new_group_id', Optional(FullObjectId(kwargs["new_group_id"]))),
                 ('new_description', description),
                 ('new_payout_condition', payout_condition),
                 ('extensions', Set([])),
@@ -657,20 +693,6 @@ class Betting_market_group_resolve(GrapheneObject):
                 ('extensions', Set([])),
             ]))
 
-class Betting_market_group_freeze(GrapheneObject):
-    def __init__(self, *args, **kwargs):
-        if isArgsThisClass(self, args):
-            self.data = args[0].data
-        else:
-            if len(args) == 1 and len(kwargs) == 0:
-                kwargs = args[0]
-            super().__init__(OrderedDict([
-                ('fee', Asset(kwargs["fee"])),
-                ('betting_market_group_id', ObjectId(kwargs["betting_market_group_id"], "betting_market_group")),
-                ('freeze', Bool(kwargs["freeze"])),
-                ('extensions', Set([])),
-            ]))
-
 
 class Bet_place(GrapheneObject):
     def __init__(self, *args, **kwargs):
@@ -685,7 +707,6 @@ class Bet_place(GrapheneObject):
                 ('betting_market_id', ObjectId(kwargs["betting_market_id"], "betting_market")),
                 ('amount_to_bet', Asset(kwargs["amount_to_bet"])),
                 ('backer_multiplier', Uint32(int(kwargs["backer_multiplier"]))),
-                ('amount_reserved_for_fees', Int64(kwargs["amount_reserved_for_fees"])),
                 ('back_or_lay', BetType(kwargs["back_or_lay"])),
                 ('extensions', Set([])),
             ]))

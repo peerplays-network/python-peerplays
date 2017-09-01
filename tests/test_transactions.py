@@ -23,6 +23,26 @@ GRAPHENE_BETTING_ODDS_PRECISION = 10000
 
 class Testcases(unittest.TestCase):
 
+    def doit(self):
+        ops = [Operation(self.op)]
+        tx = Signed_Transaction(ref_block_num=ref_block_num,
+                                ref_block_prefix=ref_block_prefix,
+                                expiration=expiration,
+                                operations=ops)
+        tx = tx.sign([wif], chain=prefix)
+        tx.verify([PrivateKey(wif).pubkey], prefix)
+        txWire = hexlify(bytes(tx)).decode("ascii")
+        self.assertEqual(self.cm[:-130], txWire[:-130])
+
+        if True:
+            from grapheneapi.grapheneapi import GrapheneAPI
+            rpc = GrapheneAPI("localhost", 8092)
+            self.cm = rpc.serialize_transaction(tx.json())
+            # print("soll: %s" % self.cm[:-130])
+            # print("ist:  %s" % txWire[:-130])
+            # print(txWire[:-130] == self.cm[:-130])
+            self.assertEqual(self.cm[:-130], txWire[:-130])
+
     def test_Transfer(self):
         pub = format(account.PrivateKey(wif).pubkey, prefix)
         from_account_id = "1.2.0"
@@ -40,7 +60,7 @@ class Testcases(unittest.TestCase):
             nonce,
             message
         )
-        op = operations.Transfer(**{
+        self.op = operations.Transfer(**{
             "fee": fee,
             "from": from_account_id,
             "to": to_account_id,
@@ -53,16 +73,7 @@ class Testcases(unittest.TestCase):
             },
             "prefix": prefix
         })
-        ops = [Operation(op)]
-        tx = Signed_Transaction(ref_block_num=ref_block_num,
-                                ref_block_prefix=ref_block_prefix,
-                                expiration=expiration,
-                                operations=ops)
-        tx = tx.sign([wif], chain=prefix)
-        tx.verify([PrivateKey(wif).pubkey], prefix)
-        txWire = hexlify(bytes(tx)).decode("ascii")
-
-        compare = ("f68585abf4dce7c804570100000000000000000000000140420"
+        self.cm = ("f68585abf4dce7c804570100000000000000000000000140420"
                    "f0000000000040102c0ded2bc1f1305fb0faac5e6c03ee3a192"
                    "4234985427b6167ca569d13df435cf02c0ded2bc1f1305fb0fa"
                    "ac5e6c03ee3a1924234985427b6167ca569d13df435cf8c94d1"
@@ -71,7 +82,7 @@ class Testcases(unittest.TestCase):
                    "3b6851d61e7c959be92cc7deb5d8491cf1c3c8c99a1eb44553c"
                    "348fb8f5001a78b18233ac66727e32fc776d48e92d9639d64f6"
                    "8e641948")
-        self.assertEqual(compare[:-130], txWire[:-130])
+        self.doit()
 
     def test_create_account(self):
         s = {"fee": {"amount": 1467634,
@@ -110,16 +121,8 @@ class Testcases(unittest.TestCase):
              "extensions": {},
              "prefix": prefix
              }
-        op = operations.Account_create(**s)
-        ops = [Operation(op)]
-        tx = Signed_Transaction(ref_block_num=ref_block_num,
-                                ref_block_prefix=ref_block_prefix,
-                                expiration=expiration,
-                                operations=ops)
-        tx = tx.sign([wif], chain=prefix)
-        tx.verify([PrivateKey(wif).pubkey], prefix)
-        txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c804570105f26416000000000000211b03000b666f"
+        self.op = operations.Account_create(**s)
+        self.cm = ("f68585abf4dce7c804570105f26416000000000000211b03000b666f"
                    "6f6261722d6631323401000000000202fe8cc11cc8251de6977636b5"
                    "5c1ab8a9d12b0b26154ac78e56e7c4257d8bcf6901000314aa202c91"
                    "58990b3ec51a1aa49b2ab5d300c97b391df3beb34bb74f3c62699e01"
@@ -131,52 +134,36 @@ class Testcases(unittest.TestCase):
                    "ac1896bd7c3d61050000000000000000011f61ad276120bc3f189296"
                    "2bfff7db5e8ce04d5adec9309c80529e3a978a4fa1073225a6d56929"
                    "e34c9d2a563e67a8f4a227e4fadb4a3bb6ec91bfdf4e57b80efd")
-        self.assertEqual(compare[:-130], txWire[:-130])
+        self.doit()
 
     def test_upgrade_account(self):
-        op = operations.Account_upgrade(**{
+        self.op = operations.Account_upgrade(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "account_to_upgrade": "1.2.0",
             "upgrade_to_lifetime_member": True,
             "prefix": prefix,
         })
-        ops = [Operation(op)]
-        tx = Signed_Transaction(ref_block_num=ref_block_num,
-                                ref_block_prefix=ref_block_prefix,
-                                expiration=expiration,
-                                operations=ops)
-        tx = tx.sign([wif], chain=prefix)
-        tx.verify([PrivateKey(wif).pubkey], prefix)
-        txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c804570108000000000000000000000100000"
+        self.cm = ("f68585abf4dce7c804570108000000000000000000000100000"
                    "11f4e42562ada1d3fed8f8eb51dd58117e3a4024959c46955a0"
                    "0d2a7e7e8b40ae7204f4617913aaaf028248d43e8c3463b8776"
                    "0ca569007dba99a2c49de75bd69b3")
-        self.assertEqual(compare[:-130], txWire[:-130])
+        self.doit()
 
     def test_proposal_update(self):
-        op = operations.Proposal_update(**{
+        self.op = operations.Proposal_update(**{
             'fee_paying_account': "1.2.1",
             'proposal': "1.10.90",
             'active_approvals_to_add': ["1.2.5"],
             "fee": {"amount": 0, "asset_id": "1.3.0"},
         })
-        ops = [Operation(op)]
-        tx = Signed_Transaction(ref_block_num=ref_block_num,
-                                ref_block_prefix=ref_block_prefix,
-                                expiration=expiration,
-                                operations=ops)
-        tx = tx.sign([wif], chain=prefix)
-        tx.verify([PrivateKey(wif).pubkey], prefix)
-        txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c804570117000000000000000000015a01050000000"
+        self.cm = ("f68585abf4dce7c804570117000000000000000000015a01050000000"
                    "000000001200b28528d1436564f4b4a9faf38b77c17d69ea85476076e"
                    "bafebbad9733ac014411b044a7570ef103a518d2e17f7250e1cd8e31c"
                    "f19272395c8fe9bbce0b4bfb4")
-        self.assertEqual(compare[:-130], txWire[:-130])
+        self.doit()
 
     def test_create_proposal(self):
-        op = operations.Proposal_create(**{
+        self.op = operations.Proposal_create(**{
             "fee": {"amount": 0,
                     "asset_id": "1.3.0"
                     },
@@ -195,104 +182,66 @@ class Testcases(unittest.TestCase):
                         "extensions": []}]}],
             "extensions": []
         })
-        ops = [Operation(op)]
-        tx = Signed_Transaction(ref_block_num=ref_block_num,
-                                ref_block_prefix=ref_block_prefix,
-                                expiration=expiration,
-                                operations=ops)
-        tx = tx.sign([wif], chain=prefix)
-        tx.verify([PrivateKey(wif).pubkey], prefix)
-        txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c80457011600000000000000000000000000"
+        self.cm = ("f68585abf4dce7c80457011600000000000000000000000000"
                    "00010000000000000000000000000000000000000000000000"
                    "00000001204baf7f11a7ff12337fc097ac6e82e7b68f82f02c"
                    "c7e24231637c88a91ae5716674acec8a1a305073165c65e520"
                    "a64769f5f62c0301ce21ab4f7c67a6801b4266")
-        self.assertEqual(compare[:-130], txWire[:-130])
+        self.doit()
 
     def test_sport_create(self):
-        op = operations.Sport_create(**{
+        self.op = operations.Sport_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "name": [["en", "Football"], ["de", "Fußball"]],
             "prefix": prefix,
         })
-        ops = [Operation(op)]
-        tx = Signed_Transaction(ref_block_num=ref_block_num,
-                                ref_block_prefix=ref_block_prefix,
-                                expiration=expiration,
-                                operations=ops)
-        tx = tx.sign([wif], chain=prefix)
-        tx.verify([PrivateKey(wif).pubkey], prefix)
-        txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c80457012f000000000000000000020264650"
+        self.cm = ("f68585abf4dce7c80457012f000000000000000000020264650"
                    "84675c39f62616c6c02656e08466f6f7462616c6c0000011f73"
                    "9bf27286518931950b40ee739e34972bda63a44e3a7901e6686"
                    "7b505f8122f2c9a47df242aad5e3630a5add2ea3aea8e62a92b"
                    "8f2247c05033e8f40eb1836e")
-        self.assertEqual(compare[:-130], txWire[:-130])
+        self.doit()
 
     def test_event_group_create(self):
-        op = operations.Event_group_create(**{
+        self.op = operations.Event_group_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "name": [["en", "NHL"], ["zh_Hans", "國家冰球聯盟"]],
             "sport_id": "1.0.1241",
             "prefix": prefix,
         })
-        ops = [Operation(op)]
-        tx = Signed_Transaction(ref_block_num=ref_block_num,
-                                ref_block_prefix=ref_block_prefix,
-                                expiration=expiration,
-                                operations=ops)
-        tx = tx.sign([wif], chain=prefix)
-        tx.verify([PrivateKey(wif).pubkey], prefix)
-        txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c804570131000000000000000000020265"
+        self.cm = ("f68585abf4dce7c804570131000000000000000000020265"
                    "6e034e484c077a685f48616e7312e59c8be5aeb6e586b0e7"
                    "9083e881afe79b9fd9040000000000010000011f2e739264"
                    "8b843f756c8773a984cb2b218a39558cb7415bf7abc6168a"
                    "2a30336e65a5fe70fa63e6b870e18e2f9e1a8dcc96070e75"
                    "a3e28f9c474e651c5860cea7")
-        self.assertEqual(compare[:-130], txWire[:-130])
+        self.doit()
 
     def test_event_create(self):
-        op = operations.Event_create(**{
+        self.op = operations.Event_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "name": [["en", "My Event name"]],
             "season": [["en", "2016-17"]],
             "start_time": "2017-03-29T09:15:05",
             "event_group_id": "1.0.1241",
             "prefix": prefix,
         })
-        ops = [Operation(op)]
-        tx = Signed_Transaction(ref_block_num=ref_block_num,
-                                ref_block_prefix=ref_block_prefix,
-                                expiration=expiration,
-                                operations=ops)
-        tx = tx.sign([wif], chain=prefix)
-        tx.verify([PrivateKey(wif).pubkey], prefix)
-        txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c8045701330000000000000000000001026"
-                   "56e07323031362d313701197bdb58d9040000000000010000"
-                   "012001ef3b40d64a3e82c0b4b35586c708c2d8521918ec4bb"
-                   "bc9db7ed395c5a619a953d59f1bc8cc7efa19d12acd69a6f5"
-                   "abd57a7cfe95fe9f3468329d7f2fabecd7")
-        self.assertEqual(compare[:-130], txWire[:-130])
+        self.cm = ("f68585abf4dce7c8045701330000000000000000000102656"
+                   "e0d4d79204576656e74206e616d650102656e07323031362d"
+                   "313701197bdb58d9040000000000010000011f22c306e6b51"
+                   "0a66a1f1bf1acb537360a5d2d0f7b788f9da359b451ffc676"
+                   "54cb594144f23476c71d6caeb94162237de346abc485d1096"
+                   "86d17a55e9e9992439a")
+        self.doit()
 
     def test_betting_market_rules_create(self):
-        op = operations.Betting_market_rules_create(**{
+        self.op = operations.Betting_market_rules_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "name": [["en", "NHL Rules v1.0"]],
             "description": [["en", "The winner will be the team with the most points at the end of the game.  The team with fewer points will not be the winner."]],
             "prefix": prefix,
         })
-        ops = [Operation(op)]
-        tx = Signed_Transaction(ref_block_num=ref_block_num,
-                                ref_block_prefix=ref_block_prefix,
-                                expiration=expiration,
-                                operations=ops)
-        tx = tx.sign([wif], chain=prefix)
-        tx.verify([PrivateKey(wif).pubkey], prefix)
-        txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c8045701350000000000000000000102656"
+        self.cm = ("f68585abf4dce7c8045701350000000000000000000102656"
                    "e0e4e484c2052756c65732076312e300102656e7c54686520"
                    "77696e6e65722077696c6c20626520746865207465616d207"
                    "769746820746865206d6f737420706f696e74732061742074"
@@ -302,11 +251,10 @@ class Testcases(unittest.TestCase):
                    "1204ae5e65355fe4f364de07f09b1858a560d8e4549c1228b"
                    "ac9a31815063d7c1531b374a668a385cfe2154e0d4c1d42de"
                    "0afe8fe3a56fef5b0d4e1f6fd660f8954")
-        self.assertEqual(compare[:-130], txWire[:-130])
+        self.doit()
 
-    #####################
     def test_betting_market_group_create(self):
-        op = operations.Betting_market_group_create(**{
+        self.op = operations.Betting_market_group_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "description": [["en", "Football"], ["de", "Fußball"]],
             "event_id": "1.0.1241",
@@ -314,47 +262,34 @@ class Testcases(unittest.TestCase):
             "asset_id": "1.3.124",
             "prefix": prefix,
         })
-        ops = [Operation(op)]
-        tx = Signed_Transaction(ref_block_num=ref_block_num,
-                                ref_block_prefix=ref_block_prefix,
-                                expiration=expiration,
-                                operations=ops)
-        tx = tx.sign([wif], chain=prefix)
-        tx.verify([PrivateKey(wif).pubkey], prefix)
-        txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c8045701370000000000000000000202646"
+        self.cm = ("f68585abf4dce7c8045701370000000000000000000202646"
                    "5084675c39f62616c6c02656e08466f6f7462616c6cd90400"
                    "00000000010b000000000016017c0000011f2603de0504424"
                    "dfab0b120e4a258ffe15ee5be333ce8e1404986ea10f1d28e"
                    "e033ae6b3d2eea9202b4a18bf3e3bff6ae5ddfe3b4b9d7713"
                    "fb2ec11f123eaaa39")
-        self.assertEqual(compare[:-130], txWire[:-130])
+        self.doit()
 
     def test_betting_market_create(self):
-        op = operations.Betting_market_create(**{
+        self.op = operations.Betting_market_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "description": [["en", "Betting Market description"]],
             "group_id": "1.0.1241",
             "payout_condition": [["en", "Foo == Bar"], ["zh_Hans", "Foo == Bar"]],
             "prefix": prefix,
         })
-        ops = [Operation(op)]
-        tx = Signed_Transaction(ref_block_num=ref_block_num,
-                                ref_block_prefix=ref_block_prefix,
-                                expiration=expiration,
-                                operations=ops)
-        tx = tx.sign([wif], chain=prefix)
-        tx.verify([PrivateKey(wif).pubkey], prefix)
-        txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c804570138000000000000000000d904"
-                   "0000000000010202656e0a466f6f203d3d20426172077a"
-                   "685f48616e730a466f6f203d3d204261720000011f294a"
-                   "2cf8976fe5def4365aa671ca65131a6177789c3c21549f"
-                   "ae80302a10a0f35968b7e9f2894d825d818f47b396365c"
-                   "f5083c2bcf60949767e054ff2efc0147")
-        self.assertEqual(compare[:-130], txWire[:-130])
+        self.cm = ("f68585abf4dce7c804570138000000000000000000d904"
+                   "0000000000010102656e1a42657474696e67204d61726b"
+                   "6574206465736372697074696f6e0202656e0a466f6f20"
+                   "3d3d20426172077a685f48616e730a466f6f203d3d2042"
+                   "6172000001201b335c7806bc13383c85ab66fbe0908258"
+                   "be15fbdd9a24fccc9a66edf324086d385718c3cb537e55"
+                   "cf89f7539f3dbf6c0ed420e0bed67744f069ceb535d65a"
+                   "ee")
+        self.doit()
 
     def test_betting_market_group_resolve(self):
-        op = operations.Betting_market_group_resolve(**{
+        self.op = operations.Betting_market_group_resolve(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "betting_market_group_id": "1.20.1024",
             "resolutions": [
@@ -363,121 +298,161 @@ class Testcases(unittest.TestCase):
             ],
             "prefix": prefix,
         })
-        ops = [Operation(op)]
-        tx = Signed_Transaction(ref_block_num=ref_block_num,
-                                ref_block_prefix=ref_block_prefix,
-                                expiration=expiration,
-                                operations=ops)
-        tx = tx.sign([wif], chain=prefix)
-        tx.verify([PrivateKey(wif).pubkey], prefix)
-        txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c80457013a00000000000000000080080"
+        self.cm = ("f68585abf4dce7c80457013a00000000000000000080080"
                    "28002020000000000000081020200000000000000000001"
                    "1f734163cbe9ae3a81bffcf81d94bf71890f744f99e5184"
                    "1ad7c46063cd661b0717eaaa6415890a56e731c1dd38e96"
                    "c6983f63999e95ec7be1a4926b526177a986")
-        self.assertEqual(compare[:-130], txWire[:-130])
-
-    def test_betting_market_group_freeze(self):
-        op = operations.Betting_market_group_freeze(**{
-            "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "betting_market_group_id": "1.20.1024",
-            "freeze": False,
-            "prefix": prefix,
-        })
-        ops = [Operation(op)]
-        tx = Signed_Transaction(ref_block_num=ref_block_num,
-                                ref_block_prefix=ref_block_prefix,
-                                expiration=expiration,
-                                operations=ops)
-        tx = tx.sign([wif], chain=prefix)
-        tx.verify([PrivateKey(wif).pubkey], prefix)
-        txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c80457013c0000000000000000008008"
-                   "00000001202b5b29f8307788bc8975ef72c46a848ccb6c"
-                   "643f88e1809ca700fc7a9ac5bd6204b95e2648339857e6"
-                   "9bdb2899e56a9c71dcb3fa5ba3a6baf3d4e225dc5da507")
-        self.assertEqual(compare[:-130], txWire[:-130])
+        self.doit()
 
     def test_bet_place(self):
-        op = operations.Bet_place(**{
+        self.op = operations.Bet_place(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "bettor_id": "1.2.1241",
             "betting_market_id": "1.21.1",
             "amount_to_bet": {"amount": 1000, "asset_id": "1.3.1"},
             "backer_multiplier": 2 * GRAPHENE_BETTING_ODDS_PRECISION,
-            "amount_reserved_for_fees": 100000,
-            "back_or_lay": "back",
+            "back_or_lay": "lay",
             "prefix": prefix,
         })
-        ops = [Operation(op)]
-        tx = Signed_Transaction(ref_block_num=ref_block_num,
-                                ref_block_prefix=ref_block_prefix,
-                                expiration=expiration,
-                                operations=ops)
-        tx = tx.sign([wif], chain=prefix)
-        tx.verify([PrivateKey(wif).pubkey], prefix)
-        txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c804570139000000000000000000d909"
+        self.cm = ("f68585abf4dce7c804570139000000000000000000d909"
                    "01e80300000000000001204e0000a08601000000000000"
                    "000000000000000000011f6436844f2f4d317176e064e6"
                    "4f32d558420ac191193b4425bf215bdb97de807e77743a"
                    "c412e977ba2196a71c11b313eb898b42429af1fcc96096"
                    "16504008794e")
-        self.assertEqual(compare[:-130], txWire[:-130])
+        self.doit()
 
     def test_bet_cancel(self):
-        op = operations.Bet_cancel(**{
+        self.op = operations.Bet_cancel(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "bettor_id": "1.2.5555",
             "bet_to_cancel": "1.22.1111",
             "prefix": prefix,
         })
-        ops = [Operation(op)]
-        tx = Signed_Transaction(ref_block_num=ref_block_num,
-                                ref_block_prefix=ref_block_prefix,
-                                expiration=expiration,
-                                operations=ops)
-        tx = tx.sign([wif], chain=prefix)
-        tx.verify([PrivateKey(wif).pubkey], prefix)
-        txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c80457013f000000000000000000b32bd70800"
+        self.cm = ("f68585abf4dce7c80457013f000000000000000000b32bd70800"
                    "0001201d84eb0e1b0e4490119bd1cc17f7ab0a648ac00c50a36e"
                    "f3b0d7e12012c8ed0f78c7acad5701d9a0df58e38e33d896bad5"
                    "fc68a0f59f2f9b591062a194049518")
-        self.assertEqual(compare[:-130], txWire[:-130])
+        self.doit()
 
-    # Mising
     def test_sport_update(self):
-        op = operations.Sport_update(**{
+        self.op = operations.Sport_update(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "sport_id": "1.0.1241",
-            "name": [["en", "Football"], ["de", "Fußball"]],
+            "sport_id": "1.16.1241",
+            "new_name": [["en", "Football"], ["de", "Fußball"]],
             "prefix": prefix,
         })
-        ops = [Operation(op)]
-        tx = Signed_Transaction(ref_block_num=ref_block_num,
-                                ref_block_prefix=ref_block_prefix,
-                                expiration=expiration,
-                                operations=ops)
-        tx = tx.sign([wif], chain=prefix)
-        tx.verify([PrivateKey(wif).pubkey], prefix)
-        txWire = hexlify(bytes(tx)).decode("ascii")
-        compare = ("f68585abf4dce7c80457012f000000000000000000020264650"
-                   "84675c39f62616c6c02656e08466f6f7462616c6c0000011f73"
-                   "9bf27286518931950b40ee739e34972bda63a44e3a7901e6686"
-                   "7b505f8122f2c9a47df242aad5e3630a5add2ea3aea8e62a92b"
-                   "8f2247c05033e8f40eb1836e")
-        self.assertEqual(compare[:-130], txWire[:-130])
+        self.cm = ("f68585abf4dce7c804570130000000000000000000d90901020"
+                   "26465084675c39f62616c6c02656e08466f6f7462616c6c0000"
+                   "012046e4c042915f933b7a3717806c92bcad8f6e08eff756685"
+                   "1de6a209eacf4b6726fe1db5013ec0853acab6c96a572503dd7"
+                   "b0a899d144d1ece18021a52b2c5ff3")
+        self.doit()
+
+    def test_event_update(self):
+        self.op = operations.Event_update(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "event_id": "1.18.12414",
+            "new_event_group_id": "1.0.1241",
+            "new_name": [["en", "My Event name"]],
+            "new_season": [["en", "2016-17"]],
+            "new_start_time": "2017-03-29T09:15:05",
+            "is_live_market": True,
+            "prefix": prefix,
+        })
+        self.cm = ("f68585abf4dce7c804570134000000000000000000fe6001d90"
+                   "4000000000001010102656e0d4d79204576656e74206e616d65"
+                   "010102656e07323031362d313701197bdb580101000001207e7"
+                   "3251603500baea831cda528dfcbec55fa34994f8fca23fe2b2a"
+                   "21e0edbb2c033df02e267129c29a61a74588b21b16539be116f"
+                   "97e1f477ef0203d77a46046")
+        self.doit()
+
+    def test_event_group_update(self):
+        self.op = operations.Event_group_update(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "event_group_id": "1.17.12",
+            "new_sport_id": "1.16.1241",
+            "new_name": [["en", "NHL"], ["zh_Hans", "國家冰球聯盟"]],
+            "prefix": prefix,
+        })
+        self.cm = ("f68585abf4dce7c80457013200000000000000000001d904000"
+                   "000001001010202656e034e484c077a685f48616e7312e59c8b"
+                   "e5aeb6e586b0e79083e881afe79b9f0c000001201eea42229a7"
+                   "15506ec419d41a459d546cad9247f7100d62015fdf187747e9b"
+                   "78378b538cbde9902afb6b9ac95736999927146759174b60fbe"
+                   "3d477e007611080")
+        self.doit()
+
+    def test_betting_market_rules_update(self):
+        self.op = operations.Betting_market_rules_update(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "betting_market_rules_id": "1.19.2324",
+            "new_name": [["en", "NHL Rules v1.0"]],
+            "new_description": [["en", "The winner will be the team with the most points at the end of the game.  The team with fewer points will not be the winner."]],
+            "prefix": prefix,
+        })
+        self.cm = ("f68585abf4dce7c804570136000000000000000000010102656"
+                   "e0e4e484c2052756c65732076312e30010102656e7c54686520"
+                   "77696e6e65722077696c6c20626520746865207465616d20776"
+                   "9746820746865206d6f737420706f696e747320617420746865"
+                   "20656e64206f66207468652067616d652e20205468652074656"
+                   "16d207769746820666577657220706f696e74732077696c6c20"
+                   "6e6f74206265207468652077696e6e65722e009412000120576"
+                   "68943d630b9c55f0f37157907d7c82563fe80cebd17023e14ba"
+                   "8ad1a5270d1c86825e153a1d9caace868487e76bd7590ffdab1"
+                   "39c5eebbf41f12d52e55405")
+        self.doit()
+
+    def test_betting_market_group_update(self):
+        self.op = operations.Betting_market_group_update(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "betting_market_group_id": "1.20.24124",
+            "new_description": [["en", "Football"], ["de", "Fußball"]],
+            "new_event_id": "1.0.1241",
+            "new_rules_id": "1.22.11",
+            "freeze": False,
+            "delay_bets": False,
+            "prefix": prefix,
+        })
+        self.cm = ("f68585abf4dce7c804570146000000000000000000bcbc01010"
+                   "2026465084675c39f62616c6c02656e08466f6f7462616c6c01"
+                   "0b00000000001601010001000000011f50b9bc677bcdfd5eb44"
+                   "d22ae8ebd0ad1a14b30edeeece0caffeee5ae884bb6836ba454"
+                   "35314d7c74720ebd9512e86624e28fa47096e23ab2adc543ac1"
+                   "064dc35")
+        self.doit()
+
+    def test_betting_market_update(self):
+        self.op = operations.Betting_market_update(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "betting_market_id": "1.21.124",
+            "new_group_id": "1.0.1241",
+            "new_description": [["en", "Betting market description"]],
+            "new_payout_condition": [["en", "Foo == Bar"], ["zh_Hans", "Foo == Bar"]],
+            "prefix": prefix,
+        })
+        self.cm = ("f68585abf4dce7c8045701470000000000000000007c01d9040"
+                   "00000000001010102656e1a42657474696e67206d61726b6574"
+                   "206465736372697074696f6e010202656e0a466f6f203d3d204"
+                   "26172077a685f48616e730a466f6f203d3d204261720000011f"
+                   "0e15c672784026c1cd5459f11ae7f1a43cefe23bed4a86fd677"
+                   "402db5d5815ab0882a16847a74cfa6d7e32dc8d3fcad919fe36"
+                   "02ddeb1ee739489921805f1326")
+        self.doit()
 
     def compareConstructedTX(self):
-        op = operations.Betting_market_rules_create(**{
+        self.op = operations.Betting_market_group_resolve(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "name": [["en", "NHL Rules v1.0"]],
-            "description": [["en", "The winner will be the team with the most points at the end of the game.  The team with fewer points will not be the winner."]],
+            "betting_market_group_id": "1.20.1024",
+            "resolutions": [
+                ["1.21.257", "cancel"],
+                ["1.21.256", "cancel"],
+            ],
             "prefix": prefix,
         })
-        ops = [Operation(op)]
+        ops = [Operation(self.op)]
 
         """
         from peerplays import PeerPlays
@@ -499,11 +474,11 @@ class Testcases(unittest.TestCase):
 
         from grapheneapi.grapheneapi import GrapheneAPI
         rpc = GrapheneAPI("localhost", 8092)
-        compare = rpc.serialize_transaction(tx.json())
-        print("soll: %s" % compare[:-130])
+        self.cm = rpc.serialize_transaction(tx.json())
+        print("soll: %s" % self.cm[:-130])
         print("ist:  %s" % txWire[:-130])
-        print(txWire[:-130] == compare[:-130])
-        self.assertEqual(compare[:-130], txWire[:-130])
+        print(txWire[:-130] == self.cm[:-130])
+        self.assertEqual(self.cm[:-130], txWire[:-130])
 
 
 if __name__ == '__main__':

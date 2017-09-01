@@ -5,7 +5,7 @@ from graphenebase.types import (
     Varint32, Int64, String, Bytes, Void,
     Array, PointInTime, Signature, Bool,
     Set, Fixed_array, Optional, Static_variant,
-    Map, Id, VoteId,
+    Map, Id, VoteId, Enum8,
     ObjectId as GPHObjectId,
 )
 from graphenebase.objects import GrapheneObject, isArgsThisClass
@@ -181,14 +181,14 @@ class Enum(Uint64):
         return str(self.options[self.data])
 
 
-class BetType(Enum):
+class BetType(Enum8):
     options = [
         "back",
         "lay",
     ]
 
 
-class BettingMarketResolution(Enum):
+class BettingMarketResolution(Enum8):
     options = [
         "win",
         "not_win",
