@@ -14,6 +14,7 @@ from .objecttypes import object_type
 from .account import PublicKey
 from graphenebase.objects import Operation as GPHOperation
 from .operationids import operations
+from .types import Enum
 default_prefix = "PPY"
 
 
@@ -164,21 +165,6 @@ class AccountOptions(GrapheneObject):
                 ('votes', Array([VoteId(o) for o in kwargs["votes"]])),
                 ('extensions', Set([])),
             ]))
-
-
-class Enum(Uint64):
-    def __init__(self, selection):
-        assert selection in self.options or \
-            isinstance(selection, int) and len(self.options) < selection, \
-            "Options are %s. Given '%s'" % (
-                self.options, selection)
-        if selection in self.options:
-            super(Enum, self).__init__(self.options.index(selection))
-        else:
-            super(Enum, self).__init__(selection)
-
-    def __str__(self):
-        return str(self.options[self.data])
 
 
 class BetType(Enum):
