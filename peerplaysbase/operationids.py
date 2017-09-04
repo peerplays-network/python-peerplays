@@ -59,7 +59,7 @@ ops = [
     "bet_place",
     "betting_market_group_resolve",
     "betting_market_group_resolved",
-    "betting_market_group_freeze",
+    "bet_adjusted",
     "betting_market_group_cancel_unmatched_bets",
     "bet_matched",
     "bet_cancel",
@@ -69,6 +69,8 @@ ops = [
     "game_move",
     "tournament_payout",
     "tournament_leave",
+    "betting_market_group_update",
+    "betting_market_update",
 ]
 operations = {o: ops.index(o) for o in ops}
 
