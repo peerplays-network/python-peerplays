@@ -5,7 +5,7 @@ from graphenebase.types import (
     Varint32, Int64, String, Bytes, Void,
     Array, PointInTime, Signature, Bool,
     Set, Fixed_array, Optional, Static_variant,
-    Map, Id, VoteId, Enum8,
+    Map, Id, VoteId,
     ObjectId as GPHObjectId,
 )
 from graphenebase.objects import GrapheneObject, isArgsThisClass
@@ -14,6 +14,7 @@ from .objecttypes import object_type
 from .account import PublicKey
 from graphenebase.objects import Operation as GPHOperation
 from .operationids import operations
+from .types import Enum
 default_prefix = "PPY"
 
 
@@ -166,29 +167,14 @@ class AccountOptions(GrapheneObject):
             ]))
 
 
-class Enum(Uint64):
-    def __init__(self, selection):
-        assert selection in self.options or \
-            isinstance(selection, int) and len(self.options) < selection, \
-            "Options are %s. Given '%s'" % (
-                self.options, selection)
-        if selection in self.options:
-            super(Enum, self).__init__(self.options.index(selection))
-        else:
-            super(Enum, self).__init__(selection)
-
-    def __str__(self):
-        return str(self.options[self.data])
-
-
-class BetType(Enum8):
+class BetType(Enum):
     options = [
         "back",
         "lay",
     ]
 
 
-class BettingMarketResolution(Enum8):
+class BettingMarketResolution(Enum):
     options = [
         "win",
         "not_win",

@@ -13,6 +13,8 @@ import unittest
 from pprint import pprint
 from binascii import hexlify
 
+TEST_AGAINST_CLI_WALLET = False
+
 prefix = "PPY"
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
 ref_block_num = 34294
@@ -23,7 +25,7 @@ GRAPHENE_BETTING_ODDS_PRECISION = 10000
 
 class Testcases(unittest.TestCase):
 
-    def doit(self):
+    def doit(self, printWire=False):
         ops = [Operation(self.op)]
         tx = Signed_Transaction(ref_block_num=ref_block_num,
                                 ref_block_prefix=ref_block_prefix,
@@ -32,9 +34,13 @@ class Testcases(unittest.TestCase):
         tx = tx.sign([wif], chain=prefix)
         tx.verify([PrivateKey(wif).pubkey], prefix)
         txWire = hexlify(bytes(tx)).decode("ascii")
+        if printWire:
+            print()
+            print(txWire)
+            print()
         self.assertEqual(self.cm[:-130], txWire[:-130])
 
-        if True:
+        if TEST_AGAINST_CLI_WALLET:
             from grapheneapi.grapheneapi import GrapheneAPI
             rpc = GrapheneAPI("localhost", 8092)
             self.cm = rpc.serialize_transaction(tx.json())
@@ -299,10 +305,10 @@ class Testcases(unittest.TestCase):
             "prefix": prefix,
         })
         self.cm = ("f68585abf4dce7c80457013a00000000000000000080080"
-                   "28002020000000000000081020200000000000000000001"
-                   "1f734163cbe9ae3a81bffcf81d94bf71890f744f99e5184"
-                   "1ad7c46063cd661b0717eaaa6415890a56e731c1dd38e96"
-                   "c6983f63999e95ec7be1a4926b526177a986")
+                   "2800204810204000001201f978ef488f7e2a23568c42943"
+                   "84332575b602d727e64a467e4fa351b04348134300db2f9"
+                   "59045b7b67f3822192279d9a6ef5a4a4a6203d644c668f7"
+                   "0dc42421")
         self.doit()
 
     def test_bet_place(self):
@@ -316,11 +322,10 @@ class Testcases(unittest.TestCase):
             "prefix": prefix,
         })
         self.cm = ("f68585abf4dce7c804570139000000000000000000d909"
-                   "01e80300000000000001204e0000a08601000000000000"
-                   "000000000000000000011f6436844f2f4d317176e064e6"
-                   "4f32d558420ac191193b4425bf215bdb97de807e77743a"
-                   "c412e977ba2196a71c11b313eb898b42429af1fcc96096"
-                   "16504008794e")
+                   "01e80300000000000001204e0000020000011f2255c9c3"
+                   "47ca766db54cbbece1243f3b3f4958ae94fb215c8e504e"
+                   "780329098d622782c809b28cb9094dfbd17d919a15c202"
+                   "837baf0844605b56ea4a48510de0")
         self.doit()
 
     def test_bet_cancel(self):
@@ -443,13 +448,13 @@ class Testcases(unittest.TestCase):
         self.doit()
 
     def compareConstructedTX(self):
-        self.op = operations.Betting_market_group_resolve(**{
+        self.op = operations.Bet_place(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "betting_market_group_id": "1.20.1024",
-            "resolutions": [
-                ["1.21.257", "cancel"],
-                ["1.21.256", "cancel"],
-            ],
+            "bettor_id": "1.2.1241",
+            "betting_market_id": "1.21.1",
+            "amount_to_bet": {"amount": 1000, "asset_id": "1.3.1"},
+            "backer_multiplier": 2 * GRAPHENE_BETTING_ODDS_PRECISION,
+            "back_or_lay": "lay",
             "prefix": prefix,
         })
         ops = [Operation(self.op)]

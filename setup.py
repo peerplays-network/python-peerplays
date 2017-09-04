@@ -46,7 +46,7 @@ setup(
         ],
     },
     install_requires=[
-        "graphenelib>=0.5.2",
+        "graphenelib>=0.5.4",
         "scrypt",
         "appdirs",
         "pycrypto",
