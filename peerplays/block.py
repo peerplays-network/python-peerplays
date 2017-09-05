@@ -1,9 +1,10 @@
 from peerplays.instance import shared_peerplays_instance
 from .exceptions import BlockDoesNotExistsException
 from .utils import parse_time
+from .blockchainobject import BlockchainObject
 
 
-class Block(dict):
+class Block(BlockchainObject):
     """ Read a single block from the chain
 
         :param int block: block number
@@ -29,19 +30,16 @@ class Block(dict):
         block,
         peerplays_instance=None,
     ):
-        self.peerplays = peerplays_instance or shared_peerplays_instance()
-        self.block = block
-
-        if isinstance(block, Block):
-            super(Block, self).__init__(block)
-        else:
-            self.refresh()
+        super().__init__(
+            block,
+            peerplays_instance=peerplays_instance,
+        )
 
     def refresh(self):
         """ Even though blocks never change, you freshly obtain its contents
             from an API with this method
         """
-        block = self.peerplays.rpc.get_block(self.block)
+        block = self.peerplays.rpc.get_block(self.identifier)
         if not block:
             raise BlockDoesNotExistsException
         super(Block, self).__init__(block)

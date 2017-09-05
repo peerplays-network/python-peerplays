@@ -1,8 +1,9 @@
 from peerplays.instance import shared_peerplays_instance
 from .exceptions import EventDoesNotExistException
+from .blockchainobject import BlockchainObject
 
 
-class Event(dict):
+class Event(BlockchainObject):
     """ Read data about an event on the chain
 
         :param str identifier: Identifier
@@ -15,17 +16,11 @@ class Event(dict):
         lazy=False,
         peerplays_instance=None,
     ):
-        self.peerplays = peerplays_instance or shared_peerplays_instance()
-        self.cached = False
-
-        if isinstance(identifier, str):
-            self.identifier = identifier
-            if not lazy:
-                self.refresh()
-        elif isinstance(identifier, dict):
-            self.cached = False
-            self.identifier = identifier.get("id")
-            super(Event, self).__init__(identifier)
+        super().__init__(
+            identifier,
+            lazy=lazy,
+            peerplays_instance=peerplays_instance,
+        )
 
     def refresh(self):
         assert self.identifier[:5] == "1.19.",\
@@ -36,19 +31,6 @@ class Event(dict):
         super(Event, self).__init__(data)
         self.cached = True
 
-    def __getitem__(self, key):
-        if not self.cached:
-            self.refresh()
-        return super(Event, self).__getitem__(key)
-
-    def items(self):
-        if not self.cached:
-            self.refresh()
-        return super(Event, self).items()
-
-    def __repr__(self):
-        return "<Event %s>" % str(self.identifier)
-
     @property
     def eventgroup(self):
         from .eventgroup import EventGroup
@@ -56,4 +38,5 @@ class Event(dict):
 
 
 class Events(list):
-    raise NotImplementedError("Missing API calls")
+    def __init__(self, *args, **kwargs):
+        raise NotImplementedError("Missing API calls")

@@ -1,8 +1,9 @@
 from peerplays.instance import shared_peerplays_instance
 from .exceptions import BetDoesNotExistException
+from .blockchainobject import BlockchainObject
 
 
-class Bet(dict):
+class Bet(BlockchainObject):
     """ Read data about a Bet on the chain
 
         :param str identifier: Identifier
@@ -14,9 +15,10 @@ class Bet(dict):
         identifier,
         peerplays_instance=None,
     ):
-        self.identifier = identifier
-        self.peerplays = peerplays_instance or shared_peerplays_instance()
-        self.refresh()
+        super().__init__(
+            identifier,
+            peerplays_instance=peerplays_instance,
+        )
 
     def refresh(self):
         assert self.identifier[:5] == "1.22.",\

@@ -118,3 +118,8 @@ class SportDoesNotExistException(Exception):
     """ Sport does not exist
     """
     pass
+
+class RuleDoesNotExistsException(Exception):
+    """ Rule does not exist
+    """
+    pass

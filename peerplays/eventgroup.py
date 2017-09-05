@@ -1,8 +1,9 @@
 from peerplays.instance import shared_peerplays_instance
 from .exceptions import EventGroupDoesNotExistException
+from .blockchainobject import BlockchainObject
 
 
-class EventGroup(dict):
+class EventGroup(BlockchainObject):
     """ Read data about an event group on the chain
 
         :param str identifier: Identifier
@@ -15,17 +16,11 @@ class EventGroup(dict):
         lazy=False,
         peerplays_instance=None,
     ):
-        self.peerplays = peerplays_instance or shared_peerplays_instance()
-        self.cached = False
-
-        if isinstance(identifier, str):
-            self.identifier = identifier
-            if not lazy:
-                self.refresh()
-        elif isinstance(identifier, dict):
-            self.cached = False
-            self.identifier = identifier.get("id")
-            super(EventGroup, self).__init__(identifier)
+        super().__init__(
+            identifier,
+            lazy=lazy,
+            peerplays_instance=peerplays_instance,
+        )
 
     def refresh(self):
         assert self.identifier[:5] == "1.18.",\
@@ -35,19 +30,6 @@ class EventGroup(dict):
             raise EventGroupDoesNotExistException(self.identifier)
         super(EventGroup, self).__init__(data)
         self.cached = True
-
-    def __getitem__(self, key):
-        if not self.cached:
-            self.refresh()
-        return super(EventGroup, self).__getitem__(key)
-
-    def items(self):
-        if not self.cached:
-            self.refresh()
-        return super(EventGroup, self).items()
-
-    def __repr__(self):
-        return "<EventGroup %s>" % str(self.identifier)
 
     @property
     def sport(self):

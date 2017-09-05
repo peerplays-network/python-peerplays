@@ -1,9 +1,10 @@
 from peerplays.instance import shared_peerplays_instance
 from .amount import Amount
 from .exceptions import AccountDoesNotExistsException
+from .blockchainobject import BlockchainObject
 
 
-class Account(dict):
+class Account(BlockchainObject):
     """ This class allows to easily access Account data
 
         :param str account_name: Name of the account
@@ -36,28 +37,21 @@ class Account(dict):
         peerplays_instance=None
     ):
         self.full = full
-        self.peerplays = peerplays_instance or shared_peerplays_instance()
-
-        if isinstance(account, Account):
-            super(Account, self).__init__(account)
-            self.name = account["name"]
-        elif isinstance(account, str):
-            self.name = account.strip().lower()
-        else:
-            raise ValueError("Account() expects an account name, id or an instance of Account")
-
-        self.refresh()
+        super().__init__(
+            account,
+            peerplays_instance=peerplays_instance,
+        )
 
     def refresh(self):
         """ Refresh/Obtain an account's data from the API server
         """
         import re
-        if re.match("^1\.2\.[0-9]*$", self.name):
-            account = self.peerplays.rpc.get_objects([self.name])[0]
+        if re.match("^1\.2\.[0-9]*$", self.identifier):
+            account = self.peerplays.rpc.get_objects([self.identifier])[0]
         else:
-            account = self.peerplays.rpc.lookup_account_names([self.name])[0]
+            account = self.peerplays.rpc.lookup_account_names([self.identifier])[0]
         if not account:
-            raise AccountDoesNotExistsException(self.name)
+            raise AccountDoesNotExistsException(self.identifier)
 
         if self.full:
             account = self.peerplays.rpc.get_full_accounts([account["id"]], False)[0][1]
@@ -67,7 +61,10 @@ class Account(dict):
                     self[k] = v
         else:
             super(Account, self).__init__(account)
-        self.name = self["name"]
+
+    @property
+    def name(self):
+        return self["name"]
 
     @property
     def balances(self):

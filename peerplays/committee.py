@@ -1,9 +1,10 @@
 from peerplays.instance import shared_peerplays_instance
 from .account import Account
 from .exceptions import CommitteeMemberDoesNotExistsException
+from .blockchainobject import BlockchainObject
 
 
-class Committee(dict):
+class Committee(BlockchainObject):
     """ Read data about a Committee Member in the chain
 
         :param str member: Name of the Committee Member
@@ -16,12 +17,13 @@ class Committee(dict):
         member,
         peerplays_instance=None,
     ):
-        self.member = member
-        self.peerplays = peerplays_instance or shared_peerplays_instance()
-        self.refresh()
+        super().__init__(
+            member,
+            peerplays_instance=peerplays_instance,
+        )
 
     def refresh(self):
-        account = Account(self.member)
+        account = Account(self.identifier)
         member = self.peerplays.rpc.get_committee_member_by_account(account["id"])
         if not member:
             raise CommitteeMemberDoesNotExistsException
@@ -30,4 +32,4 @@ class Committee(dict):
 
     @property
     def account(self):
-        return Account(self.member)
+        return Account(self.identifier)
