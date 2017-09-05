@@ -131,6 +131,9 @@ class PeerPlays(object):
         self.wallet = Wallet(self.rpc, **kwargs)
         self.txbuffer = TransactionBuilder(peerplays_instance=self)
 
+    # -------------------------------------------------------------------------
+    # Basic Calls
+    # -------------------------------------------------------------------------
     def connect(self,
                 node="",
                 rpcuser="",
@@ -221,6 +224,51 @@ class PeerPlays(object):
         """
         return self.rpc.get_dynamic_global_properties()
 
+    # -------------------------------------------------------------------------
+    # Simple Transfer
+    # -------------------------------------------------------------------------
+    def transfer(self, to, amount, asset, memo="", account=None):
+        """ Transfer an asset to another account.
+
+            :param str to: Recipient
+            :param float amount: Amount to transfer
+            :param str asset: Asset to transfer
+            :param str memo: (optional) Memo, may begin with `#` for encrypted messaging
+            :param str account: (optional) the source account for the transfer if not ``default_account``
+        """
+        from .memo import Memo
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+
+        account = Account(account, peerplays_instance=self)
+        amount = Amount(amount, asset, peerplays_instance=self)
+        to = Account(to, peerplays_instance=self)
+
+        memoObj = Memo(
+            from_account=account,
+            to_account=to,
+            peerplays_instance=self
+        )
+
+        op = operations.Transfer(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "from": account["id"],
+            "to": to["id"],
+            "amount": {
+                "amount": int(amount),
+                "asset_id": amount.asset["id"]
+            },
+            "memo": memoObj.encrypt(memo),
+            "prefix": self.rpc.chain_params["prefix"]
+        })
+        return self.finalizeOp(op, account, "active")
+
+    # -------------------------------------------------------------------------
+    # Account related calls
+    # -------------------------------------------------------------------------
     def create_account(
         self,
         account_name,
@@ -375,44 +423,25 @@ class PeerPlays(object):
         op = operations.Account_create(**op)
         return self.finalizeOp(op, registrar, "active")
 
-    def transfer(self, to, amount, asset, memo="", account=None):
-        """ Transfer an asset to another account.
+    def upgrade_account(self, account=None):
+        """ Upgrade an account to Lifetime membership
 
-            :param str to: Recipient
-            :param float amount: Amount to transfer
-            :param str asset: Asset to transfer
-            :param str memo: (optional) Memo, may begin with `#` for encrypted messaging
-            :param str account: (optional) the source account for the transfer if not ``default_account``
+            :param str account: (optional) the account to allow access
+                to (defaults to ``default_account``)
         """
-        from .memo import Memo
         if not account:
             if "default_account" in config:
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-
-        account = Account(account, peerplays_instance=self)
-        amount = Amount(amount, asset, peerplays_instance=self)
-        to = Account(to, peerplays_instance=self)
-
-        memoObj = Memo(
-            from_account=account,
-            to_account=to,
-            peerplays_instance=self
-        )
-
-        op = operations.Transfer(**{
+        account = Account(account)
+        op = operations.Account_upgrade(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "from": account["id"],
-            "to": to["id"],
-            "amount": {
-                "amount": int(amount),
-                "asset_id": amount.asset["id"]
-            },
-            "memo": memoObj.encrypt(memo),
+            "account_to_upgrade": account["id"],
+            "upgrade_to_lifetime_member": True,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account, "active")
+        return self.finalizeOp(op, account["name"], "active")
 
     def _test_weights_treshold(self, authority):
         """ This method raises an error if the threshold of an authority cannot
@@ -603,6 +632,9 @@ class PeerPlays(object):
         })
         return self.finalizeOp(op, account["name"], "active")
 
+    # -------------------------------------------------------------------------
+    #  Approval and Disapproval of witnesses, workers, committee, and proposals
+    # -------------------------------------------------------------------------
     def approvewitness(self, witnesses, account=None):
         """ Approve a witness
 
@@ -753,31 +785,6 @@ class PeerPlays(object):
         })
         return self.finalizeOp(op, account["name"], "active")
 
-    def cancel(self, orderNumber, account=None):
-        """ Cancels an order you have placed in a given market. Requires
-            only the "orderNumber". An order number takes the form
-            ``1.7.xxx``.
-
-            :param str orderNumber: The Order Object ide of the form ``1.7.xxxx``
-        """
-        if not account:
-            if "default_account" in config:
-                account = config["default_account"]
-        if not account:
-            raise ValueError("You need to provide an account")
-        account = Account(account, full=False, peerplays_instance=self)
-
-        op = []
-        for order in list(orderNumber):
-            op.append(
-                operations.Limit_order_cancel(**{
-                    "fee": {"amount": 0, "asset_id": "1.3.0"},
-                    "fee_paying_account": account["id"],
-                    "order": order,
-                    "extensions": [],
-                    "prefix": self.rpc.chain_params["prefix"]}))
-        return self.finalizeOp(op, account["name"], "active")
-
     def approveproposal(self, proposal_ids, account=None, approver=None):
         """ Approve Proposal
 
@@ -846,26 +853,37 @@ class PeerPlays(object):
             }))
         return self.finalizeOp(op, account["name"], "active")
 
-    def upgrade_account(self, account=None):
-        """ Upgrade an account to Lifetime membership
+    # -------------------------------------------------------------------------
+    # Trading cancel
+    # -------------------------------------------------------------------------
+    def cancel(self, orderNumber, account=None):
+        """ Cancels an order you have placed in a given market. Requires
+            only the "orderNumber". An order number takes the form
+            ``1.7.xxx``.
 
-            :param str account: (optional) the account to allow access
-                to (defaults to ``default_account``)
+            :param str orderNumber: The Order Object ide of the form ``1.7.xxxx``
         """
         if not account:
             if "default_account" in config:
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account)
-        op = operations.Account_upgrade(**{
-            "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "account_to_upgrade": account["id"],
-            "upgrade_to_lifetime_member": True,
-            "prefix": self.rpc.chain_params["prefix"]
-        })
+        account = Account(account, full=False, peerplays_instance=self)
+
+        op = []
+        for order in list(orderNumber):
+            op.append(
+                operations.Limit_order_cancel(**{
+                    "fee": {"amount": 0, "asset_id": "1.3.0"},
+                    "fee_paying_account": account["id"],
+                    "order": order,
+                    "extensions": [],
+                    "prefix": self.rpc.chain_params["prefix"]}))
         return self.finalizeOp(op, account["name"], "active")
 
+    # -------------------------------------------------------------------------
+    # Bookie related calls
+    # -------------------------------------------------------------------------
     def sport_create(self, names, account=None):
         """ Create a sport. This needs to be **proposed**.
 
