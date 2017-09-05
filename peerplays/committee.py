@@ -12,15 +12,7 @@ class Committee(BlockchainObject):
         :param bool lazy: Use lazy loading
 
     """
-    def __init__(
-        self,
-        member,
-        peerplays_instance=None,
-    ):
-        super().__init__(
-            member,
-            peerplays_instance=peerplays_instance,
-        )
+    type_id = 5
 
     def refresh(self):
         account = Account(self.identifier)

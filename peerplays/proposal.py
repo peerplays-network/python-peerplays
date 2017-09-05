@@ -11,19 +11,9 @@ class Proposal(BlockchainObject):
         :param peerplays peerplays_instance: Peerplays() instance to use when accesing a RPC
 
     """
-    def __init__(
-        self,
-        id,
-        peerplays_instance=None,
-    ):
-        super().__init__(
-            id,
-            peerplays_instance=peerplays_instance,
-        )
+    type_id = 10
 
     def refresh(self):
-        a, b, c = self.identifier.split(".")
-        assert int(a) == 1 and int(b) == 10, "Valid proposal ids are 1.10.x"
         proposal = self.peerplays.rpc.get_objects([self.identifier])
         if not any(proposal):
             raise ProposalDoesNotExistException

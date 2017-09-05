@@ -25,16 +25,6 @@ class Block(BlockchainObject):
                   refreshed with ``Account.refresh()``.
 
     """
-    def __init__(
-        self,
-        block,
-        peerplays_instance=None,
-    ):
-        super().__init__(
-            block,
-            peerplays_instance=peerplays_instance,
-        )
-
     def refresh(self):
         """ Even though blocks never change, you freshly obtain its contents
             from an API with this method

@@ -30,6 +30,8 @@ class Account(BlockchainObject):
 
     """
 
+    type_id = 2
+
     def __init__(
         self,
         account,

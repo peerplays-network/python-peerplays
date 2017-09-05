@@ -10,17 +10,7 @@ class BettingMarket(BlockchainObject):
         :param peerplays peerplays_instance: PeerPlays() instance to use when accesing a RPC
 
     """
-    def __init__(
-        self,
-        identifier,
-        lazy=False,
-        peerplays_instance=None,
-    ):
-        super().__init__(
-            identifier,
-            lazy=lazy,
-            peerplays_instance=peerplays_instance,
-        )
+    type_id = 21
 
     def refresh(self):
         assert self.identifier[:5] == "1.21.",\

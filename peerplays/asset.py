@@ -19,6 +19,8 @@ class Asset(BlockchainObject):
                   refreshed with ``Asset.refresh()``.
     """
 
+    type_id = 3
+
     def __init__(
         self,
         asset,

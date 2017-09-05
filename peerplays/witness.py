@@ -12,30 +12,14 @@ class Witness(BlockchainObject):
 
     """
 
-    def __init__(
-        self,
-        witness,
-        lazy=False,
-        peerplays_instance=None,
-    ):
-        super().__init__(
-            witness,
-            lazy=lazy,
-            peerplays_instance=peerplays_instance,
-        )
+    type_ids = [6, 2]
 
     def refresh(self):
         parts = self.identifier.split(".")
-        if len(parts) == 3:
-            a, b, _ = self.identifier.split(".")
-            assert int(a) == 1 and (int(b) == 6 or int(b) == 2), "Witness id's need to be 1.6.x or 1.2.x!"
-            if int(b) == 6:
-                witness = self.peerplays.rpc.get_object(self.identifier)
-            else:
-                witness = self.peerplays.rpc.get_witness_by_account(self.identifier)
+        if int(parts[1]) == 6:
+            witness = self.peerplays.rpc.get_object(self.identifier)
         else:
-            account = Account(self.identifier)
-            witness = self.peerplays.rpc.get_witness_by_account(account["id"])
+            witness = self.peerplays.rpc.get_witness_by_account(self.identifier)
         if not witness:
             raise WitnessDoesNotExistsException
         super(Witness, self).__init__(witness)
