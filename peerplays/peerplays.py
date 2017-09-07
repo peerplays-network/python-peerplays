@@ -1223,7 +1223,7 @@ class PeerPlays(object):
         if not account:
             raise ValueError("You need to provide an account")
         account = Account(account)
-        op = operations.Betting_market_update(**{
+        op = operations.Betting_market_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "group_id": group_id,
             "description": descriptions,
