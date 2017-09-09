@@ -1,9 +1,10 @@
 import json
 from peerplays.instance import shared_peerplays_instance
 from .exceptions import AssetDoesNotExistsException
+from .blockchainobject import BlockchainObject
 
 
-class Asset(dict):
+class Asset(BlockchainObject):
     """ Deals with Assets of the network.
 
         :param str Asset: Symbol name or object id of an asset
@@ -18,7 +19,7 @@ class Asset(dict):
                   refreshed with ``Asset.refresh()``.
     """
 
-    assets_cache = dict()
+    type_id = 3
 
     def __init__(
         self,
@@ -27,34 +28,19 @@ class Asset(dict):
         full=False,
         peerplays_instance=None
     ):
-        self.cached = False
         self.full = full
-        self.asset = None
-
-        self.peerplays = peerplays_instance or shared_peerplays_instance()
-
-        if isinstance(asset, Asset):
-            self.asset = asset.get("symbol")
-            super(Asset, self).__init__(asset)
-            self.cached = True
-            self._cache(asset)
-        elif isinstance(asset, str):
-            self.asset = asset
-            if self.asset in Asset.assets_cache:
-                super(Asset, self).__init__(Asset.assets_cache[self.asset])
-                self.cached = True
-            elif not lazy and not self.cached:
-                self.refresh()
-                self.cached = True
-        else:
-            raise ValueError("Asset() expects a symbol, id or an instance of Asset")
+        super().__init__(
+            asset,
+            lazy=lazy,
+            peerplays_instance=peerplays_instance,
+        )
 
     def refresh(self):
         """ Refresh the data from the API server
         """
         from peerplaysbase import asset_permissions
 
-        asset = self.peerplays.rpc.get_asset(self.asset)
+        asset = self.peerplays.rpc.get_asset(self.identifier)
         if not asset:
             raise AssetDoesNotExistsException
         super(Asset, self).__init__(asset)
@@ -71,12 +57,13 @@ class Asset(dict):
         except:
             self["description"] = asset["options"]["description"]
 
-        self.cached = True
-        self._cache(asset)
+    @property
+    def symbol(self):
+        return self["symbol"]
 
-    def _cache(self, asset):
-        # store in cache
-        Asset.assets_cache[asset["symbol"]] = asset
+    @property
+    def precision(self):
+        return self["precision"]
 
     @property
     def is_bitasset(self):
@@ -95,13 +82,3 @@ class Asset(dict):
         """ List the permissions that are currently used (flags)
         """
         return self["flags"]
-
-    def __getitem__(self, key):
-        if not self.cached:
-            self.refresh()
-        return super(Asset, self).__getitem__(key)
-
-    def items(self):
-        if not self.cached:
-            self.refresh()
-        return super(Asset, self).items()

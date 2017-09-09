@@ -128,6 +128,12 @@ class Amount(dict):
             self["asset"] = Asset(self["symbol"], peerplays_instance=self.peerplays)
         return self["asset"]
 
+    def json(self):
+        return {
+            "amount": int(self),
+            "asset_id": self["asset"]["id"]
+        }
+
     def __str__(self):
         return "{:,.{prec}f} {}".format(
             self["amount"],

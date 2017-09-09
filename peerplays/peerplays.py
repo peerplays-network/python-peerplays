@@ -13,6 +13,14 @@ from .amount import Amount
 from .witness import Witness
 from .committee import Committee
 from .storage import configStorage as config
+from .sport import Sport
+from .eventgroup import EventGroup
+from .event import Event
+from .rules import Rules
+from .bettingmarketgroup import BettingMarketGroup
+from .bettingmarket import BettingMarket
+from .bet import Bet
+
 from .exceptions import (
     AccountExistsException,
     AccountDoesNotExistsException,
@@ -24,6 +32,7 @@ from .transactionbuilder import TransactionBuilder
 from .utils import formatTime
 
 log = logging.getLogger(__name__)
+GRAPHENE_BETTING_ODDS_PRECISION = 10000
 
 
 class PeerPlays(object):
@@ -131,6 +140,9 @@ class PeerPlays(object):
         self.wallet = Wallet(self.rpc, **kwargs)
         self.txbuffer = TransactionBuilder(peerplays_instance=self)
 
+    # -------------------------------------------------------------------------
+    # Basic Calls
+    # -------------------------------------------------------------------------
     def connect(self,
                 node="",
                 rpcuser="",
@@ -221,6 +233,51 @@ class PeerPlays(object):
         """
         return self.rpc.get_dynamic_global_properties()
 
+    # -------------------------------------------------------------------------
+    # Simple Transfer
+    # -------------------------------------------------------------------------
+    def transfer(self, to, amount, asset, memo="", account=None):
+        """ Transfer an asset to another account.
+
+            :param str to: Recipient
+            :param float amount: Amount to transfer
+            :param str asset: Asset to transfer
+            :param str memo: (optional) Memo, may begin with `#` for encrypted messaging
+            :param str account: (optional) the source account for the transfer if not ``default_account``
+        """
+        from .memo import Memo
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+
+        account = Account(account, peerplays_instance=self)
+        amount = Amount(amount, asset, peerplays_instance=self)
+        to = Account(to, peerplays_instance=self)
+
+        memoObj = Memo(
+            from_account=account,
+            to_account=to,
+            peerplays_instance=self
+        )
+
+        op = operations.Transfer(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "from": account["id"],
+            "to": to["id"],
+            "amount": {
+                "amount": int(amount),
+                "asset_id": amount.asset["id"]
+            },
+            "memo": memoObj.encrypt(memo),
+            "prefix": self.rpc.chain_params["prefix"]
+        })
+        return self.finalizeOp(op, account, "active")
+
+    # -------------------------------------------------------------------------
+    # Account related calls
+    # -------------------------------------------------------------------------
     def create_account(
         self,
         account_name,
@@ -375,44 +432,25 @@ class PeerPlays(object):
         op = operations.Account_create(**op)
         return self.finalizeOp(op, registrar, "active")
 
-    def transfer(self, to, amount, asset, memo="", account=None):
-        """ Transfer an asset to another account.
+    def upgrade_account(self, account=None):
+        """ Upgrade an account to Lifetime membership
 
-            :param str to: Recipient
-            :param float amount: Amount to transfer
-            :param str asset: Asset to transfer
-            :param str memo: (optional) Memo, may begin with `#` for encrypted messaging
-            :param str account: (optional) the source account for the transfer if not ``default_account``
+            :param str account: (optional) the account to allow access
+                to (defaults to ``default_account``)
         """
-        from .memo import Memo
         if not account:
             if "default_account" in config:
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-
-        account = Account(account, peerplays_instance=self)
-        amount = Amount(amount, asset, peerplays_instance=self)
-        to = Account(to, peerplays_instance=self)
-
-        memoObj = Memo(
-            from_account=account,
-            to_account=to,
-            peerplays_instance=self
-        )
-
-        op = operations.Transfer(**{
+        account = Account(account)
+        op = operations.Account_upgrade(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "from": account["id"],
-            "to": to["id"],
-            "amount": {
-                "amount": int(amount),
-                "asset_id": amount.asset["id"]
-            },
-            "memo": memoObj.encrypt(memo),
+            "account_to_upgrade": account["id"],
+            "upgrade_to_lifetime_member": True,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account, "active")
+        return self.finalizeOp(op, account["name"], "active")
 
     def _test_weights_treshold(self, authority):
         """ This method raises an error if the threshold of an authority cannot
@@ -603,6 +641,9 @@ class PeerPlays(object):
         })
         return self.finalizeOp(op, account["name"], "active")
 
+    # -------------------------------------------------------------------------
+    #  Approval and Disapproval of witnesses, workers, committee, and proposals
+    # -------------------------------------------------------------------------
     def approvewitness(self, witnesses, account=None):
         """ Approve a witness
 
@@ -753,31 +794,6 @@ class PeerPlays(object):
         })
         return self.finalizeOp(op, account["name"], "active")
 
-    def cancel(self, orderNumber, account=None):
-        """ Cancels an order you have placed in a given market. Requires
-            only the "orderNumber". An order number takes the form
-            ``1.7.xxx``.
-
-            :param str orderNumber: The Order Object ide of the form ``1.7.xxxx``
-        """
-        if not account:
-            if "default_account" in config:
-                account = config["default_account"]
-        if not account:
-            raise ValueError("You need to provide an account")
-        account = Account(account, full=False, peerplays_instance=self)
-
-        op = []
-        for order in list(orderNumber):
-            op.append(
-                operations.Limit_order_cancel(**{
-                    "fee": {"amount": 0, "asset_id": "1.3.0"},
-                    "fee_paying_account": account["id"],
-                    "order": order,
-                    "extensions": [],
-                    "prefix": self.rpc.chain_params["prefix"]}))
-        return self.finalizeOp(op, account["name"], "active")
-
     def approveproposal(self, proposal_ids, account=None, approver=None):
         """ Approve Proposal
 
@@ -846,26 +862,37 @@ class PeerPlays(object):
             }))
         return self.finalizeOp(op, account["name"], "active")
 
-    def upgrade_account(self, account=None):
-        """ Upgrade an account to Lifetime membership
+    # -------------------------------------------------------------------------
+    # Trading cancel
+    # -------------------------------------------------------------------------
+    def cancel(self, orderNumber, account=None):
+        """ Cancels an order you have placed in a given market. Requires
+            only the "orderNumber". An order number takes the form
+            ``1.7.xxx``.
 
-            :param str account: (optional) the account to allow access
-                to (defaults to ``default_account``)
+            :param str orderNumber: The Order Object ide of the form ``1.7.xxxx``
         """
         if not account:
             if "default_account" in config:
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account)
-        op = operations.Account_upgrade(**{
-            "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "account_to_upgrade": account["id"],
-            "upgrade_to_lifetime_member": True,
-            "prefix": self.rpc.chain_params["prefix"]
-        })
+        account = Account(account, full=False, peerplays_instance=self)
+
+        op = []
+        for order in list(orderNumber):
+            op.append(
+                operations.Limit_order_cancel(**{
+                    "fee": {"amount": 0, "asset_id": "1.3.0"},
+                    "fee_paying_account": account["id"],
+                    "order": order,
+                    "extensions": [],
+                    "prefix": self.rpc.chain_params["prefix"]}))
         return self.finalizeOp(op, account["name"], "active")
 
+    # -------------------------------------------------------------------------
+    # Bookie related calls
+    # -------------------------------------------------------------------------
     def sport_create(self, names, account=None):
         """ Create a sport. This needs to be **proposed**.
 
@@ -884,6 +911,31 @@ class PeerPlays(object):
         op = operations.Sport_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "name": names,
+            "prefix": self.rpc.chain_params["prefix"]
+        })
+        return self.finalizeOp(op, account["name"], "active")
+
+    def sport_update(self, sport_id, names=[], account=None):
+        """ Update a sport. This needs to be **proposed**.
+
+            :param str sport_id: The id of the sport to update
+            :param list names: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param str account: (optional) the account to allow access
+                to (defaults to ``default_account``)
+        """
+        assert self.proposer, "'sport_create' needs to be proposed"
+        assert isinstance(names, list)
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account)
+        sport = Sport(sport_id)
+        op = operations.Sport_update(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "sport_id": sport["id"],
+            "new_name": names,
             "prefix": self.rpc.chain_params["prefix"]
         })
         return self.finalizeOp(op, account["name"], "active")
@@ -908,6 +960,33 @@ class PeerPlays(object):
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "name": names,
             "sport_id": sport_id,
+            "prefix": self.rpc.chain_params["prefix"]
+        })
+        return self.finalizeOp(op, account["name"], "active")
+
+    def event_group_update(self, event_group_id, names=[], sport_id="0.0.0", account=None):
+        """ Update an event group. This needs to be **proposed**.
+
+            :param str event_id: Id of the event group to update
+            :param list names: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param str sport_id: Sport ID to create the event group for (defaults to *relative* id ``0.0.0``)
+            :param str account: (optional) the account to allow access
+                to (defaults to ``default_account``)
+        """
+        assert self.proposer, "'event_group_create' needs to be proposed"
+        assert isinstance(names, list)
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account)
+        event_group = EventGroup(event_group_id)
+        op = operations.Event_group_update(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "event_group_id": event_group["id"],
+            "new_name": names,
+            "new_sport_id": sport_id,
             "prefix": self.rpc.chain_params["prefix"]
         })
         return self.finalizeOp(op, account["name"], "active")
@@ -948,6 +1027,46 @@ class PeerPlays(object):
         })
         return self.finalizeOp(op, account["name"], "active")
 
+    def event_update(
+        self,
+        event_id,
+        name,
+        season,
+        start_time,
+        event_group_id="0.0.0",
+        account=None
+    ):
+        """ Update an event. This needs to be **proposed**.
+
+            :param str event_id: Id of the event to update
+            :param list name: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param list season: Internationalized season, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param str event_group_id: Event group ID to create the event for (defaults to *relative* id ``0.0.0``)
+            :param datetime start_time: Time of the start of the event
+            :param str account: (optional) the account to allow access
+                to (defaults to ``default_account``)
+        """
+        assert self.proposer, "'event_create' needs to be proposed"
+        assert isinstance(season, list)
+        assert isinstance(start_time, datetime), "start_time needs to be a `datetime.datetime`"
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account)
+        event = Event(event_id)
+        op = operations.Event_update(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "event_id": event["id"],
+            "new_name": name,
+            "new_season": season,
+            "new_start_time": formatTime(start_time),
+            "new_event_group_id": event_group_id,
+            "prefix": self.rpc.chain_params["prefix"]
+        })
+        return self.finalizeOp(op, account["name"], "active")
+
     def betting_market_rules_create(self, names, descriptions, account=None):
         """ Create betting market rules
 
@@ -970,6 +1089,35 @@ class PeerPlays(object):
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "name": names,
             "description": descriptions,
+            "prefix": self.rpc.chain_params["prefix"]
+        })
+        return self.finalizeOp(op, account["name"], "active")
+
+    def betting_market_rules_update(self, rules_id, names, descriptions, account=None):
+        """ Update betting market rules
+
+            :param str rules_id: Id of the betting market rules to update
+            :param list names: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param list descriptions: Internationalized descriptions, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param str account: (optional) the account to allow access
+                to (defaults to ``default_account``)
+
+        """
+        assert self.proposer, "'betting_market_rules_create' needs to be proposed"
+        assert isinstance(names, list)
+        assert isinstance(descriptions, list)
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account)
+        rules = Rules(rules_id)
+        op = operations.Betting_market_rules_update(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "betting_market_rules_id": rules["id"],
+            "new_name": names,
+            "new_description": descriptions,
             "prefix": self.rpc.chain_params["prefix"]
         })
         return self.finalizeOp(op, account["name"], "active")
@@ -1011,27 +1159,43 @@ class PeerPlays(object):
         })
         return self.finalizeOp(op, account["name"], "active")
 
-    def betting_market_group_freeze(self, betting_market_group_id, freeze=True, account=None):
-        """ Freeze a betting market group. This needs to be **proposed**.
+    def betting_market_group_update(
+        self,
+        betting_market_group_id,
+        description,
+        event_id="0.0.0",
+        rules_id="0.0.0",
+        freeze=False,
+        delay_bets=False,
+        account=None,
+    ):
+        """ Update an betting market. This needs to be **proposed**.
 
-            :param str betting_market_group_id: Market Group ID to resolve
-            :param bool freeze: Freeze group if ``True``
+            :param str betting_market_group_id: Id of the betting market group to update
+            :param list description: Internationalized list of descriptions
+            :param str event_id: Event ID to create this for (defaults to *relative* id ``0.0.0``)
+            :param str rule_id: Rule ID to create this with (defaults to *relative* id ``0.0.0``)
+            :param bool freeze: Freeze the MBG
+            :param bool delay_bets: Delay betting
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
-
         """
         assert self.proposer, "'betting_market_create' needs to be proposed"
-        assert isinstance(freeze, bool)
         if not account:
             if "default_account" in config:
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account)
-        op = operations.Betting_market_group_freeze(**{
+        account = Account(account, peerplays_instance=self)
+        bmg = BettingMarketGroup(betting_market_group_id)
+        op = operations.Betting_market_group_update(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "betting_market_group_id": betting_market_group_id,
+            "betting_market_group_id": bmg["id"],
+            "new_description": description,
+            "new_event_id": event_id,
+            "new_rules_id": rules_id,
             "freeze": freeze,
+            "delay_bets": delay_bets,
             "prefix": self.rpc.chain_params["prefix"]
         })
         return self.finalizeOp(op, account["name"], "active")
@@ -1039,12 +1203,14 @@ class PeerPlays(object):
     def betting_market_create(
         self,
         payout_condition,
+        descriptions,
         group_id="0.0.0",
         account=None
     ):
         """ Create an event group. This needs to be **proposed**.
 
             :param list payout_condition: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param list descriptions: Internationalized descriptions, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
             :param str group_id: Group ID to create the market for (defaults to *relative* id ``0.0.0``)
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
@@ -1060,7 +1226,44 @@ class PeerPlays(object):
         op = operations.Betting_market_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "group_id": group_id,
+            "description": descriptions,
             "payout_condition": payout_condition,
+            "prefix": self.rpc.chain_params["prefix"]
+        })
+        return self.finalizeOp(op, account["name"], "active")
+
+    def betting_market_update(
+        self,
+        betting_market_id,
+        payout_condition,
+        descriptions,
+        group_id="0.0.0",
+        account=None
+    ):
+        """ Update an event group. This needs to be **proposed**.
+
+            :param str betting_market_id: Id of the betting market to update
+            :param list payout_condition: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param list descriptions: Internationalized descriptions, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param str group_id: Group ID to create the market for (defaults to *relative* id ``0.0.0``)
+            :param str account: (optional) the account to allow access
+                to (defaults to ``default_account``)
+        """
+        assert self.proposer, "'betting_market_create' needs to be proposed"
+        assert isinstance(payout_condition, list)
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account)
+        market = BettingMarket(betting_market_id)
+        op = operations.Betting_market_update(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "betting_market_id": market["id"],
+            "new_group_id": group_id,
+            "new_description": descriptions,
+            "new_payout_condition": payout_condition,
             "prefix": self.rpc.chain_params["prefix"]
         })
         return self.finalizeOp(op, account["name"], "active")
@@ -1094,6 +1297,68 @@ class PeerPlays(object):
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "betting_market_group_id": betting_market_group_id,
             "resolutions": results,
+            "prefix": self.rpc.chain_params["prefix"]
+        })
+        return self.finalizeOp(op, account["name"], "active")
+
+    # -------------------------------------------------------------------------
+    # The betting in bookie
+    # -------------------------------------------------------------------------
+    def bet_place(
+        self,
+        betting_market_id,
+        amount_to_bet,
+        backer_multiplier,
+        back_or_lay,
+        account=None
+    ):
+        """ Place a bet
+
+            :param str betting_market_id: The identifier for the market to bet in
+            :param peerplays.amount.Amount amount_to_bet: Amount to bet with
+            :param int backer_multiplier: Multipler for backer
+            :param str back_or_lay: "back" or "lay" the bet
+            :param str account: (optional) the account to bet (defaults
+                        to ``default_account``)
+        """
+        assert isinstance(amount_to_bet, Amount)
+        assert back_or_lay in ["back", "lay"]
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account)
+        bm = BettingMarket(betting_market_id)
+        op = operations.Bet_place(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "bettor_id": account["id"],
+            "betting_market_id": bm["id"],
+            "amount_to_bet": amount_to_bet.json(),
+            "backer_multiplier": int(backer_multiplier) * GRAPHENE_BETTING_ODDS_PRECISION,
+            "back_or_lay": back_or_lay,
+            "prefix": self.rpc.chain_params["prefix"]
+        })
+        return self.finalizeOp(op, account["name"], "active")
+
+    def bet_cancel(self, bet_to_cancel, account=None):
+        """ Cancel a bet
+
+            :param str bet_to_cancel: The identifier that identifies the bet to cancel
+            :param str account: (optional) the account that owns the bet (defaults
+                        to ``default_account``)
+        """
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account)
+        bet = Bet(bet_to_cancel)
+        op = operations.Bet_cancel(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "bettor_id": account["id"],
+            "bet_to_cancel": bet["id"],
             "prefix": self.rpc.chain_params["prefix"]
         })
         return self.finalizeOp(op, account["name"], "active")

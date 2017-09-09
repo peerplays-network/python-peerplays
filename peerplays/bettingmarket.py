@@ -1,31 +1,16 @@
 from peerplays.instance import shared_peerplays_instance
 from .exceptions import BettingMarketDoesNotExistException
+from .blockchainobject import BlockchainObject
 
 
-class BettingMarket(dict):
+class BettingMarket(BlockchainObject):
     """ Read data about a Betting Market on the chain
 
         :param str identifier: Identifier
         :param peerplays peerplays_instance: PeerPlays() instance to use when accesing a RPC
 
     """
-    def __init__(
-        self,
-        identifier,
-        lazy=False,
-        peerplays_instance=None,
-    ):
-        self.peerplays = peerplays_instance or shared_peerplays_instance()
-        self.cached = False
-
-        if isinstance(identifier, str):
-            self.identifier = identifier
-            if not lazy:
-                self.refresh()
-        elif isinstance(identifier, dict):
-            self.cached = False
-            self.identifier = identifier.get("id")
-            super(BettingMarket, self).__init__(identifier)
+    type_id = 21
 
     def refresh(self):
         assert self.identifier[:5] == "1.21.",\
@@ -35,19 +20,6 @@ class BettingMarket(dict):
             raise BettingMarketDoesNotExistException(self.identifier)
         super(BettingMarket, self).__init__(data)
         self.cached = True
-
-    def __getitem__(self, key):
-        if not self.cached:
-            self.refresh()
-        return super(BettingMarket, self).__getitem__(key)
-
-    def items(self):
-        if not self.cached:
-            self.refresh()
-        return super(BettingMarket, self).items()
-
-    def __repr__(self):
-        return "<BettingMarket %s>" % str(self.identifier)
 
     @property
     def bettingmarketgroup(self):
