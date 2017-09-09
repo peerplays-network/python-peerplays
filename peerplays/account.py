@@ -36,11 +36,13 @@ class Account(BlockchainObject):
         self,
         account,
         full=False,
+        lazy=False,
         peerplays_instance=None
     ):
         self.full = full
         super().__init__(
             account,
+            lazy=lazy,
             peerplays_instance=peerplays_instance,
         )
 
