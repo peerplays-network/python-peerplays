@@ -1,5 +1,4 @@
 import json
-from peerplays.instance import shared_peerplays_instance
 from .exceptions import AssetDoesNotExistsException
 from .blockchainobject import BlockchainObject
 

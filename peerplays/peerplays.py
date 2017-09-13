@@ -1139,7 +1139,7 @@ class PeerPlays(object):
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, "'betting_market_create' needs to be proposed"
+        assert self.proposer, "'betting_market_group_create' needs to be proposed"
         if not asset:
             asset = self.rpc.chain_params["core_symbol"]
         if not account:
@@ -1180,7 +1180,7 @@ class PeerPlays(object):
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, "'betting_market_create' needs to be proposed"
+        assert self.proposer, "'betting_market_group_update' needs to be proposed"
         if not account:
             if "default_account" in config:
                 account = config["default_account"]
@@ -1226,7 +1226,7 @@ class PeerPlays(object):
         op = operations.Betting_market_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "group_id": group_id,
-            "description": descriptions,
+            "descriptions": descriptions,
             "payout_condition": payout_condition,
             "prefix": self.rpc.chain_params["prefix"]
         })
