@@ -2,8 +2,9 @@ import json
 import logging
 import random
 import re
-from datetime import datetime, timedelta
+import collections
 
+from datetime import datetime, timedelta
 from peerplaysapi.node import PeerPlaysNodeRPC
 from peerplaysbase.account import PrivateKey, PublicKey
 from peerplaysbase import transactions, operations
@@ -16,7 +17,7 @@ from .storage import configStorage as config
 from .sport import Sport
 from .eventgroup import EventGroup
 from .event import Event
-from .rules import Rules
+from .rule import Rule, Rules
 from .bettingmarketgroup import BettingMarketGroup
 from .bettingmarket import BettingMarket
 from .bet import Bet
@@ -138,7 +139,14 @@ class PeerPlays(object):
                          **kwargs)
 
         self.wallet = Wallet(self.rpc, **kwargs)
-        self.txbuffer = TransactionBuilder(peerplays_instance=self)
+
+        # This is a Transaction buffer for regular operations
+        self._direct_buffer = TransactionBuilder(peerplays_instance=self)
+
+        # This is a Transaction buffer for **proposals**!
+        self._proposal_buffer = TransactionBuilder(peerplays_instance=self)
+
+        self.txbuffer = self._direct_buffer
 
     # -------------------------------------------------------------------------
     # Basic Calls
@@ -198,6 +206,13 @@ class PeerPlays(object):
             self.txbuffer.appendSigner(account, permission)
             self.txbuffer.sign()
             return self.txbuffer.broadcast()
+
+    def use_proposal_buffer(self):
+        assert self.proposer, "No proposing account provided. Use 'proposer=xx'"
+        self.txbuffer = self._proposal_buffer
+
+    def use_direct_buffer(self):
+        self.txbuffer = self._direct_buffer
 
     def sign(self, tx=None, wifs=[]):
         """ Sign a provided transaction witht he provided key(s)
@@ -659,7 +674,7 @@ class PeerPlays(object):
         account = Account(account, peerplays_instance=self)
         options = account["options"]
 
-        if not isinstance(witnesses, (list, set)):
+        if not isinstance(witnesses, collections.Iterable):
             witnesses = set(witnesses)
 
         for witness in witnesses:
@@ -696,7 +711,7 @@ class PeerPlays(object):
         account = Account(account, peerplays_instance=self)
         options = account["options"]
 
-        if not isinstance(witnesses, (list, set)):
+        if not isinstance(witnesses, collections.Iterable):
             witnesses = set(witnesses)
 
         for witness in witnesses:
@@ -734,7 +749,7 @@ class PeerPlays(object):
         account = Account(account, peerplays_instance=self)
         options = account["options"]
 
-        if not isinstance(committees, (list, set)):
+        if not isinstance(committees, collections.Iterable):
             committees = set(committees)
 
         for committee in committees:
@@ -771,7 +786,7 @@ class PeerPlays(object):
         account = Account(account, peerplays_instance=self)
         options = account["options"]
 
-        if not isinstance(committees, (list, set)):
+        if not isinstance(committees, collections.Iterable):
             committees = set(committees)
 
         for committee in committees:
@@ -813,8 +828,8 @@ class PeerPlays(object):
         else:
             approver = Account(approver)
 
-        if not isinstance(proposal_ids, (list, set)):
-            proposal_ids = set(proposal_ids)
+        if not isinstance(proposal_ids, collections.Iterable):
+            proposal_ids = set([proposal_ids])
 
         op = []
         for proposal_id in proposal_ids:
@@ -847,8 +862,8 @@ class PeerPlays(object):
         else:
             approver = Account(approver)
 
-        if not isinstance(proposal_ids, (list, set)):
-            proposal_ids = set(proposal_ids)
+        if not isinstance(proposal_ids, collections.Iterable):
+            proposal_ids = set([proposal_ids])
 
         op = []
         for proposal_id in proposal_ids:
@@ -1112,10 +1127,10 @@ class PeerPlays(object):
         if not account:
             raise ValueError("You need to provide an account")
         account = Account(account)
-        rules = Rules(rules_id)
+        rule = Rule(rules_id)
         op = operations.Betting_market_rules_update(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "betting_market_rules_id": rules["id"],
+            "betting_market_rules_id": rule["id"],
             "new_name": names,
             "new_description": descriptions,
             "prefix": self.rpc.chain_params["prefix"]
@@ -1286,7 +1301,7 @@ class PeerPlays(object):
 
         """
         assert self.proposer, "'betting_market_create' needs to be proposed"
-        assert isinstance(results, (list, set))
+        assert isinstance(results, collections.Iterable)
         if not account:
             if "default_account" in config:
                 account = config["default_account"]
