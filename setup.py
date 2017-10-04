@@ -50,7 +50,8 @@ setup(
         "scrypt",
         "appdirs",
         "pycrypto",
-        "click-datetime"
+        "click-datetime",
+        "prettytable",
     ],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],

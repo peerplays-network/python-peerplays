@@ -59,7 +59,7 @@ class BlockchainObject(dict):
         lazy=True,
         use_cache=True,
         peerplays_instance=None,
-        **kwargs,
+        **kwargs
     ):
         self.peerplays = peerplays_instance or shared_peerplays_instance()
         self.cached = False
