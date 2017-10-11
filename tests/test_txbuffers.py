@@ -13,6 +13,7 @@ class Testcases(unittest.TestCase):
         self.ppy = PeerPlays(
             nobroadcast=True,
             wif={
+                # Force signing with this key
                 "active": wif
             })
 
