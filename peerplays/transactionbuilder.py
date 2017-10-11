@@ -1,6 +1,6 @@
 from .account import Account
 from peerplaysbase.objects import Operation
-from peerplaysbase.account import PrivateKey
+from peerplaysbase.account import PrivateKey, PublicKey
 from peerplaysbase.signedtransactions import Signed_Transaction
 from peerplaysbase import transactions, operations
 from .exceptions import (
@@ -27,14 +27,21 @@ class TransactionBuilder(dict):
         self.clear()
         if not isinstance(tx, dict):
             raise ValueError("Invalid TransactionBuilder Format")
-        self.proposer = proposer or self.peerplays.proposer
         super(TransactionBuilder, self).__init__(tx)
+        # Do we need to reconstruct the tx from self.ops?
+        self._require_reconstruction = True
 
     def is_signed(self):
         return "signatures" in self and self["signatures"]
 
     def is_constructed(self):
         return "expiration" in self and self["expiration"]
+
+    def is_require_reconstruction(self):
+        return self._require_reconstruction
+
+    def require_reconstruction(self):
+        self._require_reconstruction = True
 
     def appendOps(self, ops):
         """ Append op(s) to the transaction builder
@@ -45,6 +52,7 @@ class TransactionBuilder(dict):
             self.ops.extend(ops)
         else:
             self.ops.append(ops)
+        self.require_reconstruction()
 
     def appendSigner(self, account, permission):
         """ Try to obtain the wif key from the wallet by telling which account
@@ -54,11 +62,11 @@ class TransactionBuilder(dict):
         account = Account(account, peerplays_instance=self.peerplays)
         required_treshold = account[permission]["weight_threshold"]
 
-        def fetchkeys(account, level=0):
+        def fetchkeys(account, perm, level=0):
             if level > 2:
                 return []
             r = []
-            for authority in account[permission]["key_auths"]:
+            for authority in account[perm]["key_auths"]:
                 wif = self.peerplays.wallet.getPrivateKeyForPublicKey(
                     authority[0])
                 if wif:
@@ -66,14 +74,30 @@ class TransactionBuilder(dict):
 
             if sum([x[1] for x in r]) < required_treshold:
                 # go one level deeper
-                for authority in account[permission]["account_auths"]:
+                for authority in account[perm]["account_auths"]:
                     auth_account = Account(
                         authority[0], peerplays_instance=self.peerplays)
-                    r.extend(fetchkeys(auth_account, level + 1))
+                    r.extend(fetchkeys(auth_account, perm, level + 1))
 
             return r
-        keys = fetchkeys(account)
-        self.wifs.extend([x[0] for x in keys])
+
+        if account not in self.available_signers:
+            # is the account an instance of public key?
+            if isinstance(account, PublicKey):
+                self.wifs.append(
+                    self.peerplays.wallet.getPrivateKeyForPublicKey(
+                        str(account)
+                    )
+                )
+            else:
+                account = Account(account, peerplays_instance=self.peerplays)
+                required_treshold = account[permission]["weight_threshold"]
+                keys = fetchkeys(account, permission)
+                if permission != "owner":
+                    keys.extend(fetchkeys(account, "owner"))
+                self.wifs.extend([x[0] for x in keys])
+
+            self.available_signers.append(account)
 
     def appendWif(self, wif):
         """ Add a wif that should be used for signing of the transaction.
@@ -89,10 +113,10 @@ class TransactionBuilder(dict):
         """ Construct the actual transaction and store it in the class's dict
             store
         """
-        if self.proposer:
+        if self.peerplays.proposer:
             ops = [operations.Op_wrapper(op=o) for o in list(self.ops)]
             proposer = Account(
-                self.proposer,
+                self.peerplays.proposer,
                 peerplays_instance=self.peerplays
             )
             ops = operations.Proposal_create(**{
@@ -101,6 +125,7 @@ class TransactionBuilder(dict):
                 "expiration_time": transactions.formatTimeFromNow(
                     self.peerplays.proposal_expiration),
                 "proposed_ops": [o.json() for o in ops],
+                "review_period_seconds": self.peerplays.proposal_review,
                 "extensions": []
             })
             ops = [Operation(ops)]
@@ -131,9 +156,9 @@ class TransactionBuilder(dict):
         self.constructTx()
 
         # If we are doing a proposal, obtain the account from the proposer_id
-        if self.proposer:
+        if self.peerplays.proposer:
             proposer = Account(
-                self.proposer,
+                self.peerplays.proposer,
                 peerplays_instance=self.peerplays)
             self.wifs = []
             self.appendSigner(proposer["id"], "active")
@@ -190,6 +215,14 @@ class TransactionBuilder(dict):
         ret = self.json()
         self.clear()
 
+        if self.peerplays.blocking:
+            chain = Blockchain(
+                mode=("head" if self.peerplays.blocking == "head" else "irreversible"),
+                peerplays_instance=self.peerplays
+            )
+            tx = chain.awaitTxConfirmation(tx)
+            return tx
+
         return ret
 
     def clear(self):
@@ -197,6 +230,7 @@ class TransactionBuilder(dict):
         """
         self.ops = []
         self.wifs = []
+        self.available_signers = []
         # This makes sure that is_constructed will return False afterwards
         self["expiration"] = None
         super(TransactionBuilder, self).__init__({})
@@ -205,38 +239,46 @@ class TransactionBuilder(dict):
         """ This is a private method that adds side information to a
             unsigned/partial transaction in order to simplify later
             signing (e.g. for multisig or coldstorage)
+
+            FIXME: Does not work with owner keys!
         """
         self.constructTx()
-        accountObj = Account(account)
-        authority = accountObj[permission]
-        # We add a required_authorities to be able to identify
-        # how to sign later. This is an array, because we
-        # may later want to allow multiple operations per tx
-        self.update({"required_authorities": {
-            accountObj["name"]: authority
-        }})
-        for account_auth in authority["account_auths"]:
-            account_auth_account = Account(account_auth[0])
-            self["required_authorities"].update({
-                account_auth[0]: account_auth_account.get(permission)
-            })
-
-        # Try to resolve required signatures for offline signing
-        self["missing_signatures"] = [
-            x[0] for x in authority["key_auths"]
-        ]
-        # Add one recursion of keys from account_auths:
-        for account_auth in authority["account_auths"]:
-            account_auth_account = Account(account_auth[0])
-            self["missing_signatures"].extend(
-                [x[0] for x in account_auth_account[permission]["key_auths"]]
-            )
         self["blockchain"] = self.peerplays.rpc.chain_params
+
+        if isinstance(account, PublicKey):
+            self["missing_signatures"] = [
+                str(account)
+            ]
+        else:
+            accountObj = Account(account)
+            authority = accountObj[permission]
+            # We add a required_authorities to be able to identify
+            # how to sign later. This is an array, because we
+            # may later want to allow multiple operations per tx
+            self.update({"required_authorities": {
+                accountObj["name"]: authority
+            }})
+            for account_auth in authority["account_auths"]:
+                account_auth_account = Account(account_auth[0])
+                self["required_authorities"].update({
+                    account_auth[0]: account_auth_account.get(permission)
+                })
+
+            # Try to resolve required signatures for offline signing
+            self["missing_signatures"] = [
+                x[0] for x in authority["key_auths"]
+            ]
+            # Add one recursion of keys from account_auths:
+            for account_auth in authority["account_auths"]:
+                account_auth_account = Account(account_auth[0])
+                self["missing_signatures"].extend(
+                    [x[0] for x in account_auth_account[permission]["key_auths"]]
+                )
 
     def json(self):
         """ Show the transaction as plain json
         """
-        if not self.is_constructed():
+        if not self.is_constructed() or self.is_require_reconstruction():
             self.constructTx()
         return dict(self)
 

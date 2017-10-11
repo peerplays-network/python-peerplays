@@ -48,7 +48,9 @@ class PeerPlays(object):
         :param bool offline: Boolean to prevent connecting to network (defaults to ``False``) *(optional)*
         :param str proposer: Propose a transaction using this proposer *(optional)*
         :param int proposal_expiration: Expiration time (in seconds) for the proposal *(optional)*
+        :param int proposal_review: Review period (in seconds) for the proposal *(optional)*
         :param int expiration: Delay in seconds until transactions are supposed to expire *(optional)*
+        :param str blocking: Wait for broadcasted transactions to be included in a block and return full transaction (can be "head" or "irrversible")
         :param bool bundle: Do not broadcast transactions right away, but allow to bundle operations *(optional)*
 
         Three wallet operation modes are possible:
@@ -126,9 +128,10 @@ class PeerPlays(object):
         self.unsigned = bool(kwargs.get("unsigned", False))
         self.expiration = int(kwargs.get("expiration", 30))
         self.proposer = kwargs.get("proposer", None)
-        self.previous_proposer = None  # For temporary storage of proposer name
         self.proposal_expiration = int(kwargs.get("proposal_expiration", 60 * 60 * 24))
+        self.proposal_review = int(kwargs.get("proposal_review", 0))
         self.bundle = bool(kwargs.get("bundle", False))
+        self.blocking = kwargs.get("blocking", False)
 
         # Multiple txbuffers can be stored here
         self._txbuffers = []
@@ -169,6 +172,15 @@ class PeerPlays(object):
 
         self.rpc = PeerPlaysNodeRPC(node, rpcuser, rpcpassword, **kwargs)
 
+    def newWallet(self, pwd):
+        """ Create a new wallet. This method is basically only calls
+            :func:`bitshares.wallet.create`.
+
+            :param str pwd: Password to use for the new wallet
+            :raises bitshares.exceptions.WalletExists: if there is already a wallet created
+        """
+        self.wallet.create(pwd)
+
     def finalizeOp(self, ops, account, permission):
         """ This method obtains the required private keys if present in
             the wallet, finalizes the transaction, signs it and
@@ -202,6 +214,7 @@ class PeerPlays(object):
         elif self.bundle:
             # In case we want to add more ops to the tx (bundle)
             self.txbuffer.appendSigner(account, permission)
+            return self.txbuffer.json()
         else:
             # default behavior: sign + broadcast
             self.txbuffer.appendSigner(account, permission)
