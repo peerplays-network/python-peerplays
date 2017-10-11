@@ -9,7 +9,6 @@ from .exceptions import (
     InvalidWifError
 )
 from peerplays.instance import shared_peerplays_instance
-from .blockchain import Blockchain
 import logging
 log = logging.getLogger(__name__)
 
@@ -41,8 +40,11 @@ class TransactionBuilder(dict):
     def is_require_reconstruction(self):
         return self._require_reconstruction
 
-    def require_reconstruction(self):
+    def set_require_reconstruction(self):
         self._require_reconstruction = True
+
+    def unset_require_reconstruction(self):
+        self._require_reconstruction = False
 
     def appendOps(self, ops):
         """ Append op(s) to the transaction builder
@@ -53,7 +55,7 @@ class TransactionBuilder(dict):
             self.ops.extend(ops)
         else:
             self.ops.append(ops)
-        self.require_reconstruction()
+        self.set_require_reconstruction()
 
     def appendSigner(self, account, permission):
         """ Try to obtain the wif key from the wallet by telling which account
@@ -144,6 +146,7 @@ class TransactionBuilder(dict):
             operations=ops
         )
         super(TransactionBuilder, self).__init__(self.tx.json())
+        self.unset_require_reconstruction()
 
     def sign(self):
         """ Sign a provided transaction witht he provided key(s)
@@ -200,30 +203,25 @@ class TransactionBuilder(dict):
         if not self.is_signed():
             self.sign()
 
+        ret = self.json()
+
         if self.peerplays.nobroadcast:
             log.warning("Not broadcasting anything!")
-            ret = self.json()
             self.clear()
             return ret
 
         # Broadcast
         try:
-            self.peerplays.rpc.broadcast_transaction(
-                self.json(), api="network_broadcast")
+            if self.peerplays.blocking:
+                ret = self.peerplays.rpc.broadcast_transaction_synchronous(
+                    ret, api="network_broadcast")
+            else:
+                self.peerplays.rpc.broadcast_transaction(
+                    ret, api="network_broadcast")
         except Exception as e:
             raise e
 
-        ret = self.json()
         self.clear()
-
-        if self.peerplays.blocking:
-            chain = Blockchain(
-                mode=("head" if self.peerplays.blocking == "head" else "irreversible"),
-                peerplays_instance=self.peerplays
-            )
-            tx = chain.awaitTxConfirmation(ret)
-            return tx
-
         return ret
 
     def clear(self):
