@@ -71,7 +71,7 @@ class PeerPlays(object):
           signatures!
 
         If no node is provided, it will connect to the node of
-        http://ppy-node.bitshares.eu. It is **highly** recommended that you pick your own
+        http://ppy-node.peerplays.eu. It is **highly** recommended that you pick your own
         node instead. Default settings can be changed with:
 
         .. code-block:: python
@@ -174,10 +174,10 @@ class PeerPlays(object):
 
     def newWallet(self, pwd):
         """ Create a new wallet. This method is basically only calls
-            :func:`bitshares.wallet.create`.
+            :func:`peerplays.wallet.create`.
 
             :param str pwd: Password to use for the new wallet
-            :raises bitshares.exceptions.WalletExists: if there is already a wallet created
+            :raises peerplays.exceptions.WalletExists: if there is already a wallet created
         """
         self.wallet.create(pwd)
 
@@ -284,8 +284,8 @@ class PeerPlays(object):
         """
         self._txbuffers.append(TransactionBuilder(
             *args,
-            **kwargs,
-            peerplays_instance=self
+            peerplays_instance=self,
+            **kwargs
         ))
         id = len(self._txbuffers) - 1
         self.set_txbuffer(id)

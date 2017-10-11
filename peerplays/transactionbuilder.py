@@ -9,6 +9,7 @@ from .exceptions import (
     InvalidWifError
 )
 from peerplays.instance import shared_peerplays_instance
+from .blockchain import Blockchain
 import logging
 log = logging.getLogger(__name__)
 
@@ -220,7 +221,7 @@ class TransactionBuilder(dict):
                 mode=("head" if self.peerplays.blocking == "head" else "irreversible"),
                 peerplays_instance=self.peerplays
             )
-            tx = chain.awaitTxConfirmation(tx)
+            tx = chain.awaitTxConfirmation(ret)
             return tx
 
         return ret

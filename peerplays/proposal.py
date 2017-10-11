@@ -2,6 +2,8 @@ from .instance import shared_peerplays_instance
 from .account import Account
 from .exceptions import ProposalDoesNotExistException
 from .blockchainobject import BlockchainObject
+import logging
+log = logging.getLogger(__name__)
 
 
 class Proposal(BlockchainObject):

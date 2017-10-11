@@ -29,3 +29,4 @@ __all__ = [
 ]
 base58.known_prefixes.append("PPY")
 base58.known_prefixes.append("PPY1")
+base58.known_prefixes.append("PPYTEST")

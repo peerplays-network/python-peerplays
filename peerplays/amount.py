@@ -79,17 +79,17 @@ class Amount(dict):
             self["asset"] = Asset(args[1], peerplays_instance=self.peerplays)
             self["symbol"] = self["asset"]["symbol"]
 
-        elif amount and asset and isinstance(asset, Asset):
+        elif isinstance(amount, (int, float)) and asset and isinstance(asset, Asset):
             self["amount"] = amount
             self["asset"] = asset
             self["symbol"] = self["asset"]["symbol"]
 
-        elif amount and asset and isinstance(asset, dict):
+        elif isinstance(amount, (int, float)) and asset and isinstance(asset, dict):
             self["amount"] = amount
             self["asset"] = asset
             self["symbol"] = self["asset"]["symbol"]
 
-        elif amount and asset and isinstance(asset, str):
+        elif isinstance(amount, (int, float)) and asset and isinstance(asset, str):
             self["amount"] = amount
             self["asset"] = Asset(asset)
             self["symbol"] = asset
@@ -119,6 +119,9 @@ class Amount(dict):
         """ Returns the symbol of the asset
         """
         return self["symbol"]
+
+    def tuple(self):
+        return float(self), self.symbol
 
     @property
     def asset(self):

@@ -93,15 +93,6 @@ class Memo(object):
             raise MissingKeyError("Memo key for %s missing!" % self.to_account["name"])
 
         # TODO: Use pubkeys of the message, not pubkeys of account!
-        print(
-            PrivateKey(memo_wif),
-            PublicKey(
-                self.from_account["options"]["memo_key"],
-                prefix=self.peerplays.rpc.chain_params["prefix"]
-            ),
-            memo.get("nonce"),
-            memo.get("message")
-        )
         return PPYMemo.decode_memo(
             PrivateKey(memo_wif),
             PublicKey(
