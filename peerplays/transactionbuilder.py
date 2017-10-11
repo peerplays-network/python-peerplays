@@ -1,6 +1,6 @@
 from .account import Account
 from peerplaysbase.objects import Operation
-from peerplaysbase.account import PrivateKey, PublicKey
+from peerplaysbase.account import PrivateKey
 from peerplaysbase.signedtransactions import Signed_Transaction
 from peerplaysbase import transactions, operations
 from .exceptions import (
@@ -17,13 +17,24 @@ class TransactionBuilder(dict):
     """ This class simplifies the creation of transactions by adding
         operations and signers.
     """
-
-    def __init__(self, tx={}, peerplays_instance=None):
+    def __init__(
+        self,
+        tx={},
+        proposer=None,
+        peerplays_instance=None
+    ):
         self.peerplays = peerplays_instance or shared_peerplays_instance()
         self.clear()
         if not isinstance(tx, dict):
             raise ValueError("Invalid TransactionBuilder Format")
+        self.proposer = proposer or self.peerplays.proposer
         super(TransactionBuilder, self).__init__(tx)
+
+    def is_signed(self):
+        return "signatures" in self and self["signatures"]
+
+    def is_constructed(self):
+        return "expiration" in self and self["expiration"]
 
     def appendOps(self, ops):
         """ Append op(s) to the transaction builder
@@ -48,14 +59,16 @@ class TransactionBuilder(dict):
                 return []
             r = []
             for authority in account[permission]["key_auths"]:
-                wif = self.peerplays.wallet.getPrivateKeyForPublicKey(authority[0])
+                wif = self.peerplays.wallet.getPrivateKeyForPublicKey(
+                    authority[0])
                 if wif:
                     r.append([wif, authority[1]])
 
             if sum([x[1] for x in r]) < required_treshold:
                 # go one level deeper
                 for authority in account[permission]["account_auths"]:
-                    auth_account = Account(authority[0], peerplays_instance=self.peerplays)
+                    auth_account = Account(
+                        authority[0], peerplays_instance=self.peerplays)
                     r.extend(fetchkeys(auth_account, level + 1))
 
             return r
@@ -76,10 +89,10 @@ class TransactionBuilder(dict):
         """ Construct the actual transaction and store it in the class's dict
             store
         """
-        if self.peerplays.proposer:
+        if self.proposer:
             ops = [operations.Op_wrapper(op=o) for o in list(self.ops)]
             proposer = Account(
-                self.peerplays.proposer,
+                self.proposer,
                 peerplays_instance=self.peerplays
             )
             ops = operations.Proposal_create(**{
@@ -96,7 +109,8 @@ class TransactionBuilder(dict):
 
         ops = transactions.addRequiredFees(self.peerplays.rpc, ops)
         expiration = transactions.formatTimeFromNow(self.peerplays.expiration)
-        ref_block_num, ref_block_prefix = transactions.getBlockParams(self.peerplays.rpc)
+        ref_block_num, ref_block_prefix = transactions.getBlockParams(
+            self.peerplays.rpc)
         self.tx = Signed_Transaction(
             ref_block_num=ref_block_num,
             ref_block_prefix=ref_block_prefix,
@@ -117,9 +131,9 @@ class TransactionBuilder(dict):
         self.constructTx()
 
         # If we are doing a proposal, obtain the account from the proposer_id
-        if self.peerplays.proposer:
+        if self.proposer:
             proposer = Account(
-                self.peerplays.proposer,
+                self.proposer,
                 peerplays_instance=self.peerplays)
             self.wifs = []
             self.appendSigner(proposer["id"], "active")
@@ -127,7 +141,8 @@ class TransactionBuilder(dict):
         # We need to set the default prefix, otherwise pubkeys are
         # presented wrongly!
         if self.peerplays.rpc:
-            operations.default_prefix = self.peerplays.rpc.chain_params["prefix"]
+            operations.default_prefix = (
+                self.peerplays.rpc.chain_params["prefix"])
         elif "blockchain" in self:
             operations.default_prefix = self["blockchain"]["prefix"]
 
@@ -156,28 +171,34 @@ class TransactionBuilder(dict):
 
             :param tx tx: Signed transaction to broadcast
         """
-        if not "signatures" in self or not self["signatures"]:
+        if not self.is_signed():
             self.sign()
 
         if self.peerplays.nobroadcast:
             log.warning("Not broadcasting anything!")
-            return self
+            ret = self.json()
+            self.clear()
+            return ret
 
         # Broadcast
         try:
-            self.peerplays.rpc.broadcast_transaction(self.json(), api="network_broadcast")
+            self.peerplays.rpc.broadcast_transaction(
+                self.json(), api="network_broadcast")
         except Exception as e:
             raise e
 
+        ret = self.json()
         self.clear()
 
-        return self
+        return ret
 
     def clear(self):
         """ Clear the transaction builder and start from scratch
         """
         self.ops = []
         self.wifs = []
+        # This makes sure that is_constructed will return False afterwards
+        self["expiration"] = None
         super(TransactionBuilder, self).__init__({})
 
     def addSigningInformation(self, account, permission):
@@ -215,6 +236,8 @@ class TransactionBuilder(dict):
     def json(self):
         """ Show the transaction as plain json
         """
+        if not self.is_constructed():
+            self.constructTx()
         return dict(self)
 
     def appendMissingSignatures(self):

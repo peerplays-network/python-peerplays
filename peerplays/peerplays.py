@@ -126,8 +126,12 @@ class PeerPlays(object):
         self.unsigned = bool(kwargs.get("unsigned", False))
         self.expiration = int(kwargs.get("expiration", 30))
         self.proposer = kwargs.get("proposer", None)
+        self.previous_proposer = None  # For temporary storage of proposer name
         self.proposal_expiration = int(kwargs.get("proposal_expiration", 60 * 60 * 24))
         self.bundle = bool(kwargs.get("bundle", False))
+
+        # Multiple txbuffers can be stored here
+        self._txbuffers = []
 
         # Store config for access through other Classes
         self.config = config
@@ -139,14 +143,7 @@ class PeerPlays(object):
                          **kwargs)
 
         self.wallet = Wallet(self.rpc, **kwargs)
-
-        # This is a Transaction buffer for regular operations
-        self._direct_buffer = TransactionBuilder(peerplays_instance=self)
-
-        # This is a Transaction buffer for **proposals**!
-        self._proposal_buffer = TransactionBuilder(peerplays_instance=self)
-
-        self.txbuffer = self._direct_buffer
+        self.new_txbuffer()
 
     # -------------------------------------------------------------------------
     # Basic Calls
@@ -190,6 +187,10 @@ class PeerPlays(object):
                 that require active permission with ops that require
                 posting permission. Neither can you use different
                 accounts for different operations!
+
+            ... note:: This uses ``peerplays.txbuffer`` as instance of
+                :class:`peerplays.transactionbuilder.TransactionBuilder`.
+                You may want to use your own txbuffer
         """
         # Append transaction
         self.txbuffer.appendOps(ops)
@@ -206,13 +207,6 @@ class PeerPlays(object):
             self.txbuffer.appendSigner(account, permission)
             self.txbuffer.sign()
             return self.txbuffer.broadcast()
-
-    def use_proposal_buffer(self):
-        assert self.proposer, "No proposing account provided. Use 'proposer=xx'"
-        self.txbuffer = self._proposal_buffer
-
-    def use_direct_buffer(self):
-        self.txbuffer = self._direct_buffer
 
     def sign(self, tx=None, wifs=[]):
         """ Sign a provided transaction witht he provided key(s)
@@ -247,6 +241,42 @@ class PeerPlays(object):
         """ Returns the global properties
         """
         return self.rpc.get_dynamic_global_properties()
+
+    # -------------------------------------------------------------------------
+    # Transaction Buffers
+    # -------------------------------------------------------------------------
+    @property
+    def txbuffer(self):
+        """ Returns the currently active tx buffer
+        """
+        return self._txbuffers[self._current_txbuffer]
+
+    def set_txbuffer(self, i):
+        """ Lets you switch the current txbuffer
+
+            :param int i: Id of the txbuffer
+        """
+        self._current_txbuffer = i
+
+    def get_txbuffer(self, i):
+        """ Returns the txbuffer with id i
+        """
+        if i < len(self._txbuffers):
+            return self._txbuffers[i]
+
+    def new_txbuffer(self, *args, **kwargs):
+        """ Let's obtain a new txbuffer
+
+            :returns int txid: id of the new txbuffer
+        """
+        self._txbuffers.append(TransactionBuilder(
+            *args,
+            **kwargs,
+            peerplays_instance=self
+        ))
+        id = len(self._txbuffers) - 1
+        self.set_txbuffer(id)
+        return id
 
     # -------------------------------------------------------------------------
     # Simple Transfer
@@ -674,8 +704,8 @@ class PeerPlays(object):
         account = Account(account, peerplays_instance=self)
         options = account["options"]
 
-        if not isinstance(witnesses, collections.Iterable):
-            witnesses = set(witnesses)
+        if not isinstance(witnesses, (list, set, tuple)):
+            witnesses = {witnesses}
 
         for witness in witnesses:
             witness = Witness(witness, peerplays_instance=self)
@@ -711,8 +741,8 @@ class PeerPlays(object):
         account = Account(account, peerplays_instance=self)
         options = account["options"]
 
-        if not isinstance(witnesses, collections.Iterable):
-            witnesses = set(witnesses)
+        if not isinstance(witnesses, (list, set, tuple)):
+            witnesses = {witnesses}
 
         for witness in witnesses:
             witness = Witness(witness, peerplays_instance=self)
@@ -749,8 +779,8 @@ class PeerPlays(object):
         account = Account(account, peerplays_instance=self)
         options = account["options"]
 
-        if not isinstance(committees, collections.Iterable):
-            committees = set(committees)
+        if not isinstance(committees, (list, set, tuple)):
+            committees = {committees}
 
         for committee in committees:
             committee = Committee(committee, peerplays_instance=self)
@@ -786,8 +816,8 @@ class PeerPlays(object):
         account = Account(account, peerplays_instance=self)
         options = account["options"]
 
-        if not isinstance(committees, collections.Iterable):
-            committees = set(committees)
+        if not isinstance(committees, (list, set, tuple)):
+            committees = {committees}
 
         for committee in committees:
             committee = Committee(committee, peerplays_instance=self)
@@ -828,8 +858,8 @@ class PeerPlays(object):
         else:
             approver = Account(approver)
 
-        if not isinstance(proposal_ids, collections.Iterable):
-            proposal_ids = set([proposal_ids])
+        if not isinstance(proposal_ids, (list, set, tuple)):
+            proposal_ids = {proposal_ids}
 
         op = []
         for proposal_id in proposal_ids:
@@ -862,8 +892,8 @@ class PeerPlays(object):
         else:
             approver = Account(approver)
 
-        if not isinstance(proposal_ids, collections.Iterable):
-            proposal_ids = set([proposal_ids])
+        if not isinstance(proposal_ids, (list, set, tuple)):
+            proposal_ids = {proposal_ids}
 
         op = []
         for proposal_id in proposal_ids:
@@ -1218,14 +1248,14 @@ class PeerPlays(object):
     def betting_market_create(
         self,
         payout_condition,
-        descriptions,
+        description,
         group_id="0.0.0",
         account=None
     ):
         """ Create an event group. This needs to be **proposed**.
 
             :param list payout_condition: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
-            :param list descriptions: Internationalized descriptions, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param list description: Internationalized descriptions, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
             :param str group_id: Group ID to create the market for (defaults to *relative* id ``0.0.0``)
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
@@ -1241,7 +1271,7 @@ class PeerPlays(object):
         op = operations.Betting_market_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "group_id": group_id,
-            "descriptions": descriptions,
+            "description": description,
             "payout_condition": payout_condition,
             "prefix": self.rpc.chain_params["prefix"]
         })
@@ -1301,7 +1331,7 @@ class PeerPlays(object):
 
         """
         assert self.proposer, "'betting_market_create' needs to be proposed"
-        assert isinstance(results, collections.Iterable)
+        assert isinstance(results, (list, set, tuple))
         if not account:
             if "default_account" in config:
                 account = config["default_account"]
