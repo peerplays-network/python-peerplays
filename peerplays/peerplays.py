@@ -136,8 +136,9 @@ class PeerPlays(object):
         self.bundle = bool(kwargs.get("bundle", False))
         self.blocking = kwargs.get("blocking", False)
 
-        # Multiple txbuffers can be stored here
+        # Multiple txbuffers/propbuffer can be stored here
         self._txbuffers = []
+        self._propbuffer = []
 
         # Store config for access through other Classes
         self.config = config
@@ -150,6 +151,7 @@ class PeerPlays(object):
 
         self.wallet = Wallet(self.rpc, **kwargs)
         self.new_tx()
+        self.new_proposal()
 
     # -------------------------------------------------------------------------
     # Basic Calls
@@ -221,7 +223,16 @@ class PeerPlays(object):
             parent = kwargs["append_to"]
             assert isinstance(parent, (TransactionBuilder, ProposalBuilder))
             parent.appendOps(ops)
+            # This returns as we used append_to, it does NOT broadcast, or sign
             return parent.get_parent()
+        elif self.proposer:
+            # Legacy proposer mode!
+            proposal = self.proposal()
+            proposal.set_proposer(self.proposer)
+            proposal.set_expiration(self.proposal_expiration)
+            proposal.set_review(self.proposal_review)
+            proposal.appendOps(ops)
+            # Go forward to see what the other options do ...
         else:
             # Append tot he default buffer
             self.txbuffer.appendOps(ops)
@@ -284,10 +295,21 @@ class PeerPlays(object):
         """
         return self.tx()
 
+    @property
+    def propbuffer(self):
+        """ Return the default proposal buffer
+        """
+        return self.proposal()
+
     def tx(self):
         """ Returns the default active tx buffer
         """
         return self._txbuffers[0]
+
+    def proposal(self):
+        """ Return the default proposal buffer
+        """
+        return self._propbuffer[0]
 
     def new_proposal(
         self,
@@ -317,6 +339,7 @@ class PeerPlays(object):
         )
         if parent:
             parent.appendOps(proposal)
+        self._propbuffer.append(proposal)
         return proposal
 
     def new_tx(self, *args, **kwargs):

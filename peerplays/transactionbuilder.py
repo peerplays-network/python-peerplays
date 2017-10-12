@@ -43,6 +43,18 @@ class ProposalBuilder:
         self.parent = parent
         self.ops = list()
 
+    def set_proposer(self, p):
+        self.proposer = p
+
+    def set_expiration(self, p):
+        self.proposal_expiration = p
+
+    def set_review(self, p):
+        self.proposal_review = p
+
+    def set_parent(self, p):
+        self.parent = p
+
     def appendOps(self, ops, append_to=None):
         """ Append op(s) to the transaction builder
 
