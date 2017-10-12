@@ -49,8 +49,8 @@ class Testcases(unittest.TestCase):
     def test_finalizeOps_proposal(self):
         ppy = self.ppy
         proposal = ppy.new_proposal()
-        tx = self.ppy.transfer("init1", 1, "PPY", append_to=proposal)
-        tx = tx.json()
+        self.ppy.transfer("init1", 1, "PPY", append_to=proposal)
+        tx = ppy.tx().json()  # default tx buffer
         ops = tx["operations"]
         self.assertEqual(len(ops), 1)
         self.assertEqual(ops[0][0], 22)
@@ -62,9 +62,9 @@ class Testcases(unittest.TestCase):
         ppy = self.ppy
         parent = ppy.new_tx()
         proposal = ppy.new_proposal(parent)
-        tx = self.ppy.transfer("init1", 1, "PPY", append_to=proposal)
-        tx = self.ppy.transfer("init1", 1, "PPY", append_to=parent)
-        tx = tx.json()
+        self.ppy.transfer("init1", 1, "PPY", append_to=proposal)
+        self.ppy.transfer("init1", 1, "PPY", append_to=parent)
+        tx = parent.json()
         ops = tx["operations"]
         self.assertEqual(len(ops), 2)
         self.assertEqual(ops[0][0], 22)

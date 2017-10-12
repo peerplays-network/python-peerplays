@@ -14,14 +14,26 @@ log = logging.getLogger(__name__)
 
 
 class ProposalBuilder:
+    """ Proposal Builder allows us to construct an independent Proposal
+        that may later be added to an instance ot TransactionBuilder
+
+        :param str proposer: Account name of the proposing user
+        :param int proposal_expiration: Number seconds until the proposal is
+            supposed to expire
+        :param int proposal_review: Number of seconds for review of the
+            proposal
+        :param peerplays.transactionbuilder.TransactionBuilder: Specify
+            your own instance of transaction builder (optional)
+        :param peerplays.peerplays.PeerPlays peerplays_instance: PeerPlays instance
+    """
     def __init__(
         self,
         proposer,
         *args,
         proposal_expiration=None,
         proposal_review=None,
-        peerplays_instance=None,
         parent=None,
+        peerplays_instance=None,
         **kwargs
     ):
         self.peerplays = peerplays_instance or shared_peerplays_instance()
@@ -42,15 +54,21 @@ class ProposalBuilder:
             self.ops.append(ops)
 
     def get_parent(self):
+        """ This allows to referr to the actual parent of the Proposal
+        """
         return self.parent
 
     def __repr__(self):
         return "<Proposal ops=%s>" % str(self.ops)
 
     def json(self):
+        """ Return the json formated version of this proposal
+        """
         return self.get_raw().json()
 
     def get_raw(self):
+        """ Returns an instance of base "Operations" for further processing
+        """
         ops = [operations.Op_wrapper(op=o) for o in list(self.ops)]
         proposer = Account(
             self.proposer,
@@ -109,6 +127,8 @@ class TransactionBuilder(dict):
         return str(self.json())
 
     def get_parent(self):
+        """ TransactionBuilders don't have parents, they are their own parent
+        """
         return self
 
     def json(self):

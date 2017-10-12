@@ -1,12 +1,8 @@
-import json
 import logging
-import random
-import re
-import collections
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from peerplaysapi.node import PeerPlaysNodeRPC
-from peerplaysbase.account import PrivateKey, PublicKey
+from peerplaysbase.account import PublicKey
 from peerplaysbase import transactions, operations
 from .asset import Asset
 from .account import Account
@@ -17,7 +13,7 @@ from .storage import configStorage as config
 from .sport import Sport
 from .eventgroup import EventGroup
 from .event import Event
-from .rule import Rule, Rules
+from .rule import Rule
 from .bettingmarketgroup import BettingMarketGroup
 from .bettingmarket import BettingMarket
 from .bet import Bet
@@ -25,8 +21,6 @@ from .bet import Bet
 from .exceptions import (
     AccountExistsException,
     AccountDoesNotExistsException,
-    InsufficientAuthorityError,
-    MissingKeyError,
 )
 from .wallet import Wallet
 from .transactionbuilder import TransactionBuilder, ProposalBuilder
@@ -739,7 +733,7 @@ class PeerPlays(object):
     # -------------------------------------------------------------------------
     #  Approval and Disapproval of witnesses, workers, committee, and proposals
     # -------------------------------------------------------------------------
-    def approvewitness(self, witnesses, account=None):
+    def approvewitness(self, witnesses, account=None, **kwargs):
         """ Approve a witness
 
             :param list witnesses: list of Witness name or id
@@ -814,7 +808,7 @@ class PeerPlays(object):
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def approvecommittee(self, committees, account=None):
+    def approvecommittee(self, committees, account=None, **kwargs):
         """ Approve a committee
 
             :param list committees: list of committee member name or id
@@ -1059,8 +1053,10 @@ class PeerPlays(object):
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def event_group_update(self, event_group_id, names=[],
-            sport_id="0.0.0", account=None, **kwargs):
+    def event_group_update(
+        self, event_group_id, names=[],
+        sport_id="0.0.0", account=None, **kwargs
+    ):
         """ Update an event group. This needs to be **proposed**.
 
             :param str event_id: Id of the event group to update
