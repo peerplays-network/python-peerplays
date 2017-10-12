@@ -1,6 +1,7 @@
 import unittest
 from pprint import pprint
 from peerplays import PeerPlays
+from peerplaysbase import transactions, operations
 
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
 
@@ -17,33 +18,89 @@ class Testcases(unittest.TestCase):
                 "active": wif
             })
 
-        self.t1 = 0
-        self.t2 = self.ppy.new_txbuffer()
-
-    def test_addops(self):
+    def test_add_one_proposal_one_op(self):
         ppy = self.ppy
-        self.assertEqual(self.t1, 0)
-        self.assertEqual(self.t2, 1)
-
-        ppy.set_txbuffer(self.t1)
-        ppy.transfer("init0", 1, "PPY")
-        tx = ppy.transfer("init0", 2, "PPY")
-        # Only one Operation in Tx
+        tx1 = ppy.new_tx()
+        proposal1 = ppy.new_proposal(tx1, proposer="init0")
+        op = operations.Transfer(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "from": "1.2.0",
+            "to": "1.2.0",
+            "amount": {"amount": 0, "asset_id": "1.3.0"},
+            "prefix": "PPY"
+        })
+        proposal1.appendOps(op)
+        tx = tx1.json()
+        self.assertEqual(tx["operations"][0][0], 22)
         self.assertEqual(len(tx["operations"]), 1)
+        ps = tx["operations"][0][1]
+        self.assertEqual(len(ps["proposed_ops"]), 1)
+        self.assertEqual(ps["proposed_ops"][0]["op"][0], 0)
 
-        ppy.bundle = True
-        ppy.set_txbuffer(self.t2)
-        ppy.transfer("init0", 3, "PPY")
-        ppy.transfer("init0", 4, "PPY")
-        ppy.transfer("init0", 5, "PPY")
-        # Two ops need to be here!
-        tx2 = ppy.get_txbuffer(self.t2)
-        self.assertEqual(len(tx2.json()["operations"]), 3)
+    def test_add_one_proposal_two_ops(self):
+        ppy = self.ppy
+        tx1 = ppy.new_tx()
+        proposal1 = ppy.new_proposal(tx1, proposer="init0")
+        op = operations.Transfer(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "from": "1.2.0",
+            "to": "1.2.0",
+            "amount": {"amount": 0, "asset_id": "1.3.0"},
+            "prefix": "PPY"
+        })
+        proposal1.appendOps(op)
+        proposal1.appendOps(op)
+        tx = tx1.json()
+        self.assertEqual(tx["operations"][0][0], 22)
+        self.assertEqual(len(tx["operations"]), 1)
+        ps = tx["operations"][0][1]
+        self.assertEqual(len(ps["proposed_ops"]), 2)
+        self.assertEqual(ps["proposed_ops"][0]["op"][0], 0)
+        self.assertEqual(ps["proposed_ops"][1]["op"][0], 0)
 
-        # After broadcast, there should not be anything left in the buffer
-        tx2.broadcast()
-        self.assertEqual(len(tx2.json()["operations"]), 0)
+    def test_have_two_proposals(self):
+        ppy = self.ppy
+        tx1 = ppy.new_tx()
 
-        # After tx1, there should not be anything left in the buffer
-        tx1 = ppy.get_txbuffer(self.t1)
-        self.assertEqual(len(tx1.json()["operations"]), 0)
+        # Proposal 1
+        proposal1 = ppy.new_proposal(tx1, proposer="init0")
+        op = operations.Transfer(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "from": "1.2.0",
+            "to": "1.2.0",
+            "amount": {"amount": 0, "asset_id": "1.3.0"},
+            "prefix": "PPY"
+        })
+        for i in range(0, 3):
+            proposal1.appendOps(op)
+
+        # Proposal 1
+        proposal2 = ppy.new_proposal(tx1, proposer="init0")
+        op = operations.Transfer(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "from": "1.2.0",
+            "to": "1.2.0",
+            "amount": {"amount": 5555555, "asset_id": "1.3.0"},
+            "prefix": "PPY"
+        })
+        for i in range(0, 2):
+            proposal2.appendOps(op)
+        tx = tx1.json()
+
+        self.assertEqual(len(tx["operations"]), 2)  # 2 proposals
+
+        # Test proposal 1
+        prop = tx["operations"][0]
+        self.assertEqual(prop[0], 22)
+        ps = prop[1]
+        self.assertEqual(len(ps["proposed_ops"]), 3)
+        for i in range(0, 3):
+            self.assertEqual(ps["proposed_ops"][i]["op"][0], 0)
+
+        # Test proposal 2
+        prop = tx["operations"][1]
+        self.assertEqual(prop[0], 22)
+        ps = prop[1]
+        self.assertEqual(len(ps["proposed_ops"]), 2)
+        for i in range(0, 2):
+            self.assertEqual(ps["proposed_ops"][i]["op"][0], 0)

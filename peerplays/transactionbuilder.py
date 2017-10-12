@@ -13,6 +13,65 @@ import logging
 log = logging.getLogger(__name__)
 
 
+class ProposalBuilder:
+    def __init__(
+        self,
+        proposer,
+        *args,
+        proposal_expiration=None,
+        proposal_review=None,
+        peerplays_instance=None,
+        parent=None,
+        **kwargs
+    ):
+        self.peerplays = peerplays_instance or shared_peerplays_instance()
+        self.proposer = proposer
+        self.proposal_expiration = proposal_expiration or 2 * 24 * 60 * 60
+        self.proposal_review = proposal_review
+        self.parent = parent
+        self.ops = list()
+
+    def appendOps(self, ops, append_to=None):
+        """ Append op(s) to the transaction builder
+
+            :param list ops: One or a list of operations
+        """
+        if isinstance(ops, list):
+            self.ops.extend(ops)
+        else:
+            self.ops.append(ops)
+
+    def get_parent(self):
+        return self.parent
+
+    def __repr__(self):
+        return "<Proposal ops=%s>" % str(self.ops)
+
+    def json(self):
+        return self.get_raw().json()
+
+    def get_raw(self):
+        ops = [operations.Op_wrapper(op=o) for o in list(self.ops)]
+        proposer = Account(
+            self.proposer,
+            peerplays_instance=self.peerplays
+        )
+        data = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "fee_paying_account": proposer["id"],
+            "expiration_time": transactions.formatTimeFromNow(
+                self.proposal_expiration),
+            "proposed_ops": [o.json() for o in ops],
+            "extensions": []
+        }
+        if self.proposal_review:
+            data.update({
+                "review_period_seconds": self.proposal_review
+            })
+        ops = operations.Proposal_create(**data)
+        return Operation(ops)
+
+
 class TransactionBuilder(dict):
     """ This class simplifies the creation of transactions by adding
         operations and signers.
@@ -31,22 +90,35 @@ class TransactionBuilder(dict):
         # Do we need to reconstruct the tx from self.ops?
         self._require_reconstruction = True
 
-    def is_signed(self):
+    def _is_signed(self):
         return "signatures" in self and self["signatures"]
 
-    def is_constructed(self):
+    def _is_constructed(self):
         return "expiration" in self and self["expiration"]
 
-    def is_require_reconstruction(self):
+    def _is_require_reconstruction(self):
         return self._require_reconstruction
 
-    def set_require_reconstruction(self):
+    def _set_require_reconstruction(self):
         self._require_reconstruction = True
 
-    def unset_require_reconstruction(self):
+    def _unset_require_reconstruction(self):
         self._require_reconstruction = False
 
-    def appendOps(self, ops):
+    def __str__(self):
+        return str(self.json())
+
+    def get_parent(self):
+        return self
+
+    def json(self):
+        """ Show the transaction as plain json
+        """
+        if not self._is_constructed() or self._is_require_reconstruction():
+            self.constructTx()
+        return dict(self)
+
+    def appendOps(self, ops, append_to=None):
         """ Append op(s) to the transaction builder
 
             :param list ops: One or a list of operations
@@ -55,7 +127,7 @@ class TransactionBuilder(dict):
             self.ops.extend(ops)
         else:
             self.ops.append(ops)
-        self.set_require_reconstruction()
+        self._set_require_reconstruction()
 
     def appendSigner(self, account, permission):
         """ Try to obtain the wif key from the wallet by telling which account
@@ -116,25 +188,17 @@ class TransactionBuilder(dict):
         """ Construct the actual transaction and store it in the class's dict
             store
         """
-        if self.peerplays.proposer:
-            ops = [operations.Op_wrapper(op=o) for o in list(self.ops)]
-            proposer = Account(
-                self.peerplays.proposer,
-                peerplays_instance=self.peerplays
-            )
-            ops = operations.Proposal_create(**{
-                "fee": {"amount": 0, "asset_id": "1.3.0"},
-                "fee_paying_account": proposer["id"],
-                "expiration_time": transactions.formatTimeFromNow(
-                    self.peerplays.proposal_expiration),
-                "proposed_ops": [o.json() for o in ops],
-                "review_period_seconds": self.peerplays.proposal_review,
-                "extensions": []
-            })
-            ops = [Operation(ops)]
-        else:
-            ops = [Operation(o) for o in list(self.ops)]
+        ops = list()
+        for op in self.ops:
+            if isinstance(op, ProposalBuilder):
+                # This operation is a proposal an needs to be deal with
+                # differently
+                ops.append(op.get_raw())
+            else:
+                # otherwise, we simply wrap ops into Operations
+                ops.extend([Operation(op)])
 
+        # We no wrap everything into an actual transaction
         ops = transactions.addRequiredFees(self.peerplays.rpc, ops)
         expiration = transactions.formatTimeFromNow(self.peerplays.expiration)
         ref_block_num, ref_block_prefix = transactions.getBlockParams(
@@ -146,7 +210,7 @@ class TransactionBuilder(dict):
             operations=ops
         )
         super(TransactionBuilder, self).__init__(self.tx.json())
-        self.unset_require_reconstruction()
+        self._unset_require_reconstruction()
 
     def sign(self):
         """ Sign a provided transaction witht he provided key(s)
@@ -200,7 +264,7 @@ class TransactionBuilder(dict):
 
             :param tx tx: Signed transaction to broadcast
         """
-        if not self.is_signed():
+        if not self._is_signed():
             self.sign()
 
         ret = self.json()
@@ -230,7 +294,7 @@ class TransactionBuilder(dict):
         self.ops = []
         self.wifs = []
         self.available_signers = []
-        # This makes sure that is_constructed will return False afterwards
+        # This makes sure that _is_constructed will return False afterwards
         self["expiration"] = None
         super(TransactionBuilder, self).__init__({})
 
@@ -273,13 +337,6 @@ class TransactionBuilder(dict):
                 self["missing_signatures"].extend(
                     [x[0] for x in account_auth_account[permission]["key_auths"]]
                 )
-
-    def json(self):
-        """ Show the transaction as plain json
-        """
-        if not self.is_constructed() or self.is_require_reconstruction():
-            self.constructTx()
-        return dict(self)
 
     def appendMissingSignatures(self):
         """ Store which accounts/keys are supposed to sign the transaction

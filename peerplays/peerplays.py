@@ -29,7 +29,7 @@ from .exceptions import (
     MissingKeyError,
 )
 from .wallet import Wallet
-from .transactionbuilder import TransactionBuilder
+from .transactionbuilder import TransactionBuilder, ProposalBuilder
 from .utils import formatTime
 
 log = logging.getLogger(__name__)
@@ -146,7 +146,7 @@ class PeerPlays(object):
                          **kwargs)
 
         self.wallet = Wallet(self.rpc, **kwargs)
-        self.new_txbuffer()
+        self.new_tx()
 
     # -------------------------------------------------------------------------
     # Basic Calls
@@ -181,7 +181,7 @@ class PeerPlays(object):
         """
         self.wallet.create(pwd)
 
-    def finalizeOp(self, ops, account, permission):
+    def finalizeOp(self, ops, account, permission, **kwargs):
         """ This method obtains the required private keys if present in
             the wallet, finalizes the transaction, signs it and
             broadacasts it
@@ -191,6 +191,13 @@ class PeerPlays(object):
                 operation
             :param string permission: The required permission for
                 signing (active, owner, posting)
+            :param object append_to: This allows to provide an instance of
+                ProposalsBuilder (see :func:`peerplays.new_proposal`) or
+                TransactionBuilder (see :func:`peerplays.new_tx()`) to specify
+                where to put a specific operation.
+
+            ... note:: ``append_to`` is exposed to every method used in the
+                PeerPlays class
 
             ... note::
 
@@ -204,9 +211,17 @@ class PeerPlays(object):
                 :class:`peerplays.transactionbuilder.TransactionBuilder`.
                 You may want to use your own txbuffer
         """
-        # Append transaction
-        self.txbuffer.appendOps(ops)
+        if "append_to" in kwargs and kwargs["append_to"]:
+            # Append to the parent and return
+            parent = kwargs["append_to"]
+            assert isinstance(parent, (TransactionBuilder, ProposalBuilder))
+            parent.appendOps(ops)
+            return parent.get_parent()
+        else:
+            # Append tot he default buffer
+            self.txbuffer.appendOps(ops)
 
+        # Add signing information, signer, sign and optionally broadcast
         if self.unsigned:
             # In case we don't want to sign anything
             self.txbuffer.addSigningInformation(account, permission)
@@ -262,39 +277,60 @@ class PeerPlays(object):
     def txbuffer(self):
         """ Returns the currently active tx buffer
         """
-        return self._txbuffers[self._current_txbuffer]
+        return self.tx()
 
-    def set_txbuffer(self, i):
-        """ Lets you switch the current txbuffer
-
-            :param int i: Id of the txbuffer
+    def tx(self):
+        """ Returns the default active tx buffer
         """
-        self._current_txbuffer = i
+        return self._txbuffers[0]
 
-    def get_txbuffer(self, i):
-        """ Returns the txbuffer with id i
-        """
-        if i < len(self._txbuffers):
-            return self._txbuffers[i]
+    def new_proposal(
+        self,
+        parent=None,
+        proposer=None,
+        proposal_expiration=None,
+        proposal_review=None
+    ):
+        if not parent:
+            parent = self.tx()
+        if not proposal_expiration:
+            proposal_expiration = self.proposal_expiration
 
-    def new_txbuffer(self, *args, **kwargs):
+        if not proposal_review:
+            proposal_review = self.proposal_review
+
+        if not proposer:
+            if "default_account" in config:
+                proposer = config["default_account"]
+
+        proposal = ProposalBuilder(
+            proposer,
+            proposal_expiration,
+            proposal_review,
+            peerplays_instance=self,
+            parent=parent
+        )
+        if parent:
+            parent.appendOps(proposal)
+        return proposal
+
+    def new_tx(self, *args, **kwargs):
         """ Let's obtain a new txbuffer
 
             :returns int txid: id of the new txbuffer
         """
-        self._txbuffers.append(TransactionBuilder(
+        builder = TransactionBuilder(
             *args,
             peerplays_instance=self,
             **kwargs
-        ))
-        id = len(self._txbuffers) - 1
-        self.set_txbuffer(id)
-        return id
+        )
+        self._txbuffers.append(builder)
+        return builder
 
     # -------------------------------------------------------------------------
     # Simple Transfer
     # -------------------------------------------------------------------------
-    def transfer(self, to, amount, asset, memo="", account=None):
+    def transfer(self, to, amount, asset, memo="", account=None, **kwargs):
         """ Transfer an asset to another account.
 
             :param str to: Recipient
@@ -331,7 +367,7 @@ class PeerPlays(object):
             "memo": memoObj.encrypt(memo),
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account, "active")
+        return self.finalizeOp(op, account, "active", **kwargs)
 
     # -------------------------------------------------------------------------
     # Account related calls
@@ -352,6 +388,7 @@ class PeerPlays(object):
         additional_active_accounts=[],
         proxy_account="proxy-to-self",
         storekeys=True,
+        **kwargs
     ):
         """ Create new account on PeerPlays
 
@@ -488,9 +525,9 @@ class PeerPlays(object):
             "prefix": self.rpc.chain_params["prefix"]
         }
         op = operations.Account_create(**op)
-        return self.finalizeOp(op, registrar, "active")
+        return self.finalizeOp(op, registrar, "active", **kwargs)
 
-    def upgrade_account(self, account=None):
+    def upgrade_account(self, account=None, **kwargs):
         """ Upgrade an account to Lifetime membership
 
             :param str account: (optional) the account to allow access
@@ -508,7 +545,7 @@ class PeerPlays(object):
             "upgrade_to_lifetime_member": True,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     def _test_weights_treshold(self, authority):
         """ This method raises an error if the threshold of an authority cannot
@@ -526,7 +563,7 @@ class PeerPlays(object):
             raise ValueError("Threshold too restrictive!")
 
     def allow(self, foreign, weight=None, permission="active",
-              account=None, threshold=None):
+              account=None, threshold=None, **kwargs):
         """ Give additional access to an account by some other public
             key or account.
 
@@ -588,12 +625,12 @@ class PeerPlays(object):
             "prefix": self.rpc.chain_params["prefix"]
         })
         if permission == "owner":
-            return self.finalizeOp(op, account["name"], "owner")
+            return self.finalizeOp(op, account["name"], "owner", **kwargs)
         else:
-            return self.finalizeOp(op, account["name"], "active")
+            return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     def disallow(self, foreign, permission="active",
-                 account=None, threshold=None):
+                 account=None, threshold=None, **kwargs):
         """ Remove additional access to an account by some other public
             key or account.
 
@@ -667,11 +704,11 @@ class PeerPlays(object):
             "extensions": {}
         })
         if permission == "owner":
-            return self.finalizeOp(op, account["name"], "owner")
+            return self.finalizeOp(op, account["name"], "owner", **kwargs)
         else:
-            return self.finalizeOp(op, account["name"], "active")
+            return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def update_memo_key(self, key, account=None):
+    def update_memo_key(self, key, account=None, **kwargs):
         """ Update an account's memo public key
 
             This method does **not** add any private keys to your
@@ -697,7 +734,7 @@ class PeerPlays(object):
             "new_options": account["options"],
             "extensions": {}
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     # -------------------------------------------------------------------------
     #  Approval and Disapproval of witnesses, workers, committee, and proposals
@@ -737,9 +774,9 @@ class PeerPlays(object):
             "extensions": {},
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def disapprovewitness(self, witnesses, account=None):
+    def disapprovewitness(self, witnesses, account=None, **kwargs):
         """ Disapprove a witness
 
             :param list witnesses: list of Witness name or id
@@ -775,7 +812,7 @@ class PeerPlays(object):
             "extensions": {},
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     def approvecommittee(self, committees, account=None):
         """ Approve a committee
@@ -812,9 +849,9 @@ class PeerPlays(object):
             "extensions": {},
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def disapprovecommittee(self, committees, account=None):
+    def disapprovecommittee(self, committees, account=None, **kwargs):
         """ Disapprove a committee
 
             :param list committees: list of committee name or id
@@ -850,9 +887,9 @@ class PeerPlays(object):
             "extensions": {},
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def approveproposal(self, proposal_ids, account=None, approver=None):
+    def approveproposal(self, proposal_ids, account=None, approver=None, **kwargs):
         """ Approve Proposal
 
             :param list proposal_id: Ids of the proposals
@@ -884,9 +921,9 @@ class PeerPlays(object):
                 'active_approvals_to_add': [approver["id"]],
                 "prefix": self.rpc.chain_params["prefix"]
             }))
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def disapproveproposal(self, proposal_ids, account=None, approver=None):
+    def disapproveproposal(self, proposal_ids, account=None, approver=None, **kwargs):
         """ Disapprove Proposal
 
             :param list proposal_ids: Id of the proposals
@@ -918,12 +955,12 @@ class PeerPlays(object):
                 'active_approvals_to_remove': [approver["id"]],
                 "prefix": self.rpc.chain_params["prefix"]
             }))
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     # -------------------------------------------------------------------------
     # Trading cancel
     # -------------------------------------------------------------------------
-    def cancel(self, orderNumber, account=None):
+    def cancel(self, orderNumber, account=None, **kwargs):
         """ Cancels an order you have placed in a given market. Requires
             only the "orderNumber". An order number takes the form
             ``1.7.xxx``.
@@ -946,12 +983,12 @@ class PeerPlays(object):
                     "order": order,
                     "extensions": [],
                     "prefix": self.rpc.chain_params["prefix"]}))
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     # -------------------------------------------------------------------------
     # Bookie related calls
     # -------------------------------------------------------------------------
-    def sport_create(self, names, account=None):
+    def sport_create(self, names, account=None, **kwargs):
         """ Create a sport. This needs to be **proposed**.
 
             :param list names: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
@@ -971,9 +1008,9 @@ class PeerPlays(object):
             "name": names,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def sport_update(self, sport_id, names=[], account=None):
+    def sport_update(self, sport_id, names=[], account=None, **kwargs):
         """ Update a sport. This needs to be **proposed**.
 
             :param str sport_id: The id of the sport to update
@@ -996,9 +1033,9 @@ class PeerPlays(object):
             "new_name": names,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def event_group_create(self, names, sport_id="0.0.0", account=None):
+    def event_group_create(self, names, sport_id="0.0.0", account=None, **kwargs):
         """ Create an event group. This needs to be **proposed**.
 
             :param list names: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
@@ -1020,9 +1057,10 @@ class PeerPlays(object):
             "sport_id": sport_id,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def event_group_update(self, event_group_id, names=[], sport_id="0.0.0", account=None):
+    def event_group_update(self, event_group_id, names=[],
+            sport_id="0.0.0", account=None, **kwargs):
         """ Update an event group. This needs to be **proposed**.
 
             :param str event_id: Id of the event group to update
@@ -1047,7 +1085,7 @@ class PeerPlays(object):
             "new_sport_id": sport_id,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     def event_create(
         self,
@@ -1055,7 +1093,8 @@ class PeerPlays(object):
         season,
         start_time,
         event_group_id="0.0.0",
-        account=None
+        account=None,
+        **kwargs
     ):
         """ Create an event. This needs to be **proposed**.
 
@@ -1083,7 +1122,7 @@ class PeerPlays(object):
             "event_group_id": event_group_id,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     def event_update(
         self,
@@ -1092,7 +1131,8 @@ class PeerPlays(object):
         season,
         start_time,
         event_group_id="0.0.0",
-        account=None
+        account=None,
+        **kwargs
     ):
         """ Update an event. This needs to be **proposed**.
 
@@ -1123,9 +1163,9 @@ class PeerPlays(object):
             "new_event_group_id": event_group_id,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def betting_market_rules_create(self, names, descriptions, account=None):
+    def betting_market_rules_create(self, names, descriptions, account=None, **kwargs):
         """ Create betting market rules
 
             :param list names: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
@@ -1149,9 +1189,9 @@ class PeerPlays(object):
             "description": descriptions,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def betting_market_rules_update(self, rules_id, names, descriptions, account=None):
+    def betting_market_rules_update(self, rules_id, names, descriptions, account=None, **kwargs):
         """ Update betting market rules
 
             :param str rules_id: Id of the betting market rules to update
@@ -1178,7 +1218,7 @@ class PeerPlays(object):
             "new_description": descriptions,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     def betting_market_group_create(
         self,
@@ -1186,7 +1226,8 @@ class PeerPlays(object):
         event_id="0.0.0",
         rules_id="0.0.0",
         asset=None,
-        account=None
+        account=None,
+        **kwargs
     ):
         """ Create an betting market. This needs to be **proposed**.
 
@@ -1215,7 +1256,7 @@ class PeerPlays(object):
             "asset_id": asset["id"],
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     def betting_market_group_update(
         self,
@@ -1226,6 +1267,7 @@ class PeerPlays(object):
         freeze=False,
         delay_bets=False,
         account=None,
+        **kwargs
     ):
         """ Update an betting market. This needs to be **proposed**.
 
@@ -1256,14 +1298,15 @@ class PeerPlays(object):
             "delay_bets": delay_bets,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     def betting_market_create(
         self,
         payout_condition,
         description,
         group_id="0.0.0",
-        account=None
+        account=None,
+        **kwargs
     ):
         """ Create an event group. This needs to be **proposed**.
 
@@ -1288,7 +1331,7 @@ class PeerPlays(object):
             "payout_condition": payout_condition,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     def betting_market_update(
         self,
@@ -1296,7 +1339,8 @@ class PeerPlays(object):
         payout_condition,
         descriptions,
         group_id="0.0.0",
-        account=None
+        account=None,
+        **kwargs
     ):
         """ Update an event group. This needs to be **proposed**.
 
@@ -1324,9 +1368,9 @@ class PeerPlays(object):
             "new_payout_condition": payout_condition,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def betting_market_resolve(self, betting_market_group_id, results, account=None):
+    def betting_market_resolve(self, betting_market_group_id, results, account=None, **kwargs):
         """ Create an betting market. This needs to be **proposed**.
 
             :param str betting_market_group_id: Market Group ID to resolve
@@ -1357,7 +1401,7 @@ class PeerPlays(object):
             "resolutions": results,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     # -------------------------------------------------------------------------
     # The betting in bookie
@@ -1368,7 +1412,8 @@ class PeerPlays(object):
         amount_to_bet,
         backer_multiplier,
         back_or_lay,
-        account=None
+        account=None,
+        **kwargs
     ):
         """ Place a bet
 
@@ -1397,9 +1442,9 @@ class PeerPlays(object):
             "back_or_lay": back_or_lay,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def bet_cancel(self, bet_to_cancel, account=None):
+    def bet_cancel(self, bet_to_cancel, account=None, **kwargs):
         """ Cancel a bet
 
             :param str bet_to_cancel: The identifier that identifies the bet to cancel
@@ -1419,4 +1464,4 @@ class PeerPlays(object):
             "bet_to_cancel": bet["id"],
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
