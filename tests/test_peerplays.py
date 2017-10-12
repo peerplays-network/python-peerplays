@@ -48,9 +48,11 @@ class Testcases(unittest.TestCase):
 
     def test_finalizeOps_proposal(self):
         ppy = self.ppy
-        proposal = ppy.new_proposal()
+        # proposal = ppy.new_proposal(ppy.tx())
+        proposal = ppy.proposal()
         self.ppy.transfer("init1", 1, "PPY", append_to=proposal)
         tx = ppy.tx().json()  # default tx buffer
+        pprint(tx)
         ops = tx["operations"]
         self.assertEqual(len(ops), 1)
         self.assertEqual(ops[0][0], 22)

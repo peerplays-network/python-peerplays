@@ -64,6 +64,9 @@ class ProposalBuilder:
             self.ops.extend(ops)
         else:
             self.ops.append(ops)
+        parent = self.parent
+        if parent:
+            parent._set_require_reconstruction()
 
     def get_parent(self):
         """ This allows to referr to the actual parent of the Proposal

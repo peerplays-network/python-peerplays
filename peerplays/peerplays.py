@@ -136,10 +136,6 @@ class PeerPlays(object):
         self.bundle = bool(kwargs.get("bundle", False))
         self.blocking = kwargs.get("blocking", False)
 
-        # Multiple txbuffers/propbuffer can be stored here
-        self._txbuffers = []
-        self._propbuffer = []
-
         # Store config for access through other Classes
         self.config = config
 
@@ -150,8 +146,9 @@ class PeerPlays(object):
                          **kwargs)
 
         self.wallet = Wallet(self.rpc, **kwargs)
-        self.new_tx()
-        self.new_proposal()
+
+        # txbuffers/propbuffer are initialized and cleared
+        self.clear()
 
     # -------------------------------------------------------------------------
     # Basic Calls
@@ -222,6 +219,8 @@ class PeerPlays(object):
             # Append to the parent and return
             parent = kwargs["append_to"]
             assert isinstance(parent, (TransactionBuilder, ProposalBuilder))
+            print(parent)
+            print(ops)
             parent.appendOps(ops)
             # This returns as we used append_to, it does NOT broadcast, or sign
             return parent.get_parent()
@@ -302,7 +301,7 @@ class PeerPlays(object):
         return self.proposal()
 
     def tx(self):
-        """ Returns the default active tx buffer
+        """ Returns the default transaction buffer
         """
         return self._txbuffers[0]
 
@@ -354,6 +353,13 @@ class PeerPlays(object):
         )
         self._txbuffers.append(builder)
         return builder
+
+    def clear(self):
+        self._txbuffers = []
+        self._propbuffer = []
+        # Base/Default proposal/tx buffers
+        self.new_tx()
+        self.new_proposal()
 
     # -------------------------------------------------------------------------
     # Simple Transfer
