@@ -73,6 +73,14 @@ class ProposalBuilder:
         if parent:
             parent._set_require_reconstruction()
 
+    def list_operations(self):
+        return self.ops
+
+    def broadcast(self):
+        assert self.parent, "No parent transaction provided!"
+        self.parent._set_require_reconstruction()
+        return self.parent.broadcast()
+
     def get_parent(self):
         """ This allows to referr to the actual parent of the Proposal
         """
@@ -130,6 +138,9 @@ class TransactionBuilder(dict):
 
     def is_empty(self):
         return not (len(self.ops) > 0)
+
+    def list_operations(self):
+        return self.ops
 
     def _is_signed(self):
         return "signatures" in self and self["signatures"]
@@ -313,6 +324,10 @@ class TransactionBuilder(dict):
 
             :param tx tx: Signed transaction to broadcast
         """
+        # Cannot broadcast an empty transaction
+        if not self.ops:
+            return self.json()
+
         if not self._is_signed():
             self.sign()
 

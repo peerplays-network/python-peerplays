@@ -223,14 +223,15 @@ class PeerPlays(object):
                     "You may not use append_to and peerplays.proposer at "
                     "the same time. Append peerplays.new_proposal(..) instead"
                 )
-            # Append to the parent and return
-            parent = kwargs["append_to"]
-            assert isinstance(parent, (TransactionBuilder, ProposalBuilder))
-            parent.appendOps(ops)
+            # Append to the append_to and return
+            append_to = kwargs["append_to"]
+            parent = append_to.get_parent()
+            assert isinstance(append_to, (TransactionBuilder, ProposalBuilder))
+            append_to.appendOps(ops)
             # Add the signer to the buffer so we sign the tx properly
-            self.txbuffer.appendSigner(account, permission)
+            parent.appendSigner(account, permission)
             # This returns as we used append_to, it does NOT broadcast, or sign
-            return parent.get_parent()
+            return append_to.get_parent()
         elif self.proposer:
             # Legacy proposer mode!
             proposal = self.proposal()
@@ -1077,7 +1078,6 @@ class PeerPlays(object):
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, "'sport_create' needs to be proposed"
         assert isinstance(names, list)
         if not account:
             if "default_account" in config:
@@ -1101,7 +1101,6 @@ class PeerPlays(object):
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, "'sport_create' needs to be proposed"
         assert isinstance(names, list)
         if not account:
             if "default_account" in config:
@@ -1130,7 +1129,6 @@ class PeerPlays(object):
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, "'event_group_create' needs to be proposed"
         assert isinstance(names, list)
         if not account:
             if "default_account" in config:
@@ -1160,7 +1158,6 @@ class PeerPlays(object):
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, "'event_group_create' needs to be proposed"
         assert isinstance(names, list)
         if not account:
             if "default_account" in config:
@@ -1199,7 +1196,6 @@ class PeerPlays(object):
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, "'event_create' needs to be proposed"
         assert isinstance(season, list)
         assert isinstance(start_time, datetime), \
             "start_time needs to be a `datetime.datetime`"
@@ -1242,7 +1238,6 @@ class PeerPlays(object):
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, "'event_create' needs to be proposed"
         assert isinstance(season, list)
         assert isinstance(start_time, datetime), \
             "start_time needs to be a `datetime.datetime`"
@@ -1277,8 +1272,6 @@ class PeerPlays(object):
                 to (defaults to ``default_account``)
 
         """
-        assert self.proposer, \
-            "'betting_market_rules_create' needs to be proposed"
         assert isinstance(names, list)
         assert isinstance(descriptions, list)
         if not account:
@@ -1309,8 +1302,6 @@ class PeerPlays(object):
                 to (defaults to ``default_account``)
 
         """
-        assert self.proposer, \
-            "'betting_market_rules_create' needs to be proposed"
         assert isinstance(names, list)
         assert isinstance(descriptions, list)
         if not account:
@@ -1350,8 +1341,6 @@ class PeerPlays(object):
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, \
-            "'betting_market_group_create' needs to be proposed"
         if not asset:
             asset = self.rpc.chain_params["core_symbol"]
         if not account:
@@ -1396,8 +1385,6 @@ class PeerPlays(object):
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, \
-            "'betting_market_group_update' needs to be proposed"
         if not account:
             if "default_account" in config:
                 account = config["default_account"]
@@ -1436,7 +1423,6 @@ class PeerPlays(object):
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, "'betting_market_create' needs to be proposed"
         assert isinstance(payout_condition, list)
         if not account:
             if "default_account" in config:
@@ -1474,7 +1460,6 @@ class PeerPlays(object):
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, "'betting_market_create' needs to be proposed"
         assert isinstance(payout_condition, list)
         if not account:
             if "default_account" in config:
@@ -1513,7 +1498,6 @@ class PeerPlays(object):
                ]
 
         """
-        assert self.proposer, "'betting_market_create' needs to be proposed"
         assert isinstance(results, (list, set, tuple))
         if not account:
             if "default_account" in config:
