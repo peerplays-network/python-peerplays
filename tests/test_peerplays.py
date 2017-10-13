@@ -12,9 +12,10 @@ class Testcases(unittest.TestCase):
 
         self.ppy = PeerPlays(
             nobroadcast=True,
-            wif={
-                "active": wif
-            })
+            wif=[wif]
+        )
+        # from getpass import getpass
+        # self.ppy.wallet.unlock(getpass())
 
     def test_connect(self):
         self.ppy.connect()
@@ -41,39 +42,12 @@ class Testcases(unittest.TestCase):
         self.ppy.transfer("init1", 3, "PPY", append_to=tx1)
         tx1 = tx1.json()
         tx2 = tx2.json()
+        pprint(tx1)
+        pprint(tx2)
         ops1 = tx1["operations"]
         ops2 = tx2["operations"]
         self.assertEqual(len(ops1), 2)
         self.assertEqual(len(ops2), 1)
-
-    def test_finalizeOps_proposal(self):
-        ppy = self.ppy
-        # proposal = ppy.new_proposal(ppy.tx())
-        proposal = ppy.proposal()
-        self.ppy.transfer("init1", 1, "PPY", append_to=proposal)
-        tx = ppy.tx().json()  # default tx buffer
-        pprint(tx)
-        ops = tx["operations"]
-        self.assertEqual(len(ops), 1)
-        self.assertEqual(ops[0][0], 22)
-        prop = ops[0][1]
-        self.assertEqual(len(prop["proposed_ops"]), 1)
-        self.assertEqual(prop["proposed_ops"][0]["op"][0], 0)
-
-    def test_finalizeOps_combined_proposal(self):
-        ppy = self.ppy
-        parent = ppy.new_tx()
-        proposal = ppy.new_proposal(parent)
-        self.ppy.transfer("init1", 1, "PPY", append_to=proposal)
-        self.ppy.transfer("init1", 1, "PPY", append_to=parent)
-        tx = parent.json()
-        ops = tx["operations"]
-        self.assertEqual(len(ops), 2)
-        self.assertEqual(ops[0][0], 22)
-        self.assertEqual(ops[1][0], 0)
-        prop = ops[0][1]
-        self.assertEqual(len(prop["proposed_ops"]), 1)
-        self.assertEqual(prop["proposed_ops"][0]["op"][0], 0)
 
 
 if __name__ == "__main__":

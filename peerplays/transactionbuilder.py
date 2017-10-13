@@ -24,24 +24,29 @@ class ProposalBuilder:
             proposal
         :param peerplays.transactionbuilder.TransactionBuilder: Specify
             your own instance of transaction builder (optional)
-        :param peerplays.peerplays.PeerPlays peerplays_instance: PeerPlays instance
+        :param peerplays.peerplays.PeerPlays peerplays_instance: PeerPlays
+            instance
     """
     def __init__(
         self,
         proposer,
-        *args,
         proposal_expiration=None,
         proposal_review=None,
         parent=None,
         peerplays_instance=None,
+        *args,
         **kwargs
     ):
         self.peerplays = peerplays_instance or shared_peerplays_instance()
-        self.proposer = proposer
-        self.proposal_expiration = proposal_expiration or 2 * 24 * 60 * 60
-        self.proposal_review = proposal_review
-        self.parent = parent
+
+        self.set_expiration(proposal_expiration or 2 * 24 * 60 * 60)
+        self.set_review(proposal_review)
+        self.set_parent(parent)
+        self.set_proposer(proposer)
         self.ops = list()
+
+    def is_empty(self):
+        return not (len(self.ops) > 0)
 
     def set_proposer(self, p):
         self.proposer = p
@@ -123,6 +128,9 @@ class TransactionBuilder(dict):
         # Do we need to reconstruct the tx from self.ops?
         self._require_reconstruction = True
 
+    def is_empty(self):
+        return not (len(self.ops) > 0)
+
     def _is_signed(self):
         return "signatures" in self and self["signatures"]
 
@@ -137,6 +145,9 @@ class TransactionBuilder(dict):
 
     def _unset_require_reconstruction(self):
         self._require_reconstruction = False
+
+    def __repr__(self):
+        return str(self)
 
     def __str__(self):
         return str(self.json())
@@ -191,10 +202,10 @@ class TransactionBuilder(dict):
 
             return r
 
-        if account not in self.available_signers:
+        if account not in self.signing_accounts:
             # is the account an instance of public key?
             if isinstance(account, PublicKey):
-                self.wifs.append(
+                self.wifs.add(
                     self.peerplays.wallet.getPrivateKeyForPublicKey(
                         str(account)
                     )
@@ -205,9 +216,10 @@ class TransactionBuilder(dict):
                 keys = fetchkeys(account, permission)
                 if permission != "owner":
                     keys.extend(fetchkeys(account, "owner"))
-                self.wifs.extend([x[0] for x in keys])
+                for x in keys:
+                    self.wifs.add(x[0])
 
-            self.available_signers.append(account)
+            self.signing_accounts.append(account)
 
     def appendWif(self, wif):
         """ Add a wif that should be used for signing of the transaction.
@@ -215,7 +227,7 @@ class TransactionBuilder(dict):
         if wif:
             try:
                 PrivateKey(wif)
-                self.wifs.append(wif)
+                self.wifs.add(wif)
             except:
                 raise InvalidWifError
 
@@ -258,12 +270,14 @@ class TransactionBuilder(dict):
         """
         self.constructTx()
 
+        # Legacy compatibility!
         # If we are doing a proposal, obtain the account from the proposer_id
         if self.peerplays.proposer:
             proposer = Account(
                 self.peerplays.proposer,
                 peerplays_instance=self.peerplays)
-            self.wifs = []
+            self.wifs = set()
+            self.signing_accounts = list()
             self.appendSigner(proposer["id"], "active")
 
         # We need to set the default prefix, otherwise pubkeys are
@@ -327,8 +341,8 @@ class TransactionBuilder(dict):
         """ Clear the transaction builder and start from scratch
         """
         self.ops = []
-        self.wifs = []
-        self.available_signers = []
+        self.wifs = set()
+        self.signing_accounts = []
         # This makes sure that _is_constructed will return False afterwards
         self["expiration"] = None
         super(TransactionBuilder, self).__init__({})

@@ -129,12 +129,14 @@ class PeerPlays(object):
         self.nobroadcast = bool(kwargs.get("nobroadcast", False))
         self.unsigned = bool(kwargs.get("unsigned", False))
         self.expiration = int(kwargs.get("expiration", 30))
+        self.bundle = bool(kwargs.get("bundle", False))
+        self.blocking = kwargs.get("blocking", False)
+
+        # Legacy Proposal attributes
         self.proposer = kwargs.get("proposer", None)
         self.proposal_expiration = int(
             kwargs.get("proposal_expiration", 60 * 60 * 24))
         self.proposal_review = int(kwargs.get("proposal_review", 0))
-        self.bundle = bool(kwargs.get("bundle", False))
-        self.blocking = kwargs.get("blocking", False)
 
         # Store config for access through other Classes
         self.config = config
@@ -216,12 +218,17 @@ class PeerPlays(object):
                 You may want to use your own txbuffer
         """
         if "append_to" in kwargs and kwargs["append_to"]:
+            if self.proposer:
+                log.warn(
+                    "You may not use append_to and peerplays.proposer at "
+                    "the same time. Append peerplays.new_proposal(..) instead"
+                )
             # Append to the parent and return
             parent = kwargs["append_to"]
             assert isinstance(parent, (TransactionBuilder, ProposalBuilder))
-            print(parent)
-            print(ops)
             parent.appendOps(ops)
+            # Add the signer to the buffer so we sign the tx properly
+            self.txbuffer.appendSigner(account, permission)
             # This returns as we used append_to, it does NOT broadcast, or sign
             return parent.get_parent()
         elif self.proposer:
@@ -305,9 +312,29 @@ class PeerPlays(object):
         """
         return self._txbuffers[0]
 
-    def proposal(self):
+    def proposal(self,
+        proposer=None,
+        proposal_expiration=None,
+        proposal_review=None
+    ):
         """ Return the default proposal buffer
+
+            ... note:: If any parameter is set, the default proposal
+               parameters will be changed!
         """
+        if not self._propbuffer:
+            return self.new_proposal(
+                self.tx(),
+                proposer,
+                proposal_expiration,
+                proposal_review
+            )
+        if proposer:
+            self._propbuffer[0].set_proposer(proposer)
+        if proposal_expiration:
+            self._propbuffer[0].set_expiration(proposal_expiration)
+        if proposal_review:
+            self._propbuffer[0].set_review(proposal_review)
         return self._propbuffer[0]
 
     def new_proposal(
@@ -329,6 +356,7 @@ class PeerPlays(object):
             if "default_account" in config:
                 proposer = config["default_account"]
 
+        # Else, we create a new object
         proposal = ProposalBuilder(
             proposer,
             proposal_expiration,
@@ -359,7 +387,7 @@ class PeerPlays(object):
         self._propbuffer = []
         # Base/Default proposal/tx buffers
         self.new_tx()
-        self.new_proposal()
+        # self.new_proposal()
 
     # -------------------------------------------------------------------------
     # Simple Transfer
