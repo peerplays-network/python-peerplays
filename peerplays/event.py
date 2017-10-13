@@ -7,10 +7,11 @@ class Event(BlockchainObject):
     """ Read data about an event on the chain
 
         :param str identifier: Identifier
-        :param peerplays peerplays_instance: PeerPlays() instance to use when accesing a RPC
+        :param peerplays peerplays_instance: PeerPlays() instance to use when
+            accesing a RPC
 
     """
-    type_id = 19
+    type_id = 18
 
     def refresh(self):
         data = self.peerplays.rpc.get_object(self.identifier)
@@ -26,5 +27,15 @@ class Event(BlockchainObject):
 
 
 class Events(list):
-    def __init__(self, *args, **kwargs):
-        raise NotImplementedError("Missing API calls")
+    """ List of all available events in an eventgroup
+    """
+    def __init__(self, eventgroup_id, peerplays_instance=None):
+        self.peerplays = peerplays_instance or shared_peerplays_instance()
+        self.events = self.peerplays.rpc.list_events_in_group(eventgroup_id)
+
+        print(self.events)
+
+        super(Events, self).__init__([
+            Event(x, lazy=True, peerplays_instance=peerplays_instance)
+            for x in self.events
+        ])
