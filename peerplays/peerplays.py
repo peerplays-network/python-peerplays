@@ -629,11 +629,13 @@ class PeerPlays(object):
         """
         weights = 0
         for a in authority["account_auths"]:
-            weights += a[1]
+            weights += int(a[1])
         for a in authority["key_auths"]:
-            weights += a[1]
+            weights += int(a[1])
         if authority["weight_threshold"] > weights:
             raise ValueError("Threshold too restrictive!")
+        if authority["weight_threshold"] == 0:
+            raise ValueError("Cannot have threshold of 0")
 
     def allow(
         self, foreign, weight=None, permission="active",
@@ -756,6 +758,8 @@ class PeerPlays(object):
                     "Unknown foreign account or unvalid public key"
                 )
 
+        if not affected_items:
+            raise ValueError("Changes nothing!")
         removed_weight = affected_items[0][1]
 
         # Define threshold
@@ -1036,35 +1040,6 @@ class PeerPlays(object):
                 'active_approvals_to_remove': [approver["id"]],
                 "prefix": self.rpc.chain_params["prefix"]
             }))
-        return self.finalizeOp(op, account["name"], "active", **kwargs)
-
-    # -------------------------------------------------------------------------
-    # Trading cancel
-    # -------------------------------------------------------------------------
-    def cancel(self, orderNumber, account=None, **kwargs):
-        """ Cancels an order you have placed in a given market. Requires
-            only the "orderNumber". An order number takes the form
-            ``1.7.xxx``.
-
-            :param str orderNumber: The Order Object ide of the form
-                ``1.7.xxxx``
-        """
-        if not account:
-            if "default_account" in config:
-                account = config["default_account"]
-        if not account:
-            raise ValueError("You need to provide an account")
-        account = Account(account, full=False, peerplays_instance=self)
-
-        op = []
-        for order in list(orderNumber):
-            op.append(
-                operations.Limit_order_cancel(**{
-                    "fee": {"amount": 0, "asset_id": "1.3.0"},
-                    "fee_paying_account": account["id"],
-                    "order": order,
-                    "extensions": [],
-                    "prefix": self.rpc.chain_params["prefix"]}))
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     # -------------------------------------------------------------------------

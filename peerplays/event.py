@@ -33,8 +33,6 @@ class Events(list):
         self.peerplays = peerplays_instance or shared_peerplays_instance()
         self.events = self.peerplays.rpc.list_events_in_group(eventgroup_id)
 
-        print(self.events)
-
         super(Events, self).__init__([
             Event(x, lazy=True, peerplays_instance=peerplays_instance)
             for x in self.events

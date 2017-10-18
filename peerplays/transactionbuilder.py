@@ -74,7 +74,7 @@ class ProposalBuilder:
             parent._set_require_reconstruction()
 
     def list_operations(self):
-        return self.ops
+        return [Operation(o) for o in self.ops]
 
     def broadcast(self):
         assert self.parent, "No parent transaction provided!"
@@ -92,11 +92,16 @@ class ProposalBuilder:
     def json(self):
         """ Return the json formated version of this proposal
         """
-        return self.get_raw().json()
+        raw = self.get_raw()
+        if not raw:
+            return dict()
+        return raw.json()
 
     def get_raw(self):
         """ Returns an instance of base "Operations" for further processing
         """
+        if not self.ops:
+            return
         ops = [operations.Op_wrapper(op=o) for o in list(self.ops)]
         proposer = Account(
             self.proposer,
@@ -140,7 +145,7 @@ class TransactionBuilder(dict):
         return not (len(self.ops) > 0)
 
     def list_operations(self):
-        return self.ops
+        return [Operation(o) for o in self.ops]
 
     def _is_signed(self):
         return "signatures" in self and self["signatures"]
@@ -251,7 +256,9 @@ class TransactionBuilder(dict):
             if isinstance(op, ProposalBuilder):
                 # This operation is a proposal an needs to be deal with
                 # differently
-                ops.append(op.get_raw())
+                proposals = op.get_raw()
+                if proposals:
+                    ops.append(proposals)
             else:
                 # otherwise, we simply wrap ops into Operations
                 ops.extend([Operation(op)])
@@ -280,6 +287,9 @@ class TransactionBuilder(dict):
                 of the transactions.
         """
         self.constructTx()
+
+        if "operations" not in self or not self["operations"]:
+            return
 
         # Legacy compatibility!
         # If we are doing a proposal, obtain the account from the proposer_id
@@ -325,11 +335,11 @@ class TransactionBuilder(dict):
             :param tx tx: Signed transaction to broadcast
         """
         # Cannot broadcast an empty transaction
-        if not self.ops:
-            return self.json()
-
         if not self._is_signed():
             self.sign()
+
+        if "operations" not in self or not self["operations"]:
+            return
 
         ret = self.json()
 

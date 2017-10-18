@@ -1,6 +1,7 @@
 import unittest
 from pprint import pprint
 from peerplays import PeerPlays
+from peerplaysbase.operationids import getOperationNameForId
 
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
 
@@ -25,10 +26,14 @@ class Testcases(unittest.TestCase):
         tx = ppy.tx().json()  # default tx buffer
         ops = tx["operations"]
         self.assertEqual(len(ops), 1)
-        self.assertEqual(ops[0][0], 22)
+        self.assertEqual(
+            getOperationNameForId(ops[0][0]),
+            "proposal_create")
         prop = ops[0][1]
         self.assertEqual(len(prop["proposed_ops"]), 1)
-        self.assertEqual(prop["proposed_ops"][0]["op"][0], 0)
+        self.assertEqual(
+            getOperationNameForId(prop["proposed_ops"][0]["op"][0]),
+            "transfer")
 
     def test_finalizeOps_proposal2(self):
         ppy = self.ppy
@@ -38,10 +43,14 @@ class Testcases(unittest.TestCase):
         tx = ppy.tx().json()  # default tx buffer
         ops = tx["operations"]
         self.assertEqual(len(ops), 1)
-        self.assertEqual(ops[0][0], 22)
+        self.assertEqual(
+            getOperationNameForId(ops[0][0]),
+            "proposal_create")
         prop = ops[0][1]
         self.assertEqual(len(prop["proposed_ops"]), 1)
-        self.assertEqual(prop["proposed_ops"][0]["op"][0], 0)
+        self.assertEqual(
+            getOperationNameForId(prop["proposed_ops"][0]["op"][0]),
+            "transfer")
 
     def test_finalizeOps_combined_proposal(self):
         ppy = self.ppy
@@ -52,11 +61,17 @@ class Testcases(unittest.TestCase):
         tx = parent.json()
         ops = tx["operations"]
         self.assertEqual(len(ops), 2)
-        self.assertEqual(ops[0][0], 22)
-        self.assertEqual(ops[1][0], 0)
+        self.assertEqual(
+            getOperationNameForId(ops[0][0]),
+            "proposal_create")
+        self.assertEqual(
+            getOperationNameForId(ops[1][0]),
+            "transfer")
         prop = ops[0][1]
         self.assertEqual(len(prop["proposed_ops"]), 1)
-        self.assertEqual(prop["proposed_ops"][0]["op"][0], 0)
+        self.assertEqual(
+            getOperationNameForId(prop["proposed_ops"][0]["op"][0]),
+            "transfer")
 
     def test_finalizeOps_changeproposer_new(self):
         ppy = self.ppy
@@ -65,11 +80,15 @@ class Testcases(unittest.TestCase):
         tx = ppy.tx().json()
         ops = tx["operations"]
         self.assertEqual(len(ops), 1)
-        self.assertEqual(ops[0][0], 22)
+        self.assertEqual(
+            getOperationNameForId(ops[0][0]),
+            "proposal_create")
         prop = ops[0][1]
         self.assertEqual(len(prop["proposed_ops"]), 1)
         self.assertEqual(prop["fee_paying_account"], "1.2.12")
-        self.assertEqual(prop["proposed_ops"][0]["op"][0], 0)
+        self.assertEqual(
+            getOperationNameForId(prop["proposed_ops"][0]["op"][0]),
+            "transfer")
 
     def test_finalizeOps_changeproposer_legacy(self):
         ppy = self.ppy
@@ -77,11 +96,15 @@ class Testcases(unittest.TestCase):
         tx = ppy.transfer("init1", 1, "PPY")
         ops = tx["operations"]
         self.assertEqual(len(ops), 1)
-        self.assertEqual(ops[0][0], 22)
+        self.assertEqual(
+            getOperationNameForId(ops[0][0]),
+            "proposal_create")
         prop = ops[0][1]
         self.assertEqual(len(prop["proposed_ops"]), 1)
         self.assertEqual(prop["fee_paying_account"], "1.2.12")
-        self.assertEqual(prop["proposed_ops"][0]["op"][0], 0)
+        self.assertEqual(
+            getOperationNameForId(prop["proposed_ops"][0]["op"][0]),
+            "transfer")
 
     def test_new_proposals(self):
         ppy = self.ppy

@@ -4,3 +4,4 @@ scrypt==0.7.1
 pyyaml
 pytest
 coverage
+mock
