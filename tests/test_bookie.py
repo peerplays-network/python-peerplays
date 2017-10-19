@@ -1,11 +1,7 @@
 import datetime
 import unittest
-import mock
-from pprint import pprint
 from peerplays import PeerPlays
-from peerplays.amount import Amount
 from peerplays.utils import parse_time
-from peerplays.bettingmarket import BettingMarket
 from peerplaysbase.operationids import getOperationNameForId
 
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
@@ -176,7 +172,8 @@ class Testcases(unittest.TestCase):
         )
 
     def test_betting_market_group_create(self):
-        name = [["de", "Meine Market Group"], ["en", "My betting market group"]]
+        name = [["de", "Meine Market Group"],
+                ["en", "My betting market group"]]
         self.ppy.betting_market_group_create(
             name,
             event_id="0.0.2",
@@ -210,7 +207,8 @@ class Testcases(unittest.TestCase):
 
     def test_betting_market_create(self):
         name = [["de", "Nuernberg gewinnt"], ["en", "Nuremberg wins"]]
-        cond = [["de", "Description: Fuerth gewinnt"], ["en", "Description: Fuerth wins"]]
+        cond = [["de", "Description: Fuerth gewinnt"],
+                ["en", "Description: Fuerth wins"]]
         self.ppy.betting_market_create(
             cond,
             name,
@@ -243,7 +241,9 @@ class Testcases(unittest.TestCase):
         )
 
     def test_betting_market_resolve(self):
-        result = [["1.21.257", "win"], ["1.21.258", "not_win"], ["1.21.259", "cancel"]]
+        result = [["1.21.257", "win"],
+                  ["1.21.258", "not_win"],
+                  ["1.21.259", "cancel"]]
         self.ppy.betting_market_resolve(
             "1.20.0",
             result
@@ -269,45 +269,3 @@ class Testcases(unittest.TestCase):
             result,
             prop["proposed_ops"][0]["op"][1]["resolutions"]
         )
-
-    @mock.patch.object(BettingMarket, 'refresh')
-    def test_bet_place(self, r):
-        def new_refresh(self):
-            dict.__init__(
-                self,
-                {"id": "1.21.11123"}
-            )
-
-        with mock.patch(
-            "peerplays.bettingmarket.BettingMarket.refresh",
-            new=new_refresh
-        ):
-
-            self.ppy.bet_place(
-                "1.21.11123",
-                Amount(1244, "PPY"),
-                2,
-                "back"
-            )
-            tx = self.ppy.tx()
-            pprint(tx)
-            ops = tx["operations"]
-            prop = ops[0][1]
-            self.assertEqual(len(ops), 1)
-            self.assertEqual(
-                getOperationNameForId(ops[0][0]),
-                "proposal_create"
-            )
-            self.assertEqual(len(prop["proposed_ops"]), 1)
-            self.assertEqual(
-                getOperationNameForId(prop["proposed_ops"][0]["op"][0]),
-                "betting_market_group_resolve"
-            )
-            self.assertEqual(
-                "1.20.0",
-                prop["proposed_ops"][0]["op"][1]["betting_market_group_id"]
-            )
-            self.assertEqual(
-                result,
-                prop["proposed_ops"][0]["op"][1]["resolutions"]
-            )

@@ -52,6 +52,7 @@ setup(
         "pycrypto",
         "click-datetime",
         "prettytable",
+        "events==0.3"
     ],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],

@@ -313,7 +313,8 @@ class PeerPlays(object):
         """
         return self._txbuffers[0]
 
-    def proposal(self,
+    def proposal(
+        self,
         proposer=None,
         proposal_expiration=None,
         proposal_review=None

@@ -5,7 +5,7 @@ from peerplays import PeerPlays
 
 ppy = PeerPlays(
     # this account creates the proposal
-    proposer="init0",
+    proposer="stefan",
     # Proposal needs to be approve within 1 hour
     proposal_expiration=60 * 60 * 24 * 14,
     # For testing, set this to true

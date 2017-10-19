@@ -220,6 +220,3 @@ class Testcases(unittest.TestCase):
             "0:11",
             op["new_options"]["votes"])
 
-
-if __name__ == "__main__":
-    unittest.main()
