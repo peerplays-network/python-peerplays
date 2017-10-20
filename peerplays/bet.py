@@ -16,4 +16,4 @@ class Bet(BlockchainObject):
         data = self.peerplays.rpc.get_object(self.identifier)
         if not data:
             raise BetDoesNotExistException(self.identifier)
-        dict.__init__(data)
+        dict.__init__(self, data)

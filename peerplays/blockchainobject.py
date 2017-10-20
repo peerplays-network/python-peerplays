@@ -4,17 +4,16 @@ from datetime import datetime, timedelta
 
 class ObjectCache(dict):
 
-    max_cache_objects = 1000
-
-    def __init__(self, initial_data={}, max_cache_objects=1000):
+    def __init__(self, initial_data={}, default_expiration=10):
         super().__init__(initial_data)
-        ObjectCache.max_cache_objects = max_cache_objects
+        self.default_expiration = default_expiration
 
     def __setitem__(self, key, value):
         if key in self:
             del self[key]
         data = {
-            "expires": datetime.utcnow() + timedelta(seconds=10),
+            "expires": datetime.utcnow() + timedelta(
+                seconds=self.default_expiration),
             "data": value
         }
         dict.__setitem__(self, key, data)

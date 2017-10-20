@@ -1,5 +1,5 @@
 from .instance import shared_peerplays_instance
-from .exceptions import RuleDoesNotExistsException
+from .exceptions import RuleDoesNotExistException
 from .blockchainobject import BlockchainObject
 
 
@@ -17,7 +17,7 @@ class Rule(BlockchainObject):
     def refresh(self):
         rule = self.peerplays.rpc.get_object(self.identifier)
         if not rule:
-            raise RuleDoesNotExistsException
+            raise RuleDoesNotExistException
         super().__init__(rule)
 
 

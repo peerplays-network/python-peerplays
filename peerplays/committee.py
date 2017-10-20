@@ -20,8 +20,8 @@ class Committee(BlockchainObject):
         if not member:
             raise CommitteeMemberDoesNotExistsException
         super(Committee, self).__init__(member)
-        self.cached = True
+        self.account_id = account["id"]
 
     @property
     def account(self):
-        return Account(self.identifier)
+        return Account(self.account_id)
