@@ -37,7 +37,7 @@ class ObjectCache(dict):
         return False
 
     def __str__(self):
-        return "ObjectCache(n={}, max_cache_objects={})".format(len(self.keys()), self.max_cache_objects)
+        return "ObjectCache(n={}, default_expiration={})".format(len(self.keys()), self.default_expiration)
 
 
 class BlockchainObject(dict):
@@ -103,8 +103,6 @@ class BlockchainObject(dict):
 
     def testid(self, id):
         parts = id.split(".")
-        if not self.type_id:
-            return
 
         if not self.type_ids:
             self.type_ids = [self.type_id]

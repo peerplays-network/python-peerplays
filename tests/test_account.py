@@ -40,6 +40,16 @@ class Testcases(unittest.TestCase):
         for h in account.history(limit=1):
             pass
 
+        # BlockchainObjects method
+        account.cached = False
+        self.assertTrue(account.items())
+        account.cached = False
+        self.assertIn("id", account)
+        account.cached = False
+        self.assertEqual(account["id"], "1.2.1")
+        self.assertEqual(str(account), "<Account 1.2.1>")
+        self.assertIsInstance(Account(account), Account)
+
     def test_account_upgrade(self):
         account = Account("witness-account")
         tx = account.upgrade()
