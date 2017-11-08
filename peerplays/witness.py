@@ -11,15 +11,24 @@ class Witness(BlockchainObject):
         :param peerplays peerplays_instance: PeerPlays() instance to use when accesing a RPC
 
     """
-
     type_ids = [6, 2]
 
     def refresh(self):
         parts = self.identifier.split(".")
-        if int(parts[1]) == 6:
-            witness = self.peerplays.rpc.get_object(self.identifier)
+        valid_objectid = False
+        try:
+            [int(x) for x in parts]
+            valid_objectid = True
+        except:
+            pass
+        if valid_objectid and len(parts) > 2:
+            if int(parts[1]) == 6:
+                witness = self.peerplays.rpc.get_object(self.identifier)
+            else:
+                witness = self.peerplays.rpc.get_witness_by_account(self.identifier)
         else:
-            witness = self.peerplays.rpc.get_witness_by_account(self.identifier)
+            account = Account(self.identifier, peerplays_instance=self.peerplays)
+            witness = self.peerplays.rpc.get_witness_by_account(account["id"])
         if not witness:
             raise WitnessDoesNotExistsException
         super(Witness, self).__init__(witness)

@@ -1,5 +1,4 @@
 import json
-from peerplays.instance import shared_peerplays_instance
 from .exceptions import AssetDoesNotExistsException
 from .blockchainobject import BlockchainObject
 
@@ -18,7 +17,6 @@ class Asset(BlockchainObject):
                   load on the API server. Instances of this class can be
                   refreshed with ``Asset.refresh()``.
     """
-
     type_id = 3
 
     def __init__(
@@ -32,6 +30,7 @@ class Asset(BlockchainObject):
         super().__init__(
             asset,
             lazy=lazy,
+            full=full,
             peerplays_instance=peerplays_instance,
         )
 
@@ -67,7 +66,7 @@ class Asset(BlockchainObject):
 
     @property
     def is_bitasset(self):
-        """ Is the asset a market pegged asset
+        """ Is the asset a :doc:`mpa`?
         """
         return ("bitasset_data_id" in self)
 
@@ -82,3 +81,8 @@ class Asset(BlockchainObject):
         """ List the permissions that are currently used (flags)
         """
         return self["flags"]
+
+    def ensure_full(self):
+        if not self.full:
+            self.full = True
+            self.refresh()

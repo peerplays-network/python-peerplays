@@ -28,7 +28,7 @@ class BettingMarketGroup(BlockchainObject):
 class BettingMarketGroups(list):
     """ List of all available BettingMarketGroups
 
-        :param strevent_id: Event ID (``1.19.xxx``)
+        :param strevent_id: Event ID (``1.18.xxx``)
     """
     def __init__(self, event_id, peerplays_instance=None):
         self.peerplays = peerplays_instance or shared_peerplays_instance()

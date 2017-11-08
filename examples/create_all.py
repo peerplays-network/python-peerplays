@@ -5,9 +5,9 @@ from peerplays import PeerPlays
 
 ppy = PeerPlays(
     # this account creates the proposal
-    proposer="init0",
+    proposer="stefan",
     # Proposal needs to be approve within 1 hour
-    proposal_expiration=60 * 2,
+    proposal_expiration=60 * 60 * 24 * 14,
     # For testing, set this to true
     nobroadcast=False,
     # We want to bundle many operations into a single transaction
@@ -38,18 +38,20 @@ ppy.betting_market_rules_create(    # relative id 0.0.3
 )
 
 ppy.betting_market_group_create(  # relative id 0.0.4
-    [["de", "Meine Market Group"], ["en", "My betting market group",]],
+    [["de", "Meine Market Group"], ["en", "My betting market group"]],
     event_id="0.0.2",
     rules_id="0.0.3",
 )
 
 ppy.betting_market_create(
     [["de", "Fuerth gewinnt"], ["en", "Fuerth wins"]],
+    [["de", "Description: Fuerth gewinnt"], ["en", "Description: Fuerth wins"]],
     group_id="0.0.4",
 )
 
 ppy.betting_market_create(
     [["de", "Nuernberg gewinnt"], ["en", "Nuremberg wins"]],
+    [["de", "Description: Fuerth gewinnt"], ["en", "Description: Fuerth wins"]],
     group_id="0.0.4",
 )
 

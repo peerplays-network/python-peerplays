@@ -1,5 +1,4 @@
 from collections import OrderedDict
-import json
 from graphenebase.types import (
     Uint8, Int16, Uint16, Uint32, Uint64,
     Varint32, Int64, String, Bytes, Void,
@@ -569,10 +568,6 @@ class Betting_market_group_update(GrapheneObject):
             else:
                 delay_bets = Optional(None)
 
-            if "new_event_id" in kwargs:
-                new_event_id = Optional(FullObjectId(kwargs["new_event_id"]))
-            else:
-                new_event_id = Optional(None)
             if "new_rules_id" in kwargs:
                 new_rules_id = Optional(FullObjectId(kwargs["new_rules_id"]))
             else:

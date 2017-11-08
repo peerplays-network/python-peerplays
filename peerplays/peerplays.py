@@ -1,12 +1,9 @@
-import json
 import logging
-import random
-import re
-from datetime import datetime, timedelta
 
+from datetime import datetime
 from peerplaysapi.node import PeerPlaysNodeRPC
-from peerplaysbase.account import PrivateKey, PublicKey
-from peerplaysbase import transactions, operations
+from peerplaysbase.account import PublicKey
+from peerplaysbase import operations
 from .asset import Asset
 from .account import Account
 from .amount import Amount
@@ -16,19 +13,14 @@ from .storage import configStorage as config
 from .sport import Sport
 from .eventgroup import EventGroup
 from .event import Event
-from .rules import Rules
+from .rule import Rule
 from .bettingmarketgroup import BettingMarketGroup
 from .bettingmarket import BettingMarket
 from .bet import Bet
 
-from .exceptions import (
-    AccountExistsException,
-    AccountDoesNotExistsException,
-    InsufficientAuthorityError,
-    MissingKeyError,
-)
+from .exceptions import AccountExistsException
 from .wallet import Wallet
-from .transactionbuilder import TransactionBuilder
+from .transactionbuilder import TransactionBuilder, ProposalBuilder
 from .utils import formatTime
 
 log = logging.getLogger(__name__)
@@ -41,14 +33,26 @@ class PeerPlays(object):
         :param str node: Node to connect to *(optional)*
         :param str rpcuser: RPC user *(optional)*
         :param str rpcpassword: RPC password *(optional)*
-        :param bool nobroadcast: Do **not** broadcast a transaction! *(optional)*
+        :param bool nobroadcast: Do **not** broadcast a transaction!
+            *(optional)*
         :param bool debug: Enable Debugging *(optional)*
-        :param array,dict,string keys: Predefine the wif keys to shortcut the wallet database *(optional)*
-        :param bool offline: Boolean to prevent connecting to network (defaults to ``False``) *(optional)*
-        :param str proposer: Propose a transaction using this proposer *(optional)*
-        :param int proposal_expiration: Expiration time (in seconds) for the proposal *(optional)*
-        :param int expiration: Delay in seconds until transactions are supposed to expire *(optional)*
-        :param bool bundle: Do not broadcast transactions right away, but allow to bundle operations *(optional)*
+        :param array,dict,string keys: Predefine the wif keys to shortcut the
+            wallet database *(optional)*
+        :param bool offline: Boolean to prevent connecting to network (defaults
+            to ``False``) *(optional)*
+        :param str proposer: Propose a transaction using this proposer
+            *(optional)*
+        :param int proposal_expiration: Expiration time (in seconds) for the
+            proposal *(optional)*
+        :param int proposal_review: Review period (in seconds) for the proposal
+            *(optional)*
+        :param int expiration: Delay in seconds until transactions are supposed
+            to expire *(optional)*
+        :param str blocking: Wait for broadcasted transactions to be included
+            in a block and return full transaction (can be "head" or
+            "irrversible")
+        :param bool bundle: Do not broadcast transactions right away, but allow
+            to bundle operations *(optional)*
 
         Three wallet operation modes are possible:
 
@@ -68,8 +72,8 @@ class PeerPlays(object):
           signatures!
 
         If no node is provided, it will connect to the node of
-        http://ppy-node.bitshares.eu. It is **highly** recommended that you pick your own
-        node instead. Default settings can be changed with:
+        http://ppy-node.peerplays.eu. It is **highly** recommended that you
+        pick your own node instead. Default settings can be changed with:
 
         .. code-block:: python
 
@@ -88,7 +92,8 @@ class PeerPlays(object):
             peerplays = PeerPlays()
             print(peerplays.info())
 
-        All that is requires is for the user to have added a key with ``peerplays``
+        All that is requires is for the user to have added a key with
+        ``peerplays``
 
         .. code-block:: bash
 
@@ -124,9 +129,14 @@ class PeerPlays(object):
         self.nobroadcast = bool(kwargs.get("nobroadcast", False))
         self.unsigned = bool(kwargs.get("unsigned", False))
         self.expiration = int(kwargs.get("expiration", 30))
-        self.proposer = kwargs.get("proposer", None)
-        self.proposal_expiration = int(kwargs.get("proposal_expiration", 60 * 60 * 24))
         self.bundle = bool(kwargs.get("bundle", False))
+        self.blocking = kwargs.get("blocking", False)
+
+        # Legacy Proposal attributes
+        self.proposer = kwargs.get("proposer", None)
+        self.proposal_expiration = int(
+            kwargs.get("proposal_expiration", 60 * 60 * 24))
+        self.proposal_review = int(kwargs.get("proposal_review", 0))
 
         # Store config for access through other Classes
         self.config = config
@@ -138,7 +148,9 @@ class PeerPlays(object):
                          **kwargs)
 
         self.wallet = Wallet(self.rpc, **kwargs)
-        self.txbuffer = TransactionBuilder(peerplays_instance=self)
+
+        # txbuffers/propbuffer are initialized and cleared
+        self.clear()
 
     # -------------------------------------------------------------------------
     # Basic Calls
@@ -164,16 +176,34 @@ class PeerPlays(object):
 
         self.rpc = PeerPlaysNodeRPC(node, rpcuser, rpcpassword, **kwargs)
 
-    def finalizeOp(self, ops, account, permission):
+    def newWallet(self, pwd):
+        """ Create a new wallet. This method is basically only calls
+            :func:`peerplays.wallet.create`.
+
+            :param str pwd: Password to use for the new wallet
+            :raises peerplays.exceptions.WalletExists: if there is already a
+                wallet created
+        """
+        self.wallet.create(pwd)
+
+    def finalizeOp(self, ops, account, permission, **kwargs):
         """ This method obtains the required private keys if present in
             the wallet, finalizes the transaction, signs it and
             broadacasts it
 
-            :param operation ops: The operation (or list of operaions) to broadcast
+            :param operation ops: The operation (or list of operaions) to
+                broadcast
             :param operation account: The account that authorizes the
                 operation
             :param string permission: The required permission for
                 signing (active, owner, posting)
+            :param object append_to: This allows to provide an instance of
+                ProposalsBuilder (see :func:`peerplays.new_proposal`) or
+                TransactionBuilder (see :func:`peerplays.new_tx()`) to specify
+                where to put a specific operation.
+
+            ... note:: ``append_to`` is exposed to every method used in the
+                PeerPlays class
 
             ... note::
 
@@ -182,10 +212,39 @@ class PeerPlays(object):
                 that require active permission with ops that require
                 posting permission. Neither can you use different
                 accounts for different operations!
-        """
-        # Append transaction
-        self.txbuffer.appendOps(ops)
 
+            ... note:: This uses ``peerplays.txbuffer`` as instance of
+                :class:`peerplays.transactionbuilder.TransactionBuilder`.
+                You may want to use your own txbuffer
+        """
+        if "append_to" in kwargs and kwargs["append_to"]:
+            if self.proposer:
+                log.warn(
+                    "You may not use append_to and peerplays.proposer at "
+                    "the same time. Append peerplays.new_proposal(..) instead"
+                )
+            # Append to the append_to and return
+            append_to = kwargs["append_to"]
+            parent = append_to.get_parent()
+            assert isinstance(append_to, (TransactionBuilder, ProposalBuilder))
+            append_to.appendOps(ops)
+            # Add the signer to the buffer so we sign the tx properly
+            parent.appendSigner(account, permission)
+            # This returns as we used append_to, it does NOT broadcast, or sign
+            return append_to.get_parent()
+        elif self.proposer:
+            # Legacy proposer mode!
+            proposal = self.proposal()
+            proposal.set_proposer(self.proposer)
+            proposal.set_expiration(self.proposal_expiration)
+            proposal.set_review(self.proposal_review)
+            proposal.appendOps(ops)
+            # Go forward to see what the other options do ...
+        else:
+            # Append tot he default buffer
+            self.txbuffer.appendOps(ops)
+
+        # Add signing information, signer, sign and optionally broadcast
         if self.unsigned:
             # In case we don't want to sign anything
             self.txbuffer.addSigningInformation(account, permission)
@@ -193,6 +252,7 @@ class PeerPlays(object):
         elif self.bundle:
             # In case we want to add more ops to the tx (bundle)
             self.txbuffer.appendSigner(account, permission)
+            return self.txbuffer.json()
         else:
             # default behavior: sign + broadcast
             self.txbuffer.appendSigner(account, permission)
@@ -234,16 +294,116 @@ class PeerPlays(object):
         return self.rpc.get_dynamic_global_properties()
 
     # -------------------------------------------------------------------------
+    # Transaction Buffers
+    # -------------------------------------------------------------------------
+    @property
+    def txbuffer(self):
+        """ Returns the currently active tx buffer
+        """
+        return self.tx()
+
+    @property
+    def propbuffer(self):
+        """ Return the default proposal buffer
+        """
+        return self.proposal()
+
+    def tx(self):
+        """ Returns the default transaction buffer
+        """
+        return self._txbuffers[0]
+
+    def proposal(
+        self,
+        proposer=None,
+        proposal_expiration=None,
+        proposal_review=None
+    ):
+        """ Return the default proposal buffer
+
+            ... note:: If any parameter is set, the default proposal
+               parameters will be changed!
+        """
+        if not self._propbuffer:
+            return self.new_proposal(
+                self.tx(),
+                proposer,
+                proposal_expiration,
+                proposal_review
+            )
+        if proposer:
+            self._propbuffer[0].set_proposer(proposer)
+        if proposal_expiration:
+            self._propbuffer[0].set_expiration(proposal_expiration)
+        if proposal_review:
+            self._propbuffer[0].set_review(proposal_review)
+        return self._propbuffer[0]
+
+    def new_proposal(
+        self,
+        parent=None,
+        proposer=None,
+        proposal_expiration=None,
+        proposal_review=None
+    ):
+        if not parent:
+            parent = self.tx()
+        if not proposal_expiration:
+            proposal_expiration = self.proposal_expiration
+
+        if not proposal_review:
+            proposal_review = self.proposal_review
+
+        if not proposer:
+            if "default_account" in config:
+                proposer = config["default_account"]
+
+        # Else, we create a new object
+        proposal = ProposalBuilder(
+            proposer,
+            proposal_expiration,
+            proposal_review,
+            peerplays_instance=self,
+            parent=parent
+        )
+        if parent:
+            parent.appendOps(proposal)
+        self._propbuffer.append(proposal)
+        return proposal
+
+    def new_tx(self, *args, **kwargs):
+        """ Let's obtain a new txbuffer
+
+            :returns int txid: id of the new txbuffer
+        """
+        builder = TransactionBuilder(
+            *args,
+            peerplays_instance=self,
+            **kwargs
+        )
+        self._txbuffers.append(builder)
+        return builder
+
+    def clear(self):
+        self._txbuffers = []
+        self._propbuffer = []
+        # Base/Default proposal/tx buffers
+        self.new_tx()
+        # self.new_proposal()
+
+    # -------------------------------------------------------------------------
     # Simple Transfer
     # -------------------------------------------------------------------------
-    def transfer(self, to, amount, asset, memo="", account=None):
+    def transfer(self, to, amount, asset, memo="", account=None, **kwargs):
         """ Transfer an asset to another account.
 
             :param str to: Recipient
             :param float amount: Amount to transfer
             :param str asset: Asset to transfer
-            :param str memo: (optional) Memo, may begin with `#` for encrypted messaging
-            :param str account: (optional) the source account for the transfer if not ``default_account``
+            :param str memo: (optional) Memo, may begin with `#` for encrypted
+                messaging
+            :param str account: (optional) the source account for the transfer
+                if not ``default_account``
         """
         from .memo import Memo
         if not account:
@@ -273,7 +433,7 @@ class PeerPlays(object):
             "memo": memoObj.encrypt(memo),
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account, "active")
+        return self.finalizeOp(op, account, "active", **kwargs)
 
     # -------------------------------------------------------------------------
     # Account related calls
@@ -294,11 +454,12 @@ class PeerPlays(object):
         additional_active_accounts=[],
         proxy_account="proxy-to-self",
         storekeys=True,
+        **kwargs
     ):
         """ Create new account on PeerPlays
 
-            The brainkey/password can be used to recover all generated keys (see
-            `peerplaysbase.account` for more details.
+            The brainkey/password can be used to recover all generated keys
+            (see `peerplaysbase.account` for more details.
 
             By default, this call will use ``default_account`` to
             register a new name ``account_name`` with all keys being
@@ -329,10 +490,14 @@ class PeerPlays(object):
                                  keys will be derived
             :param array additional_owner_keys:  Additional owner public keys
             :param array additional_active_keys: Additional active public keys
-            :param array additional_owner_accounts: Additional owner account names
-            :param array additional_active_accounts: Additional acctive account names
-            :param bool storekeys: Store new keys in the wallet (default: ``True``)
-            :raises AccountExistsException: if the account already exists on the blockchain
+            :param array additional_owner_accounts: Additional owner account
+                names
+            :param array additional_active_accounts: Additional acctive account
+                names
+            :param bool storekeys: Store new keys in the wallet (default:
+                ``True``)
+            :raises AccountExistsException: if the account already exists on
+                the blockchain
 
         """
         if not registrar and config["default_account"]:
@@ -373,9 +538,12 @@ class PeerPlays(object):
                 self.wallet.addPrivateKey(active_privkey)
                 self.wallet.addPrivateKey(memo_privkey)
         elif (owner_key and active_key and memo_key):
-            active_pubkey = PublicKey(active_key, prefix=self.rpc.chain_params["prefix"])
-            owner_pubkey = PublicKey(owner_key, prefix=self.rpc.chain_params["prefix"])
-            memo_pubkey = PublicKey(memo_key, prefix=self.rpc.chain_params["prefix"])
+            active_pubkey = PublicKey(
+                active_key, prefix=self.rpc.chain_params["prefix"])
+            owner_pubkey = PublicKey(
+                owner_key, prefix=self.rpc.chain_params["prefix"])
+            memo_pubkey = PublicKey(
+                memo_key, prefix=self.rpc.chain_params["prefix"])
         else:
             raise ValueError(
                 "Call incomplete! Provide either a password or public keys!"
@@ -403,7 +571,8 @@ class PeerPlays(object):
             active_accounts_authority.append([addaccount["id"], 1])
 
         # voting account
-        voting_account = Account(proxy_account or "proxy-to-self", peerplays_instance=self)
+        voting_account = Account(
+            proxy_account or "proxy-to-self", peerplays_instance=self)
 
         op = {
             "fee": {"amount": 0, "asset_id": "1.3.0"},
@@ -430,9 +599,9 @@ class PeerPlays(object):
             "prefix": self.rpc.chain_params["prefix"]
         }
         op = operations.Account_create(**op)
-        return self.finalizeOp(op, registrar, "active")
+        return self.finalizeOp(op, registrar, "active", **kwargs)
 
-    def upgrade_account(self, account=None):
+    def upgrade_account(self, account=None, **kwargs):
         """ Upgrade an account to Lifetime membership
 
             :param str account: (optional) the account to allow access
@@ -450,7 +619,7 @@ class PeerPlays(object):
             "upgrade_to_lifetime_member": True,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     def _test_weights_treshold(self, authority):
         """ This method raises an error if the threshold of an authority cannot
@@ -461,14 +630,18 @@ class PeerPlays(object):
         """
         weights = 0
         for a in authority["account_auths"]:
-            weights += a[1]
+            weights += int(a[1])
         for a in authority["key_auths"]:
-            weights += a[1]
+            weights += int(a[1])
         if authority["weight_threshold"] > weights:
             raise ValueError("Threshold too restrictive!")
+        if authority["weight_threshold"] == 0:
+            raise ValueError("Cannot have threshold of 0")
 
-    def allow(self, foreign, weight=None, permission="active",
-              account=None, threshold=None):
+    def allow(
+        self, foreign, weight=None, permission="active",
+        account=None, threshold=None, **kwargs
+    ):
         """ Give additional access to an account by some other public
             key or account.
 
@@ -530,12 +703,14 @@ class PeerPlays(object):
             "prefix": self.rpc.chain_params["prefix"]
         })
         if permission == "owner":
-            return self.finalizeOp(op, account["name"], "owner")
+            return self.finalizeOp(op, account["name"], "owner", **kwargs)
         else:
-            return self.finalizeOp(op, account["name"], "active")
+            return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def disallow(self, foreign, permission="active",
-                 account=None, threshold=None):
+    def disallow(
+        self, foreign, permission="active",
+        account=None, threshold=None, **kwargs
+    ):
         """ Remove additional access to an account by some other public
             key or account.
 
@@ -584,6 +759,8 @@ class PeerPlays(object):
                     "Unknown foreign account or unvalid public key"
                 )
 
+        if not affected_items:
+            raise ValueError("Changes nothing!")
         removed_weight = affected_items[0][1]
 
         # Define threshold
@@ -609,11 +786,11 @@ class PeerPlays(object):
             "extensions": {}
         })
         if permission == "owner":
-            return self.finalizeOp(op, account["name"], "owner")
+            return self.finalizeOp(op, account["name"], "owner", **kwargs)
         else:
-            return self.finalizeOp(op, account["name"], "active")
+            return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def update_memo_key(self, key, account=None):
+    def update_memo_key(self, key, account=None, **kwargs):
         """ Update an account's memo public key
 
             This method does **not** add any private keys to your
@@ -639,12 +816,12 @@ class PeerPlays(object):
             "new_options": account["options"],
             "extensions": {}
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     # -------------------------------------------------------------------------
     #  Approval and Disapproval of witnesses, workers, committee, and proposals
     # -------------------------------------------------------------------------
-    def approvewitness(self, witnesses, account=None):
+    def approvewitness(self, witnesses, account=None, **kwargs):
         """ Approve a witness
 
             :param list witnesses: list of Witness name or id
@@ -659,8 +836,8 @@ class PeerPlays(object):
         account = Account(account, peerplays_instance=self)
         options = account["options"]
 
-        if not isinstance(witnesses, (list, set)):
-            witnesses = set(witnesses)
+        if not isinstance(witnesses, (list, set, tuple)):
+            witnesses = {witnesses}
 
         for witness in witnesses:
             witness = Witness(witness, peerplays_instance=self)
@@ -679,9 +856,9 @@ class PeerPlays(object):
             "extensions": {},
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def disapprovewitness(self, witnesses, account=None):
+    def disapprovewitness(self, witnesses, account=None, **kwargs):
         """ Disapprove a witness
 
             :param list witnesses: list of Witness name or id
@@ -696,8 +873,8 @@ class PeerPlays(object):
         account = Account(account, peerplays_instance=self)
         options = account["options"]
 
-        if not isinstance(witnesses, (list, set)):
-            witnesses = set(witnesses)
+        if not isinstance(witnesses, (list, set, tuple)):
+            witnesses = {witnesses}
 
         for witness in witnesses:
             witness = Witness(witness, peerplays_instance=self)
@@ -717,9 +894,9 @@ class PeerPlays(object):
             "extensions": {},
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def approvecommittee(self, committees, account=None):
+    def approvecommittee(self, committees, account=None, **kwargs):
         """ Approve a committee
 
             :param list committees: list of committee member name or id
@@ -734,8 +911,8 @@ class PeerPlays(object):
         account = Account(account, peerplays_instance=self)
         options = account["options"]
 
-        if not isinstance(committees, (list, set)):
-            committees = set(committees)
+        if not isinstance(committees, (list, set, tuple)):
+            committees = {committees}
 
         for committee in committees:
             committee = Committee(committee, peerplays_instance=self)
@@ -754,9 +931,9 @@ class PeerPlays(object):
             "extensions": {},
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def disapprovecommittee(self, committees, account=None):
+    def disapprovecommittee(self, committees, account=None, **kwargs):
         """ Disapprove a committee
 
             :param list committees: list of committee name or id
@@ -771,8 +948,8 @@ class PeerPlays(object):
         account = Account(account, peerplays_instance=self)
         options = account["options"]
 
-        if not isinstance(committees, (list, set)):
-            committees = set(committees)
+        if not isinstance(committees, (list, set, tuple)):
+            committees = {committees}
 
         for committee in committees:
             committee = Committee(committee, peerplays_instance=self)
@@ -792,9 +969,11 @@ class PeerPlays(object):
             "extensions": {},
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def approveproposal(self, proposal_ids, account=None, approver=None):
+    def approveproposal(
+        self, proposal_ids, account=None, approver=None, **kwargs
+    ):
         """ Approve Proposal
 
             :param list proposal_id: Ids of the proposals
@@ -813,8 +992,8 @@ class PeerPlays(object):
         else:
             approver = Account(approver)
 
-        if not isinstance(proposal_ids, (list, set)):
-            proposal_ids = set(proposal_ids)
+        if not isinstance(proposal_ids, (list, set, tuple)):
+            proposal_ids = {proposal_ids}
 
         op = []
         for proposal_id in proposal_ids:
@@ -826,9 +1005,11 @@ class PeerPlays(object):
                 'active_approvals_to_add': [approver["id"]],
                 "prefix": self.rpc.chain_params["prefix"]
             }))
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def disapproveproposal(self, proposal_ids, account=None, approver=None):
+    def disapproveproposal(
+        self, proposal_ids, account=None, approver=None, **kwargs
+    ):
         """ Disapprove Proposal
 
             :param list proposal_ids: Id of the proposals
@@ -847,8 +1028,8 @@ class PeerPlays(object):
         else:
             approver = Account(approver)
 
-        if not isinstance(proposal_ids, (list, set)):
-            proposal_ids = set(proposal_ids)
+        if not isinstance(proposal_ids, (list, set, tuple)):
+            proposal_ids = {proposal_ids}
 
         op = []
         for proposal_id in proposal_ids:
@@ -860,47 +1041,19 @@ class PeerPlays(object):
                 'active_approvals_to_remove': [approver["id"]],
                 "prefix": self.rpc.chain_params["prefix"]
             }))
-        return self.finalizeOp(op, account["name"], "active")
-
-    # -------------------------------------------------------------------------
-    # Trading cancel
-    # -------------------------------------------------------------------------
-    def cancel(self, orderNumber, account=None):
-        """ Cancels an order you have placed in a given market. Requires
-            only the "orderNumber". An order number takes the form
-            ``1.7.xxx``.
-
-            :param str orderNumber: The Order Object ide of the form ``1.7.xxxx``
-        """
-        if not account:
-            if "default_account" in config:
-                account = config["default_account"]
-        if not account:
-            raise ValueError("You need to provide an account")
-        account = Account(account, full=False, peerplays_instance=self)
-
-        op = []
-        for order in list(orderNumber):
-            op.append(
-                operations.Limit_order_cancel(**{
-                    "fee": {"amount": 0, "asset_id": "1.3.0"},
-                    "fee_paying_account": account["id"],
-                    "order": order,
-                    "extensions": [],
-                    "prefix": self.rpc.chain_params["prefix"]}))
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     # -------------------------------------------------------------------------
     # Bookie related calls
     # -------------------------------------------------------------------------
-    def sport_create(self, names, account=None):
+    def sport_create(self, names, account=None, **kwargs):
         """ Create a sport. This needs to be **proposed**.
 
-            :param list names: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param list names: Internationalized names, e.g. ``[['de', 'Foo'],
+                ['en', 'bar']]``
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, "'sport_create' needs to be proposed"
         assert isinstance(names, list)
         if not account:
             if "default_account" in config:
@@ -913,17 +1066,17 @@ class PeerPlays(object):
             "name": names,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def sport_update(self, sport_id, names=[], account=None):
+    def sport_update(self, sport_id, names=[], account=None, **kwargs):
         """ Update a sport. This needs to be **proposed**.
 
             :param str sport_id: The id of the sport to update
-            :param list names: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param list names: Internationalized names, e.g. ``[['de', 'Foo'],
+                ['en', 'bar']]``
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, "'sport_create' needs to be proposed"
         assert isinstance(names, list)
         if not account:
             if "default_account" in config:
@@ -938,17 +1091,20 @@ class PeerPlays(object):
             "new_name": names,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def event_group_create(self, names, sport_id="0.0.0", account=None):
+    def event_group_create(
+        self, names, sport_id="0.0.0", account=None, **kwargs
+    ):
         """ Create an event group. This needs to be **proposed**.
 
-            :param list names: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
-            :param str sport_id: Sport ID to create the event group for (defaults to *relative* id ``0.0.0``)
+            :param list names: Internationalized names, e.g. ``[['de', 'Foo'],
+                ['en', 'bar']]``
+            :param str sport_id: Sport ID to create the event group for
+                (defaults to *relative* id ``0.0.0``)
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, "'event_group_create' needs to be proposed"
         assert isinstance(names, list)
         if not account:
             if "default_account" in config:
@@ -962,18 +1118,22 @@ class PeerPlays(object):
             "sport_id": sport_id,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def event_group_update(self, event_group_id, names=[], sport_id="0.0.0", account=None):
+    def event_group_update(
+        self, event_group_id, names=[],
+        sport_id="0.0.0", account=None, **kwargs
+    ):
         """ Update an event group. This needs to be **proposed**.
 
             :param str event_id: Id of the event group to update
-            :param list names: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
-            :param str sport_id: Sport ID to create the event group for (defaults to *relative* id ``0.0.0``)
+            :param list names: Internationalized names, e.g. ``[['de', 'Foo'],
+                ['en', 'bar']]``
+            :param str sport_id: Sport ID to create the event group for
+                (defaults to *relative* id ``0.0.0``)
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, "'event_group_create' needs to be proposed"
         assert isinstance(names, list)
         if not account:
             if "default_account" in config:
@@ -989,7 +1149,7 @@ class PeerPlays(object):
             "new_sport_id": sport_id,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     def event_create(
         self,
@@ -997,20 +1157,24 @@ class PeerPlays(object):
         season,
         start_time,
         event_group_id="0.0.0",
-        account=None
+        account=None,
+        **kwargs
     ):
         """ Create an event. This needs to be **proposed**.
 
-            :param list name: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
-            :param list season: Internationalized season, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
-            :param str event_group_id: Event group ID to create the event for (defaults to *relative* id ``0.0.0``)
+            :param list name: Internationalized names, e.g. ``[['de', 'Foo'],
+                ['en', 'bar']]``
+            :param list season: Internationalized season, e.g. ``[['de',
+                'Foo'], ['en', 'bar']]``
+            :param str event_group_id: Event group ID to create the event for
+                (defaults to *relative* id ``0.0.0``)
             :param datetime start_time: Time of the start of the event
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, "'event_create' needs to be proposed"
         assert isinstance(season, list)
-        assert isinstance(start_time, datetime), "start_time needs to be a `datetime.datetime`"
+        assert isinstance(start_time, datetime), \
+            "start_time needs to be a `datetime.datetime`"
         if not account:
             if "default_account" in config:
                 account = config["default_account"]
@@ -1025,7 +1189,7 @@ class PeerPlays(object):
             "event_group_id": event_group_id,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     def event_update(
         self,
@@ -1034,21 +1198,25 @@ class PeerPlays(object):
         season,
         start_time,
         event_group_id="0.0.0",
-        account=None
+        account=None,
+        **kwargs
     ):
         """ Update an event. This needs to be **proposed**.
 
             :param str event_id: Id of the event to update
-            :param list name: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
-            :param list season: Internationalized season, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
-            :param str event_group_id: Event group ID to create the event for (defaults to *relative* id ``0.0.0``)
+            :param list name: Internationalized names, e.g. ``[['de', 'Foo'],
+                ['en', 'bar']]``
+            :param list season: Internationalized season, e.g. ``[['de',
+                'Foo'], ['en', 'bar']]``
+            :param str event_group_id: Event group ID to create the event for
+                (defaults to *relative* id ``0.0.0``)
             :param datetime start_time: Time of the start of the event
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, "'event_create' needs to be proposed"
         assert isinstance(season, list)
-        assert isinstance(start_time, datetime), "start_time needs to be a `datetime.datetime`"
+        assert isinstance(start_time, datetime), \
+            "start_time needs to be a `datetime.datetime`"
         if not account:
             if "default_account" in config:
                 account = config["default_account"]
@@ -1065,18 +1233,21 @@ class PeerPlays(object):
             "new_event_group_id": event_group_id,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def betting_market_rules_create(self, names, descriptions, account=None):
+    def betting_market_rules_create(
+        self, names, descriptions, account=None, **kwargs
+    ):
         """ Create betting market rules
 
-            :param list names: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
-            :param list descriptions: Internationalized descriptions, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param list names: Internationalized names, e.g. ``[['de', 'Foo'],
+                ['en', 'bar']]``
+            :param list descriptions: Internationalized descriptions, e.g.
+                ``[['de', 'Foo'], ['en', 'bar']]``
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
 
         """
-        assert self.proposer, "'betting_market_rules_create' needs to be proposed"
         assert isinstance(names, list)
         assert isinstance(descriptions, list)
         if not account:
@@ -1091,19 +1262,22 @@ class PeerPlays(object):
             "description": descriptions,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def betting_market_rules_update(self, rules_id, names, descriptions, account=None):
+    def betting_market_rules_update(
+        self, rules_id, names, descriptions, account=None, **kwargs
+    ):
         """ Update betting market rules
 
             :param str rules_id: Id of the betting market rules to update
-            :param list names: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
-            :param list descriptions: Internationalized descriptions, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
+            :param list names: Internationalized names, e.g. ``[['de', 'Foo'],
+                ['en', 'bar']]``
+            :param list descriptions: Internationalized descriptions, e.g.
+                ``[['de', 'Foo'], ['en', 'bar']]``
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
 
         """
-        assert self.proposer, "'betting_market_rules_create' needs to be proposed"
         assert isinstance(names, list)
         assert isinstance(descriptions, list)
         if not account:
@@ -1112,15 +1286,15 @@ class PeerPlays(object):
         if not account:
             raise ValueError("You need to provide an account")
         account = Account(account)
-        rules = Rules(rules_id)
+        rule = Rule(rules_id)
         op = operations.Betting_market_rules_update(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "betting_market_rules_id": rules["id"],
+            "betting_market_rules_id": rule["id"],
             "new_name": names,
             "new_description": descriptions,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     def betting_market_group_create(
         self,
@@ -1128,18 +1302,21 @@ class PeerPlays(object):
         event_id="0.0.0",
         rules_id="0.0.0",
         asset=None,
-        account=None
+        account=None,
+        **kwargs
     ):
         """ Create an betting market. This needs to be **proposed**.
 
             :param list description: Internationalized list of descriptions
-            :param str event_id: Event ID to create this for (defaults to *relative* id ``0.0.0``)
-            :param str rule_id: Rule ID to create this with (defaults to *relative* id ``0.0.0``)
-            :param peerplays.asset.Asset asset: Asset to be used for this market
+            :param str event_id: Event ID to create this for (defaults to
+                *relative* id ``0.0.0``)
+            :param str rule_id: Rule ID to create this with (defaults to
+                *relative* id ``0.0.0``)
+            :param peerplays.asset.Asset asset: Asset to be used for this
+                market
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, "'betting_market_create' needs to be proposed"
         if not asset:
             asset = self.rpc.chain_params["core_symbol"]
         if not account:
@@ -1157,7 +1334,7 @@ class PeerPlays(object):
             "asset_id": asset["id"],
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     def betting_market_group_update(
         self,
@@ -1168,19 +1345,22 @@ class PeerPlays(object):
         freeze=False,
         delay_bets=False,
         account=None,
+        **kwargs
     ):
         """ Update an betting market. This needs to be **proposed**.
 
-            :param str betting_market_group_id: Id of the betting market group to update
+            :param str betting_market_group_id: Id of the betting market group
+                to update
             :param list description: Internationalized list of descriptions
-            :param str event_id: Event ID to create this for (defaults to *relative* id ``0.0.0``)
-            :param str rule_id: Rule ID to create this with (defaults to *relative* id ``0.0.0``)
+            :param str event_id: Event ID to create this for (defaults to
+                *relative* id ``0.0.0``)
+            :param str rule_id: Rule ID to create this with (defaults to
+                *relative* id ``0.0.0``)
             :param bool freeze: Freeze the MBG
             :param bool delay_bets: Delay betting
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, "'betting_market_create' needs to be proposed"
         if not account:
             if "default_account" in config:
                 account = config["default_account"]
@@ -1198,24 +1378,27 @@ class PeerPlays(object):
             "delay_bets": delay_bets,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     def betting_market_create(
         self,
         payout_condition,
-        descriptions,
+        description,
         group_id="0.0.0",
-        account=None
+        account=None,
+        **kwargs
     ):
         """ Create an event group. This needs to be **proposed**.
 
-            :param list payout_condition: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
-            :param list descriptions: Internationalized descriptions, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
-            :param str group_id: Group ID to create the market for (defaults to *relative* id ``0.0.0``)
+            :param list payout_condition: Internationalized names, e.g.
+                ``[['de', 'Foo'], ['en', 'bar']]``
+            :param list description: Internationalized descriptions, e.g.
+                ``[['de', 'Foo'], ['en', 'bar']]``
+            :param str group_id: Group ID to create the market for (defaults to
+                *relative* id ``0.0.0``)
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, "'betting_market_create' needs to be proposed"
         assert isinstance(payout_condition, list)
         if not account:
             if "default_account" in config:
@@ -1226,11 +1409,11 @@ class PeerPlays(object):
         op = operations.Betting_market_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "group_id": group_id,
-            "description": descriptions,
+            "description": description,
             "payout_condition": payout_condition,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     def betting_market_update(
         self,
@@ -1238,18 +1421,21 @@ class PeerPlays(object):
         payout_condition,
         descriptions,
         group_id="0.0.0",
-        account=None
+        account=None,
+        **kwargs
     ):
         """ Update an event group. This needs to be **proposed**.
 
             :param str betting_market_id: Id of the betting market to update
-            :param list payout_condition: Internationalized names, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
-            :param list descriptions: Internationalized descriptions, e.g. ``[['de', 'Foo'], ['en', 'bar']]``
-            :param str group_id: Group ID to create the market for (defaults to *relative* id ``0.0.0``)
+            :param list payout_condition: Internationalized names, e.g.
+                ``[['de', 'Foo'], ['en', 'bar']]``
+            :param list descriptions: Internationalized descriptions, e.g.
+                ``[['de', 'Foo'], ['en', 'bar']]``
+            :param str group_id: Group ID to create the market for (defaults to
+                *relative* id ``0.0.0``)
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert self.proposer, "'betting_market_create' needs to be proposed"
         assert isinstance(payout_condition, list)
         if not account:
             if "default_account" in config:
@@ -1266,13 +1452,16 @@ class PeerPlays(object):
             "new_payout_condition": payout_condition,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def betting_market_resolve(self, betting_market_group_id, results, account=None):
+    def betting_market_resolve(
+        self, betting_market_group_id, results, account=None, **kwargs
+    ):
         """ Create an betting market. This needs to be **proposed**.
 
             :param str betting_market_group_id: Market Group ID to resolve
-            :param list results: Array of Result of the market (``win``, ``not_win``, or ``cancel``)
+            :param list results: Array of Result of the market (``win``,
+                ``not_win``, or ``cancel``)
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
 
@@ -1285,8 +1474,7 @@ class PeerPlays(object):
                ]
 
         """
-        assert self.proposer, "'betting_market_create' needs to be proposed"
-        assert isinstance(results, (list, set))
+        assert isinstance(results, (list, set, tuple))
         if not account:
             if "default_account" in config:
                 account = config["default_account"]
@@ -1299,7 +1487,7 @@ class PeerPlays(object):
             "resolutions": results,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     # -------------------------------------------------------------------------
     # The betting in bookie
@@ -1310,11 +1498,13 @@ class PeerPlays(object):
         amount_to_bet,
         backer_multiplier,
         back_or_lay,
-        account=None
+        account=None,
+        **kwargs
     ):
         """ Place a bet
 
-            :param str betting_market_id: The identifier for the market to bet in
+            :param str betting_market_id: The identifier for the market to bet
+                in
             :param peerplays.amount.Amount amount_to_bet: Amount to bet with
             :param int backer_multiplier: Multipler for backer
             :param str back_or_lay: "back" or "lay" the bet
@@ -1335,18 +1525,21 @@ class PeerPlays(object):
             "bettor_id": account["id"],
             "betting_market_id": bm["id"],
             "amount_to_bet": amount_to_bet.json(),
-            "backer_multiplier": int(backer_multiplier) * GRAPHENE_BETTING_ODDS_PRECISION,
+            "backer_multiplier": (
+                int(backer_multiplier) * GRAPHENE_BETTING_ODDS_PRECISION
+            ),
             "back_or_lay": back_or_lay,
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def bet_cancel(self, bet_to_cancel, account=None):
+    def bet_cancel(self, bet_to_cancel, account=None, **kwargs):
         """ Cancel a bet
 
-            :param str bet_to_cancel: The identifier that identifies the bet to cancel
-            :param str account: (optional) the account that owns the bet (defaults
-                        to ``default_account``)
+            :param str bet_to_cancel: The identifier that identifies the bet to
+                cancel
+            :param str account: (optional) the account that owns the bet
+                (defaults to ``default_account``)
         """
         if not account:
             if "default_account" in config:
@@ -1361,4 +1554,4 @@ class PeerPlays(object):
             "bet_to_cancel": bet["id"],
             "prefix": self.rpc.chain_params["prefix"]
         })
-        return self.finalizeOp(op, account["name"], "active")
+        return self.finalizeOp(op, account["name"], "active", **kwargs)

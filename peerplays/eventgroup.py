@@ -7,10 +7,11 @@ class EventGroup(BlockchainObject):
     """ Read data about an event group on the chain
 
         :param str identifier: Identifier
-        :param peerplays peerplays_instance: PeerPlays() instance to use when accesing a RPC
+        :param peerplays peerplays_instance: PeerPlays() instance to use when
+            accesing a RPC
 
     """
-    type_id = 18
+    type_id = 17
 
     def refresh(self):
         data = self.peerplays.rpc.get_object(self.identifier)
@@ -23,6 +24,11 @@ class EventGroup(BlockchainObject):
     def sport(self):
         from .sport import Sport
         return Sport(self["sport_id"])
+
+    @property
+    def events(self):
+        from .event import Events
+        return Events(self["id"])
 
 
 class EventGroups(list):

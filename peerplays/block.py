@@ -9,6 +9,7 @@ class Block(BlockchainObject):
 
         :param int block: block number
         :param peerplays.peerplays.PeerPlays peerplays_instance: PeerPlays instance
+        :param bool lazy: Use lazy loading
 
         Instances of this class are dictionaries that come with additional
         methods (see below) that allow dealing with a block and it's

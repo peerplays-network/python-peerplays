@@ -13,19 +13,54 @@ import logging
 log = logging.getLogger(__name__)
 
 
-class TransactionBuilder(dict):
-    """ This class simplifies the creation of transactions by adding
-        operations and signers.
+class ProposalBuilder:
+    """ Proposal Builder allows us to construct an independent Proposal
+        that may later be added to an instance ot TransactionBuilder
+
+        :param str proposer: Account name of the proposing user
+        :param int proposal_expiration: Number seconds until the proposal is
+            supposed to expire
+        :param int proposal_review: Number of seconds for review of the
+            proposal
+        :param peerplays.transactionbuilder.TransactionBuilder: Specify
+            your own instance of transaction builder (optional)
+        :param peerplays.peerplays.PeerPlays peerplays_instance: PeerPlays
+            instance
     """
-
-    def __init__(self, tx={}, peerplays_instance=None):
+    def __init__(
+        self,
+        proposer,
+        proposal_expiration=None,
+        proposal_review=None,
+        parent=None,
+        peerplays_instance=None,
+        *args,
+        **kwargs
+    ):
         self.peerplays = peerplays_instance or shared_peerplays_instance()
-        self.clear()
-        if not isinstance(tx, dict):
-            raise ValueError("Invalid TransactionBuilder Format")
-        super(TransactionBuilder, self).__init__(tx)
 
-    def appendOps(self, ops):
+        self.set_expiration(proposal_expiration or 2 * 24 * 60 * 60)
+        self.set_review(proposal_review)
+        self.set_parent(parent)
+        self.set_proposer(proposer)
+        self.ops = list()
+
+    def is_empty(self):
+        return not (len(self.ops) > 0)
+
+    def set_proposer(self, p):
+        self.proposer = p
+
+    def set_expiration(self, p):
+        self.proposal_expiration = p
+
+    def set_review(self, p):
+        self.proposal_review = p
+
+    def set_parent(self, p):
+        self.parent = p
+
+    def appendOps(self, ops, append_to=None):
         """ Append op(s) to the transaction builder
 
             :param list ops: One or a list of operations
@@ -34,6 +69,127 @@ class TransactionBuilder(dict):
             self.ops.extend(ops)
         else:
             self.ops.append(ops)
+        parent = self.parent
+        if parent:
+            parent._set_require_reconstruction()
+
+    def list_operations(self):
+        return [Operation(o) for o in self.ops]
+
+    def broadcast(self):
+        assert self.parent, "No parent transaction provided!"
+        self.parent._set_require_reconstruction()
+        return self.parent.broadcast()
+
+    def get_parent(self):
+        """ This allows to referr to the actual parent of the Proposal
+        """
+        return self.parent
+
+    def __repr__(self):
+        return "<Proposal ops=%s>" % str(self.ops)
+
+    def json(self):
+        """ Return the json formated version of this proposal
+        """
+        raw = self.get_raw()
+        if not raw:
+            return dict()
+        return raw.json()
+
+    def get_raw(self):
+        """ Returns an instance of base "Operations" for further processing
+        """
+        if not self.ops:
+            return
+        ops = [operations.Op_wrapper(op=o) for o in list(self.ops)]
+        proposer = Account(
+            self.proposer,
+            peerplays_instance=self.peerplays
+        )
+        data = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "fee_paying_account": proposer["id"],
+            "expiration_time": transactions.formatTimeFromNow(
+                self.proposal_expiration),
+            "proposed_ops": [o.json() for o in ops],
+            "extensions": []
+        }
+        if self.proposal_review:
+            data.update({
+                "review_period_seconds": self.proposal_review
+            })
+        ops = operations.Proposal_create(**data)
+        return Operation(ops)
+
+
+class TransactionBuilder(dict):
+    """ This class simplifies the creation of transactions by adding
+        operations and signers.
+    """
+    def __init__(
+        self,
+        tx={},
+        proposer=None,
+        peerplays_instance=None
+    ):
+        self.peerplays = peerplays_instance or shared_peerplays_instance()
+        self.clear()
+        if not isinstance(tx, dict):
+            raise ValueError("Invalid TransactionBuilder Format")
+        super(TransactionBuilder, self).__init__(tx)
+        # Do we need to reconstruct the tx from self.ops?
+        self._require_reconstruction = True
+
+    def is_empty(self):
+        return not (len(self.ops) > 0)
+
+    def list_operations(self):
+        return [Operation(o) for o in self.ops]
+
+    def _is_signed(self):
+        return "signatures" in self and self["signatures"]
+
+    def _is_constructed(self):
+        return "expiration" in self and self["expiration"]
+
+    def _is_require_reconstruction(self):
+        return self._require_reconstruction
+
+    def _set_require_reconstruction(self):
+        self._require_reconstruction = True
+
+    def _unset_require_reconstruction(self):
+        self._require_reconstruction = False
+
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        return str(self.json())
+
+    def get_parent(self):
+        """ TransactionBuilders don't have parents, they are their own parent
+        """
+        return self
+
+    def json(self):
+        """ Show the transaction as plain json
+        """
+        if not self._is_constructed() or self._is_require_reconstruction():
+            self.constructTx()
+        return dict(self)
+
+    def appendOps(self, ops, append_to=None):
+        """ Append op(s) to the transaction builder
+
+            :param list ops: One or a list of operations
+        """
+        if isinstance(ops, list):
+            self.ops.extend(ops)
+        else:
+            self.ops.append(ops)
+        self._set_require_reconstruction()
 
     def appendSigner(self, account, permission):
         """ Try to obtain the wif key from the wallet by telling which account
@@ -43,24 +199,43 @@ class TransactionBuilder(dict):
         account = Account(account, peerplays_instance=self.peerplays)
         required_treshold = account[permission]["weight_threshold"]
 
-        def fetchkeys(account, level=0):
+        def fetchkeys(account, perm, level=0):
             if level > 2:
                 return []
             r = []
-            for authority in account[permission]["key_auths"]:
-                wif = self.peerplays.wallet.getPrivateKeyForPublicKey(authority[0])
+            for authority in account[perm]["key_auths"]:
+                wif = self.peerplays.wallet.getPrivateKeyForPublicKey(
+                    authority[0])
                 if wif:
                     r.append([wif, authority[1]])
 
             if sum([x[1] for x in r]) < required_treshold:
                 # go one level deeper
-                for authority in account[permission]["account_auths"]:
-                    auth_account = Account(authority[0], peerplays_instance=self.peerplays)
-                    r.extend(fetchkeys(auth_account, level + 1))
+                for authority in account[perm]["account_auths"]:
+                    auth_account = Account(
+                        authority[0], peerplays_instance=self.peerplays)
+                    r.extend(fetchkeys(auth_account, perm, level + 1))
 
             return r
-        keys = fetchkeys(account)
-        self.wifs.extend([x[0] for x in keys])
+
+        if account not in self.signing_accounts:
+            # is the account an instance of public key?
+            if isinstance(account, PublicKey):
+                self.wifs.add(
+                    self.peerplays.wallet.getPrivateKeyForPublicKey(
+                        str(account)
+                    )
+                )
+            else:
+                account = Account(account, peerplays_instance=self.peerplays)
+                required_treshold = account[permission]["weight_threshold"]
+                keys = fetchkeys(account, permission)
+                if permission != "owner":
+                    keys.extend(fetchkeys(account, "owner"))
+                for x in keys:
+                    self.wifs.add(x[0])
+
+            self.signing_accounts.append(account)
 
     def appendWif(self, wif):
         """ Add a wif that should be used for signing of the transaction.
@@ -68,7 +243,7 @@ class TransactionBuilder(dict):
         if wif:
             try:
                 PrivateKey(wif)
-                self.wifs.append(wif)
+                self.wifs.add(wif)
             except:
                 raise InvalidWifError
 
@@ -76,27 +251,23 @@ class TransactionBuilder(dict):
         """ Construct the actual transaction and store it in the class's dict
             store
         """
-        if self.peerplays.proposer:
-            ops = [operations.Op_wrapper(op=o) for o in list(self.ops)]
-            proposer = Account(
-                self.peerplays.proposer,
-                peerplays_instance=self.peerplays
-            )
-            ops = operations.Proposal_create(**{
-                "fee": {"amount": 0, "asset_id": "1.3.0"},
-                "fee_paying_account": proposer["id"],
-                "expiration_time": transactions.formatTimeFromNow(
-                    self.peerplays.proposal_expiration),
-                "proposed_ops": [o.json() for o in ops],
-                "extensions": []
-            })
-            ops = [Operation(ops)]
-        else:
-            ops = [Operation(o) for o in list(self.ops)]
+        ops = list()
+        for op in self.ops:
+            if isinstance(op, ProposalBuilder):
+                # This operation is a proposal an needs to be deal with
+                # differently
+                proposals = op.get_raw()
+                if proposals:
+                    ops.append(proposals)
+            else:
+                # otherwise, we simply wrap ops into Operations
+                ops.extend([Operation(op)])
 
+        # We no wrap everything into an actual transaction
         ops = transactions.addRequiredFees(self.peerplays.rpc, ops)
         expiration = transactions.formatTimeFromNow(self.peerplays.expiration)
-        ref_block_num, ref_block_prefix = transactions.getBlockParams(self.peerplays.rpc)
+        ref_block_num, ref_block_prefix = transactions.getBlockParams(
+            self.peerplays.rpc)
         self.tx = Signed_Transaction(
             ref_block_num=ref_block_num,
             ref_block_prefix=ref_block_prefix,
@@ -104,6 +275,7 @@ class TransactionBuilder(dict):
             operations=ops
         )
         super(TransactionBuilder, self).__init__(self.tx.json())
+        self._unset_require_reconstruction()
 
     def sign(self):
         """ Sign a provided transaction witht he provided key(s)
@@ -116,18 +288,24 @@ class TransactionBuilder(dict):
         """
         self.constructTx()
 
+        if "operations" not in self or not self["operations"]:
+            return
+
+        # Legacy compatibility!
         # If we are doing a proposal, obtain the account from the proposer_id
         if self.peerplays.proposer:
             proposer = Account(
                 self.peerplays.proposer,
                 peerplays_instance=self.peerplays)
-            self.wifs = []
+            self.wifs = set()
+            self.signing_accounts = list()
             self.appendSigner(proposer["id"], "active")
 
         # We need to set the default prefix, otherwise pubkeys are
         # presented wrongly!
         if self.peerplays.rpc:
-            operations.default_prefix = self.peerplays.rpc.chain_params["prefix"]
+            operations.default_prefix = (
+                self.peerplays.rpc.chain_params["prefix"])
         elif "blockchain" in self:
             operations.default_prefix = self["blockchain"]["prefix"]
 
@@ -156,66 +334,83 @@ class TransactionBuilder(dict):
 
             :param tx tx: Signed transaction to broadcast
         """
-        if not "signatures" in self or not self["signatures"]:
+        # Cannot broadcast an empty transaction
+        if not self._is_signed():
             self.sign()
+
+        if "operations" not in self or not self["operations"]:
+            return
+
+        ret = self.json()
 
         if self.peerplays.nobroadcast:
             log.warning("Not broadcasting anything!")
-            return self
+            self.clear()
+            return ret
 
         # Broadcast
         try:
-            self.peerplays.rpc.broadcast_transaction(self.json(), api="network_broadcast")
+            if self.peerplays.blocking:
+                ret = self.peerplays.rpc.broadcast_transaction_synchronous(
+                    ret, api="network_broadcast")
+            else:
+                self.peerplays.rpc.broadcast_transaction(
+                    ret, api="network_broadcast")
         except Exception as e:
             raise e
 
         self.clear()
-
-        return self
+        return ret
 
     def clear(self):
         """ Clear the transaction builder and start from scratch
         """
         self.ops = []
-        self.wifs = []
+        self.wifs = set()
+        self.signing_accounts = []
+        # This makes sure that _is_constructed will return False afterwards
+        self["expiration"] = None
         super(TransactionBuilder, self).__init__({})
 
     def addSigningInformation(self, account, permission):
         """ This is a private method that adds side information to a
             unsigned/partial transaction in order to simplify later
             signing (e.g. for multisig or coldstorage)
+
+            FIXME: Does not work with owner keys!
         """
         self.constructTx()
-        accountObj = Account(account)
-        authority = accountObj[permission]
-        # We add a required_authorities to be able to identify
-        # how to sign later. This is an array, because we
-        # may later want to allow multiple operations per tx
-        self.update({"required_authorities": {
-            accountObj["name"]: authority
-        }})
-        for account_auth in authority["account_auths"]:
-            account_auth_account = Account(account_auth[0])
-            self["required_authorities"].update({
-                account_auth[0]: account_auth_account.get(permission)
-            })
-
-        # Try to resolve required signatures for offline signing
-        self["missing_signatures"] = [
-            x[0] for x in authority["key_auths"]
-        ]
-        # Add one recursion of keys from account_auths:
-        for account_auth in authority["account_auths"]:
-            account_auth_account = Account(account_auth[0])
-            self["missing_signatures"].extend(
-                [x[0] for x in account_auth_account[permission]["key_auths"]]
-            )
         self["blockchain"] = self.peerplays.rpc.chain_params
 
-    def json(self):
-        """ Show the transaction as plain json
-        """
-        return dict(self)
+        if isinstance(account, PublicKey):
+            self["missing_signatures"] = [
+                str(account)
+            ]
+        else:
+            accountObj = Account(account)
+            authority = accountObj[permission]
+            # We add a required_authorities to be able to identify
+            # how to sign later. This is an array, because we
+            # may later want to allow multiple operations per tx
+            self.update({"required_authorities": {
+                accountObj["name"]: authority
+            }})
+            for account_auth in authority["account_auths"]:
+                account_auth_account = Account(account_auth[0])
+                self["required_authorities"].update({
+                    account_auth[0]: account_auth_account.get(permission)
+                })
+
+            # Try to resolve required signatures for offline signing
+            self["missing_signatures"] = [
+                x[0] for x in authority["key_auths"]
+            ]
+            # Add one recursion of keys from account_auths:
+            for account_auth in authority["account_auths"]:
+                account_auth_account = Account(account_auth[0])
+                self["missing_signatures"].extend(
+                    [x[0] for x in account_auth_account[permission]["key_auths"]]
+                )
 
     def appendMissingSignatures(self):
         """ Store which accounts/keys are supposed to sign the transaction

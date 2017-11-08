@@ -1,5 +1,4 @@
 from peerplays.instance import shared_peerplays_instance
-from .amount import Amount
 from .exceptions import AccountDoesNotExistsException
 from .blockchainobject import BlockchainObject
 
@@ -10,6 +9,9 @@ class Account(BlockchainObject):
         :param str account_name: Name of the account
         :param peerplays.peerplays.PeerPlays peerplays_instance: PeerPlays instance
         :param bool full: Obtain all account data including orders, positions, etc.
+        :param bool lazy: Use lazy loading
+        :param bool full: Obtain all account data including orders, positions,
+               etc.
         :returns: Account data
         :rtype: dictionary
         :raises peerplays.exceptions.AccountDoesNotExistsException: if account does not exist
@@ -43,6 +45,7 @@ class Account(BlockchainObject):
         super().__init__(
             account,
             lazy=lazy,
+            full=full,
             peerplays_instance=peerplays_instance,
         )
 
@@ -53,12 +56,15 @@ class Account(BlockchainObject):
         if re.match("^1\.2\.[0-9]*$", self.identifier):
             account = self.peerplays.rpc.get_objects([self.identifier])[0]
         else:
-            account = self.peerplays.rpc.lookup_account_names([self.identifier])[0]
+            account = self.peerplays.rpc.lookup_account_names(
+                [self.identifier])[0]
         if not account:
             raise AccountDoesNotExistsException(self.identifier)
+        self.identifier = account["id"]
 
         if self.full:
-            account = self.peerplays.rpc.get_full_accounts([account["id"]], False)[0][1]
+            account = self.peerplays.rpc.get_full_accounts(
+                [account["id"]], False)[0][1]
             super(Account, self).__init__(account["account"])
             for k, v in account.items():
                 if k != "account":
@@ -75,6 +81,7 @@ class Account(BlockchainObject):
         """ List balances of an account. This call returns instances of
             :class:`peerplays.amount.Amount`.
         """
+        from .amount import Amount
         balances = self.peerplays.rpc.get_account_balances(self["id"], [])
         return [
             Amount(b, peerplays_instance=self.peerplays)
@@ -85,10 +92,14 @@ class Account(BlockchainObject):
         """ Obtain the balance of a specific Asset. This call returns instances of
             :class:`peerplays.amount.Amount`.
         """
+        from .amount import Amount
+        if isinstance(symbol, dict) and "symbol" in symbol:
+            symbol = symbol["symbol"]
         balances = self.balances
         for b in balances:
             if b["symbol"] == symbol:
                 return b
+        return Amount(0, symbol)
 
     def history(
         self, first=None,
@@ -99,11 +110,16 @@ class Account(BlockchainObject):
             latest operation will be first. This call can be used in a
             ``for`` loop.
 
-            :param int first: sequence number of the first transaction to return (*optional*)
-            :param int limit: limit number of transactions to return (*optional*)
-            :param array only_ops: Limit generator by these operations (*optional*)
-            :param array exclude_ops: Exclude thse operations from generator (*optional*)
+            :param int first: sequence number of the first
+                transaction to return (*optional*)
+            :param int limit: limit number of transactions to
+                return (*optional*)
+            :param array only_ops: Limit generator by these
+                operations (*optional*)
+            :param array exclude_ops: Exclude thse operations from
+                generator (*optional*)
         """
+        from peerplaysbase.operations import getOperationNameForId
         _limit = 100
         cnt = 0
 
@@ -115,7 +131,7 @@ class Account(BlockchainObject):
             api="history"
         )
         if not mostrecent:
-            raise StopIteration
+            return
 
         if not first:
             # first = int(mostrecent[0].get("id").split(".")[2]) + 1
@@ -131,13 +147,17 @@ class Account(BlockchainObject):
                 api="history"
             )
             for i in txs:
-                if exclude_ops and i[1]["op"][0] in exclude_ops:
+                if exclude_ops and getOperationNameForId(
+                    i["op"][0]
+                ) in exclude_ops:
                     continue
-                if not only_ops or i[1]["op"][0] in only_ops:
+                if not only_ops or getOperationNameForId(
+                    i["op"][0]
+                ) in only_ops:
                     cnt += 1
                     yield i
                     if limit >= 0 and cnt >= limit:
-                        raise StopIteration
+                        return
 
             if not txs:
                 break
@@ -191,4 +211,9 @@ class AccountUpdate(dict):
             :class:`peerplays.account.Account` from this class, you can
             use the ``account`` attribute.
         """
-        return Account(self["owner"])
+        account = Account(self["owner"])
+        account.refresh()
+        return account
+
+    def __repr__(self):
+        return "<AccountUpdate: {}>".format(self["owner"])
