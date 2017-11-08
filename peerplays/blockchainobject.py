@@ -108,7 +108,7 @@ class BlockchainObject(dict):
             self.type_ids = [self.type_id]
 
         assert int(parts[0]) == self.space_id,\
-            "Valid id's for {} are {}.{}.x".format(self.__class__.__name__, self.space_id, self.type_ida)
+            "Valid id's for {} are {}.{}.x".format(self.__class__.__name__, self.space_id, self.type_id)
         assert int(parts[1]) in self.type_ids,\
             "Valid id's for {} are {}.{}.x".format(self.__class__.__name__, self.space_id, self.type_ids)
 
