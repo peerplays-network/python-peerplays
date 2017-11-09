@@ -1419,7 +1419,7 @@ class PeerPlays(object):
         self,
         betting_market_id,
         payout_condition,
-        descriptions,
+        description,
         group_id="0.0.0",
         account=None,
         **kwargs
@@ -1429,7 +1429,7 @@ class PeerPlays(object):
             :param str betting_market_id: Id of the betting market to update
             :param list payout_condition: Internationalized names, e.g.
                 ``[['de', 'Foo'], ['en', 'bar']]``
-            :param list descriptions: Internationalized descriptions, e.g.
+            :param list description: Internationalized descriptions, e.g.
                 ``[['de', 'Foo'], ['en', 'bar']]``
             :param str group_id: Group ID to create the market for (defaults to
                 *relative* id ``0.0.0``)
@@ -1448,7 +1448,7 @@ class PeerPlays(object):
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "betting_market_id": market["id"],
             "new_group_id": group_id,
-            "new_description": descriptions,
+            "new_description": description,
             "new_payout_condition": payout_condition,
             "prefix": self.rpc.chain_params["prefix"]
         })
