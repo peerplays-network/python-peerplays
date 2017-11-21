@@ -186,6 +186,13 @@ class PeerPlays(object):
         """
         self.wallet.create(pwd)
 
+    def set_default_account(self, account):
+        """ Set the default account to be used
+        """
+        Account(account)
+        config["default_account"] = account
+
+
     def finalizeOp(self, ops, account, permission, **kwargs):
         """ This method obtains the required private keys if present in
             the wallet, finalizes the transaction, signs it and

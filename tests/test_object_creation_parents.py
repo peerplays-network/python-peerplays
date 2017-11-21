@@ -4,6 +4,7 @@ from peerplays import PeerPlays
 from peerplays.utils import parse_time
 from peerplays.exceptions import ObjectNotInProposalBuffer
 from peerplaysbase.operationids import getOperationNameForId
+from peerplays.instance import set_shared_peerplays_instance
 
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
 
@@ -18,6 +19,8 @@ class Testcases(unittest.TestCase):
             # Overwrite wallet to use this list of wifs only
             wif=[wif]
         )
+        set_shared_peerplays_instance(self.ppy)
+        self.ppy.set_default_account("init0")
 
     def test_event_create(self):
         ev = [["de", "1. Bundesliga"], ["en", "First Country League"]]

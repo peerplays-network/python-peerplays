@@ -4,7 +4,7 @@ import unittest
 from peerplays import PeerPlays
 from peerplays.utils import parse_time
 from peerplaysbase.operationids import getOperationNameForId
-from pprint import pprint
+from peerplays.instance import set_shared_peerplays_instance
 
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
 
@@ -25,17 +25,8 @@ class Testcases(unittest.TestCase):
             # Overwrite wallet to use this list of wifs only
             wif=[wif]
         )
-
-        ev = [["de", "1. Bundesliga"], ["en", "First Country League"]]
-        desc = [["de", "Bundesliga"], ["en", "Germany Scoccer Championship"]]
-        season = [["de", "Januar 2016"], ["en", "January 2016"]]
-        start = datetime.datetime(2016, 1, 1, 0, 0, 0)
-        rule_name = [["en", "NHL Rules v1.0"]]
-        rule = [["en", "The winner will be the team with the most points ..."]]
-        bmg_name = [["de", "Meine Market Group"], ["en", "My betting market group"]]
-        bm_name = [["de", "Nuernberg gewinnt"], ["en", "Nuremberg wins"]]
-        cond = [["de", "Description: Fuerth gewinnt"],
-                ["en", "Description: Fuerth wins"]]
+        set_shared_peerplays_instance(self.ppy)
+        self.ppy.set_default_account("init0")
 
     def test_sport_create(self):
         sport = [
@@ -295,14 +286,15 @@ class Testcases(unittest.TestCase):
         )
 
     def test_betting_market_resolve(self):
-        result = [["1.21.257", "win"],
-                  ["1.21.258", "not_win"],
-                  ["1.21.259", "cancel"]]
         def new_refresh(self):
             dict.__init__(
                 self,
                 {"id": "1.20.0"}
             )
+
+        result = [["1.21.257", "win"],
+                  ["1.21.258", "not_win"],
+                  ["1.21.259", "cancel"]]
 
         with mock.patch(
             "peerplays.bettingmarketgroup.BettingMarketGroup.refresh",

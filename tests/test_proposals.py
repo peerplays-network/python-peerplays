@@ -2,6 +2,7 @@ import unittest
 from pprint import pprint
 from peerplays import PeerPlays
 from peerplaysbase.operationids import getOperationNameForId
+from peerplays.instance import set_shared_peerplays_instance
 
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
 
@@ -17,6 +18,8 @@ class Testcases(unittest.TestCase):
         )
         # from getpass import getpass
         # self.ppy.wallet.unlock(getpass())
+        set_shared_peerplays_instance(self.ppy)
+        self.ppy.set_default_account("init0")
 
     def test_finalizeOps_proposal(self):
         ppy = self.ppy

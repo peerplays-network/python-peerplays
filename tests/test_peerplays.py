@@ -6,6 +6,7 @@ from peerplays import PeerPlays
 from peerplaysbase.operationids import getOperationNameForId
 from peerplays.amount import Amount
 from peerplaysbase.account import PrivateKey
+from peerplays.instance import set_shared_peerplays_instance
 
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
 core_unit = "PPY"
@@ -22,9 +23,14 @@ class Testcases(unittest.TestCase):
         )
         # from getpass import getpass
         # self.ppy.wallet.unlock(getpass())
+        set_shared_peerplays_instance(self.ppy)
+        self.ppy.set_default_account("init0")
 
     def test_connect(self):
         self.ppy.connect()
+
+    def test_set_default_account(self):
+        self.ppy.set_default_account("init0")
 
     def test_info(self):
         info = self.ppy.info()
