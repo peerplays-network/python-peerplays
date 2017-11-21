@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 
 import sys
-import os
-import json
-import re
-import time
 import logging
 
 try:
@@ -14,20 +10,12 @@ except ImportError:
     sys.exit(1)
 
 from pprint import pprint
-from peerplaysbase import transactions, operations
-from peerplaysbase.account import PrivateKey, PublicKey, Address
+from peerplaysbase.account import PrivateKey
 from peerplays.storage import configStorage as config
-from peerplays.peerplays import PeerPlays
-from peerplays.block import Block
-from peerplays.amount import Amount
-from peerplays.asset import Asset
-from peerplays.account import Account
 from peerplays.transactionbuilder import TransactionBuilder
 from prettytable import PrettyTable
 from .ui import (
     print_permissions,
-    get_terminal,
-    pprintOperation,
     print_version,
 )
 from .decorators import (
@@ -35,7 +23,6 @@ from .decorators import (
     offlineChain,
     unlockWallet
 )
-from datetime import datetime
 from .main import main
 from . import (
     account,
@@ -43,7 +30,8 @@ from . import (
     proposal,
     wallet,
     witness,
-    committee
+    committee,
+    bookie
 )
 
 log = logging.getLogger(__name__)

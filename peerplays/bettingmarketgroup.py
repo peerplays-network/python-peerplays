@@ -24,6 +24,11 @@ class BettingMarketGroup(BlockchainObject):
         from .event import Event
         return Event(self["event_id"])
 
+    @property
+    def bettingmarkets(self):
+        from .bettingmarket import BettingMarkets
+        return BettingMarkets(self["id"])
+
 
 class BettingMarketGroups(list):
     """ List of all available BettingMarketGroups
