@@ -1,5 +1,6 @@
 import time
 from datetime import datetime
+from .exceptions import ObjectNotInProposalBuffer
 
 timeFormat = '%Y-%m-%dT%H:%M:%S'
 
@@ -35,3 +36,29 @@ def parse_time(block_time):
     """Take a string representation of time from the blockchain, and parse it into datetime object.
     """
     return datetime.strptime(block_time, timeFormat)
+
+
+def test_proposal_in_buffer(buf, operation_name, id):
+    from .transactionbuilder import ProposalBuilder
+    from peerplaysbase.operationids import operations
+    assert isinstance(buf, ProposalBuilder)
+
+    operationid = operations.get(operation_name)
+    _, _, j = id.split(".")
+
+    ops = buf.list_operations()
+    if (len(ops) <= int(j)):
+        raise ObjectNotInProposalBuffer(
+            "{} with id {} not found".format(
+                operation_name,
+                id
+            )
+        )
+    op = ops[int(j)].json()
+    if op[0] != operationid:
+        raise ObjectNotInProposalBuffer(
+            "{} with id {} not found".format(
+                operation_name,
+                id
+            )
+        )

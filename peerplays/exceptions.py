@@ -119,7 +119,14 @@ class SportDoesNotExistException(Exception):
     """
     pass
 
+
 class RuleDoesNotExistException(Exception):
     """ Rule does not exist
+    """
+    pass
+
+
+class ObjectNotInProposalBuffer(Exception):
+    """ Couldn't find object to relative 0.0.x
     """
     pass

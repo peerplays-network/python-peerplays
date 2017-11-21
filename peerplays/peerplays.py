@@ -21,7 +21,7 @@ from .bet import Bet
 from .exceptions import AccountExistsException
 from .wallet import Wallet
 from .transactionbuilder import TransactionBuilder, ProposalBuilder
-from .utils import formatTime
+from .utils import formatTime, test_proposal_in_buffer
 
 log = logging.getLogger(__name__)
 GRAPHENE_BETTING_ODDS_PRECISION = 10000
@@ -1111,6 +1111,15 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
+        if sport_id[0] == "1":
+            # Test if object exists
+            Sport(sport_id)
+        else:
+            # Test if object is proposed
+            test_proposal_in_buffer(
+                kwargs.get("append_to", self.propbuffer),
+                "sport_create",
+                sport_id)
         account = Account(account)
         op = operations.Event_group_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
@@ -1140,6 +1149,15 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
+        if sport_id[0] == "1":
+            # Test if object exists
+            Sport(sport_id)
+        else:
+            # Test if object is proposed
+            test_proposal_in_buffer(
+                kwargs.get("append_to", self.propbuffer),
+                "sport_create",
+                sport_id)
         account = Account(account)
         event_group = EventGroup(event_group_id)
         op = operations.Event_group_update(**{
@@ -1181,6 +1199,15 @@ class PeerPlays(object):
         if not account:
             raise ValueError("You need to provide an account")
         account = Account(account)
+        if event_group_id[0] == "1":
+            # Test if object exists
+            EventGroup(event_group_id)
+        else:
+            # Test if object is proposed
+            test_proposal_in_buffer(
+                kwargs.get("append_to", self.propbuffer),
+                "event_group_create",
+                event_group_id)
         op = operations.Event_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "name": name,
@@ -1224,6 +1251,15 @@ class PeerPlays(object):
             raise ValueError("You need to provide an account")
         account = Account(account)
         event = Event(event_id)
+        if event_group_id[0] == "1":
+            # Test if object exists
+            EventGroup(event_group_id)
+        else:
+            # Test if object is proposed
+            test_proposal_in_buffer(
+                kwargs.get("append_to", self.propbuffer),
+                "event_group_create",
+                event_group_id)
         op = operations.Event_update(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "event_id": event["id"],
@@ -1326,6 +1362,24 @@ class PeerPlays(object):
             raise ValueError("You need to provide an account")
         account = Account(account, peerplays_instance=self)
         asset = Asset(asset, peerplays_instance=self)
+        if event_id[0] == "1":
+            # Test if object exists
+            Event(event_id)
+        else:
+            # Test if object is proposed
+            test_proposal_in_buffer(
+                kwargs.get("append_to", self.propbuffer),
+                "event_create",
+                event_id)
+        if rules_id[0] == "1":
+            # Test if object exists
+            Event(rules_id)
+        else:
+            # Test if object is proposed
+            test_proposal_in_buffer(
+                kwargs.get("append_to", self.propbuffer),
+                "betting_market_rules_create",
+                rules_id)
         op = operations.Betting_market_group_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "description": description,
@@ -1368,6 +1422,24 @@ class PeerPlays(object):
             raise ValueError("You need to provide an account")
         account = Account(account, peerplays_instance=self)
         bmg = BettingMarketGroup(betting_market_group_id)
+        if event_id[0] == "1":
+            # Test if object exists
+            Event(event_id)
+        else:
+            # Test if object is proposed
+            test_proposal_in_buffer(
+                kwargs.get("append_to", self.propbuffer),
+                "event_create",
+                event_id)
+        if rules_id[0] == "1":
+            # Test if object exists
+            Event(rules_id)
+        else:
+            # Test if object is proposed
+            test_proposal_in_buffer(
+                kwargs.get("append_to", self.propbuffer),
+                "betting_market_rules_create",
+                rules_id)
         op = operations.Betting_market_group_update(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "betting_market_group_id": bmg["id"],
@@ -1406,6 +1478,15 @@ class PeerPlays(object):
         if not account:
             raise ValueError("You need to provide an account")
         account = Account(account)
+        if group_id[0] == "1":
+            # Test if object exists
+            BettingMarketGroup(group_id)
+        else:
+            # Test if object is proposed
+            test_proposal_in_buffer(
+                kwargs.get("append_to", self.propbuffer),
+                "betting_market_group_create",
+                group_id)
         op = operations.Betting_market_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "group_id": group_id,
@@ -1444,6 +1525,15 @@ class PeerPlays(object):
             raise ValueError("You need to provide an account")
         account = Account(account)
         market = BettingMarket(betting_market_id)
+        if group_id[0] == "1":
+            # Test if object exists
+            BettingMarketGroup(group_id)
+        else:
+            # Test if object is proposed
+            test_proposal_in_buffer(
+                kwargs.get("append_to", self.propbuffer),
+                "betting_market_group_create",
+                group_id)
         op = operations.Betting_market_update(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "betting_market_id": market["id"],
@@ -1481,6 +1571,8 @@ class PeerPlays(object):
         if not account:
             raise ValueError("You need to provide an account")
         account = Account(account)
+        # Test if object exists
+        BettingMarket(betting_market_group_id)
         op = operations.Betting_market_group_resolve(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "betting_market_group_id": betting_market_group_id,
