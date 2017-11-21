@@ -50,7 +50,6 @@ setup(
         "scrypt",
         "appdirs",
         "pycrypto",
-        "click-datetime",
         "prettytable",
         "events==0.3"
     ],

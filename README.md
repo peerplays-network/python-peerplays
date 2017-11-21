@@ -5,7 +5,7 @@
 ## Develop:
 
 [![docs master](https://readthedocs.org/projects/python-peerplays/badge/?version=develop)](http://python-peerplays.readthedocs.io/en/latest/)
-[![Build Status](hhttps://travis-ci.org/PBSA/python-peerplays.svg?branch=develop)](https://travis-ci.org/PBSA/python-peerplays)
+[![Build Status](https://travis-ci.org/PBSA/python-peerplays.svg?branch=develop)](https://travis-ci.org/PBSA/python-peerplays)
 [![codecov](https://codecov.io/gh/pbsa/python-peerplays/branch/develop/graph/badge.svg)](https://codecov.io/gh/pbsa/python-peerplays)
 
 Python Library for PeerPlays
