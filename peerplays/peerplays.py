@@ -1572,7 +1572,7 @@ class PeerPlays(object):
             raise ValueError("You need to provide an account")
         account = Account(account)
         # Test if object exists
-        BettingMarket(betting_market_group_id)
+        BettingMarketGroup(betting_market_group_id)
         op = operations.Betting_market_group_resolve(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "betting_market_group_id": betting_market_group_id,
