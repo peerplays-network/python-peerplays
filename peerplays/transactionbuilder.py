@@ -168,6 +168,11 @@ class TransactionBuilder(dict):
     def __str__(self):
         return str(self.json())
 
+    def __getitem__(self, key):
+        if key not in self:
+            self.constructTx()
+        return dict(self).__getitem__(key)
+
     def get_parent(self):
         """ TransactionBuilders don't have parents, they are their own parent
         """
