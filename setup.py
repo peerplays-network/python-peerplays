@@ -18,12 +18,12 @@ setup(
     version=VERSION,
     description='Python library for PEERPLAYS',
     long_description=open('README.md').read(),
-    download_url='https://github.com/xeroc/python-peerplays/tarball/' + VERSION,
+    download_url='https://github.com/PBSA/python-peerplays/tarball/' + VERSION,
     author='Fabian Schuh',
     author_email='Fabian@chainsquad.com',
     maintainer='Fabian Schuh',
     maintainer_email='Fabian@chainsquad.com',
-    url='https://bitbucket.org/peerplaysblockchain/peerplays-python',
+    url='https://github.com/PBSA/peerplays-python',
     keywords=['peerplays', 'library', 'api', 'rpc'],
     packages=[
         "peerplays",
@@ -47,11 +47,11 @@ setup(
     },
     install_requires=[
         "graphenelib>=0.5.4",
-        "scrypt",
         "appdirs",
-        "pycrypto",
         "prettytable",
-        "events==0.3"
+        "events==0.3",
+        "scrypt",
+        "pycryptodome",  # for AES, installed through graphenelib already
     ],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],

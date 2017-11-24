@@ -1380,7 +1380,7 @@ class PeerPlays(object):
                 event_id)
         if rules_id[0] == "1":
             # Test if object exists
-            Event(rules_id)
+            Rule(rules_id)
         else:
             # Test if object is proposed
             test_proposal_in_buffer(
@@ -1440,7 +1440,7 @@ class PeerPlays(object):
                 event_id)
         if rules_id[0] == "1":
             # Test if object exists
-            Event(rules_id)
+            Rule(rules_id)
         else:
             # Test if object is proposed
             test_proposal_in_buffer(
