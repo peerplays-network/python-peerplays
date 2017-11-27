@@ -286,38 +286,53 @@ class Wallet():
         pub = format(PrivateKey(wif).pubkey, self.prefix)
         return self.getAccountFromPublicKey(pub)
 
-    def getAccountFromPublicKey(self, pub):
-        """ Obtain account name from public key
+    def getAccountsFromPublicKey(self, pub):
+        """ Obtain all accounts associated with a public key
         """
-        # FIXME, this only returns the first associated key.
-        # If the key is used by multiple accounts, this
-        # will surely lead to undesired behavior
+        names = self.rpc.get_key_references([pub])
+        for name in names:
+            for i in name:
+                yield i
+
+    def getAccountFromPublicKey(self, pub):
+        """ Obtain the first account name from public key
+        """
         names = self.rpc.get_key_references([pub])[0]
         if not names:
             return None
         else:
             return names[0]
 
+    def getAllAccounts(self, pub):
+        """ Get the account data for a public key (all accounts found for this
+            public key)
+        """
+        for id in self.getAccountsFromPublicKey(pub):
+            try:
+                account = Account(id)
+            except:
+                continue
+            yield {"name": account["name"],
+                   "account": account,
+                   "type": self.getKeyType(account, pub),
+                   "pubkey": pub}
+
     def getAccount(self, pub):
-        """ Get the account data for a public key
+        """ Get the account data for a public key (first account found for this
+            public key)
         """
         name = self.getAccountFromPublicKey(pub)
         if not name:
-            return {"name": None,
-                    "type": None,
-                    "pubkey": pub
-                    }
+            return {"name": None, "type": None, "pubkey": pub}
         else:
             try:
                 account = Account(name)
             except:
                 return
-            keyType = self.getKeyType(account, pub)
             return {"name": account["name"],
                     "account": account,
-                    "type": keyType,
-                    "pubkey": pub
-                    }
+                    "type": self.getKeyType(account, pub),
+                    "pubkey": pub}
 
     def getKeyType(self, account, pub):
         """ Get key type
@@ -338,7 +353,7 @@ class Wallet():
         for pubkey in pubkeys:
             # Filter those keys not for our network
             if pubkey[:len(self.prefix)] == self.prefix:
-                accounts.append(self.getAccount(pubkey))
+                accounts.extend(self.getAllAccounts(pubkey))
         return accounts
 
     def getPublicKeys(self):
