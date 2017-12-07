@@ -29,11 +29,13 @@ def formatTimeFromNow(secs=0):
         :rtype: str
 
     """
-    return datetime.utcfromtimestamp(time.time() + int(secs)).strftime(timeFormat)
+    return datetime.utcfromtimestamp(
+        time.time() + int(secs)).strftime(timeFormat)
 
 
 def parse_time(block_time):
-    """Take a string representation of time from the blockchain, and parse it into datetime object.
+    """Take a string representation of time from the blockchain, and parse it
+       into datetime object.
     """
     return datetime.strptime(block_time, timeFormat)
 

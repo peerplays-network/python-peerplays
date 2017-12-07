@@ -160,13 +160,13 @@ class PeerPlays(object):
                 rpcuser="",
                 rpcpassword="",
                 **kwargs):
-        """ Connect to Steem network (internal use only)
+        """ Connect to PeerPlays network (internal use only)
         """
         if not node:
             if "node" in config:
                 node = config["node"]
             else:
-                raise ValueError("A Steem node needs to be provided!")
+                raise ValueError("A PeerPlays node needs to be provided!")
 
         if not rpcuser and "rpcuser" in config:
             rpcuser = config["rpcuser"]
@@ -191,7 +191,6 @@ class PeerPlays(object):
         """
         Account(account)
         config["default_account"] = account
-
 
     def finalizeOp(self, ops, account, permission, **kwargs):
         """ This method obtains the required private keys if present in
@@ -619,7 +618,7 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account)
+        account = Account(account, peerplays_instance=self)
         op = operations.Account_upgrade(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "account_to_upgrade": account["id"],
@@ -994,10 +993,13 @@ class PeerPlays(object):
         if not account:
             raise ValueError("You need to provide an account")
         account = Account(account)
-        if not approver:
+        is_key = approver and approver[:3] == self.rpc.chain_params["prefix"]
+        if not approver and not is_key:
             approver = account
+        elif approver and not is_key:
+            approver = Account(approver, peerplays_instance=self)
         else:
-            approver = Account(approver)
+            approver = PublicKey(approver)
 
         if not isinstance(proposal_ids, (list, set, tuple)):
             proposal_ids = {proposal_ids}
@@ -1005,21 +1007,32 @@ class PeerPlays(object):
         op = []
         for proposal_id in proposal_ids:
             proposal = Proposal(proposal_id, peerplays_instance=self)
-            op.append(operations.Proposal_update(**{
+            update_dict = {
                 "fee": {"amount": 0, "asset_id": "1.3.0"},
                 'fee_paying_account': account["id"],
                 'proposal': proposal["id"],
                 'active_approvals_to_add': [approver["id"]],
                 "prefix": self.rpc.chain_params["prefix"]
-            }))
-        return self.finalizeOp(op, account["name"], "active", **kwargs)
+            }
+            if is_key:
+                update_dict.update({
+                    'key_approvals_to_add': [str(approver)],
+                })
+            else:
+                update_dict.update({
+                    'active_approvals_to_add': [approver["id"]],
+                })
+            op.append(operations.Proposal_update(**update_dict))
+        if is_key:
+            self.txbuffer.appendSigner(account["name"], "active")
+        return self.finalizeOp(op, approver["name"], "active", **kwargs)
 
     def disapproveproposal(
         self, proposal_ids, account=None, approver=None, **kwargs
     ):
         """ Disapprove Proposal
 
-            :param list proposal_ids: Id of the proposals
+            :param list proposal_ids: Ids of the proposals
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
@@ -1029,11 +1042,11 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account)
+        account = Account(account, peerplays_instance=self)
         if not approver:
             approver = account
         else:
-            approver = Account(approver)
+            approver = Account(approver, peerplays_instance=self)
 
         if not isinstance(proposal_ids, (list, set, tuple)):
             proposal_ids = {proposal_ids}

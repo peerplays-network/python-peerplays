@@ -244,42 +244,42 @@ class Amount(dict):
             assert other["asset"] == self["asset"]
             return self["amount"] < other["amount"]
         else:
-            return self["amount"] < float(other)
+            return self["amount"] < float(other or 0)
 
     def __le__(self, other):
         if isinstance(other, Amount):
             assert other["asset"] == self["asset"]
             return self["amount"] <= other["amount"]
         else:
-            return self["amount"] <= float(other)
+            return self["amount"] <= float(other or 0)
 
     def __eq__(self, other):
         if isinstance(other, Amount):
             assert other["asset"] == self["asset"]
             return self["amount"] == other["amount"]
         else:
-            return self["amount"] == float(other)
+            return self["amount"] == float(other or 0)
 
     def __ne__(self, other):
         if isinstance(other, Amount):
             assert other["asset"] == self["asset"]
             return self["amount"] != other["amount"]
         else:
-            return self["amount"] != float(other)
+            return self["amount"] != float(other or 0)
 
     def __ge__(self, other):
         if isinstance(other, Amount):
             assert other["asset"] == self["asset"]
             return self["amount"] >= other["amount"]
         else:
-            return self["amount"] >= float(other)
+            return self["amount"] >= float(other or 0)
 
     def __gt__(self, other):
         if isinstance(other, Amount):
             assert other["asset"] == self["asset"]
             return self["amount"] > other["amount"]
         else:
-            return self["amount"] > float(other)
+            return self["amount"] > float(other or 0)
 
     __repr__ = __str__
     __truediv__ = __div__

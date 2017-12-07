@@ -175,7 +175,7 @@ class Blockchain(object):
                 r.update(op["op"][1])
                 yield r
 
-    def awaitTxConfirmation(self, transaction, limit=50):
+    def awaitTxConfirmation(self, transaction, limit=10):
         """ Returns the transaction as seen by the blockchain after being included into a block
 
             .. note:: If you want instant confirmation, you need to instantiate

@@ -7,14 +7,16 @@ class Account(BlockchainObject):
     """ This class allows to easily access Account data
 
         :param str account_name: Name of the account
-        :param peerplays.peerplays.PeerPlays peerplays_instance: PeerPlays instance
+        :param peerplays.peerplays.PeerPlays peerplays_instance: PeerPlays
+        instance
         :param bool full: Obtain all account data including orders, positions, etc.
         :param bool lazy: Use lazy loading
         :param bool full: Obtain all account data including orders, positions,
                etc.
         :returns: Account data
         :rtype: dictionary
-        :raises peerplays.exceptions.AccountDoesNotExistsException: if account does not exist
+        :raises peerplays.exceptions.AccountDoesNotExistsException: if account
+                does not exist
 
         Instances of this class are dictionaries that come with additional
         methods (see below) that allow dealing with an account and it's

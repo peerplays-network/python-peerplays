@@ -19,7 +19,8 @@ class Wallet():
         or uses a SQLite database managed by storage.py.
 
         :param PeerPlaysNodeRPC rpc: RPC connection to a PeerPlays node
-        :param array,dict,string keys: Predefine the wif keys to shortcut the wallet database
+        :param array,dict,string keys: Predefine the wif keys to shortcut the
+               wallet database
 
         Three wallet operation modes are possible:
 
@@ -84,7 +85,8 @@ class Wallet():
         """ This method is strictly only for in memory keys that are
             passed to Wallet/PeerPlays with the ``keys`` argument
         """
-        log.debug("Force setting of private keys. Not using the wallet database!")
+        log.debug(
+            "Force setting of private keys. Not using the wallet database!")
         if isinstance(loadkeys, dict):
             Wallet.keyMap = loadkeys
             loadkeys = list(loadkeys.values())
@@ -168,7 +170,8 @@ class Wallet():
         """ Encrypt a wif key
         """
         assert not self.locked()
-        return format(bip38.encrypt(PrivateKey(wif), self.masterpassword), "encwif")
+        return format(
+            bip38.encrypt(PrivateKey(wif), self.masterpassword), "encwif")
 
     def decrypt_wif(self, encwif):
         """ decrypt a wif key
@@ -185,13 +188,15 @@ class Wallet():
     def addPrivateKey(self, wif):
         """ Add a private key to the wallet database
         """
-        # it could be either graphenebase or peerplaysbase so we can't check the type directly
+        # it could be either graphenebase or peerplaysbase so we can't check
+        # the type directly
         if isinstance(wif, PrivateKey) or isinstance(wif, GPHPrivateKey):
             wif = str(wif)
         try:
             pub = format(PrivateKey(wif).pubkey, self.prefix)
         except:
-            raise InvalidWifError("Invalid Private Key Format. Please use WIF!")
+            raise InvalidWifError(
+                "Invalid Private Key Format. Please use WIF!")
 
         if self.keyStorage:
             # Test if wallet exists
@@ -217,7 +222,8 @@ class Wallet():
             if not self.created():
                 raise NoWalletException
 
-            return self.decrypt_wif(self.keyStorage.getPrivateKeyForPublicKey(pub))
+            return self.decrypt_wif(
+                self.keyStorage.getPrivateKeyForPublicKey(pub))
 
     def removePrivateKeyFromPublicKey(self, pub):
         """ Remove a key from the wallet database
@@ -260,7 +266,8 @@ class Wallet():
             account = self.rpc.get_account(name)
             if not account:
                 return
-            key = self.getPrivateKeyForPublicKey(account["options"]["memo_key"])
+            key = self.getPrivateKeyForPublicKey(
+                account["options"]["memo_key"])
             if key:
                 return key
             return False
@@ -297,6 +304,9 @@ class Wallet():
     def getAccountFromPublicKey(self, pub):
         """ Obtain the first account name from public key
         """
+        # FIXME, this only returns the first associated key.
+        # If the key is used by multiple accounts, this
+        # will surely lead to undesired behavior
         names = self.rpc.get_key_references([pub])[0]
         if not names:
             return None

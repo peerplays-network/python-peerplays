@@ -1,4 +1,3 @@
-from peerplays.instance import shared_peerplays_instance
 from .exceptions import BlockDoesNotExistsException
 from .utils import parse_time
 from .blockchainobject import BlockchainObject
@@ -8,7 +7,8 @@ class Block(BlockchainObject):
     """ Read a single block from the chain
 
         :param int block: block number
-        :param peerplays.peerplays.PeerPlays peerplays_instance: PeerPlays instance
+        :param peerplays.peerplays.PeerPlays peerplays_instance: PeerPlays
+            instance
         :param bool lazy: Use lazy loading
 
         Instances of this class are dictionaries that come with additional
