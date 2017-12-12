@@ -225,4 +225,3 @@ class Testcases(unittest.TestCase):
         self.assertIn(
             "0:11",
             op["new_options"]["votes"])
-
