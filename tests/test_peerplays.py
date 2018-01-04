@@ -225,3 +225,7 @@ class Testcases(unittest.TestCase):
         self.assertIn(
             "0:11",
             op["new_options"]["votes"])
+
+    def test_sign_message(self):
+        p = self.ppy.sign_message("message foobar")
+        self.ppy.verify_message(p)

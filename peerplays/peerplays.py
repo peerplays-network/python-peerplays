@@ -18,7 +18,10 @@ from .bettingmarketgroup import BettingMarketGroup
 from .bettingmarket import BettingMarket
 from .bet import Bet
 
-from .exceptions import AccountExistsException
+from .exceptions import (
+    AccountExistsException,
+    InvalidMessageSignature
+)
 from .wallet import Wallet
 from .transactionbuilder import TransactionBuilder, ProposalBuilder
 from .utils import formatTime, test_proposal_in_buffer
@@ -1667,3 +1670,94 @@ class PeerPlays(object):
             "prefix": self.rpc.chain_params["prefix"]
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
+
+    def sign_message(self, message, account=None, **kwargs):
+        from graphenebase.ecdsa import sign_message
+        from binascii import hexlify
+        encoded = """{message}
+-----BEGIN META-----
+account={account[name]}
+memokey={account[options][memo_key]}
+block={info[head_block_number]}
+timestamp={info[time]} """
+        signed_message = """
+-----BEGIN BITSHARES SIGNED MESSAGE-----
+{encoded}
+-----BEGIN SIGNATURE-----
+{signature}
+-----END BITSHARES SIGNED MESSAGE-----"""
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+
+        # Data for message
+        account = Account(account, peerplays_instance=self)
+        info = self.info()
+        encoded = encoded.format(**locals())
+        message = message.strip()
+
+        # wif key
+        wif = self.wallet.getPrivateKeyForPublicKey(
+            account["options"]["memo_key"]
+        )
+
+        # signature
+        signature = hexlify(sign_message(encoded, wif)).decode("ascii")
+
+        return signed_message.format(**locals())
+
+    def verify_message(self, message, **kwargs):
+        import re
+        from graphenebase.ecdsa import verify_message
+        from binascii import hexlify, unhexlify
+        encoded = """{message}
+-----BEGIN META-----
+account={meta[account]}
+memokey={meta[memokey]}
+block={meta[block]}
+timestamp={meta[timestamp]} """
+
+        # Split message into its parts
+        obj = re.split(
+            (
+                "-----BEGIN BITSHARES SIGNED MESSAGE-----|"
+                "-----BEGIN META-----|"
+                "-----BEGIN SIGNATURE-----|"
+                "-----END BITSHARES SIGNED MESSAGE-----"
+            ),
+            message)
+        parts = [o.strip() for o in obj]
+        assert len(parts) == 5
+
+        message = parts[1]
+        signature = parts[3]
+        # Parse the meta data
+        meta = dict(re.findall(r'(\S+)=(".*?"|\S+)', parts[2]))
+
+        # Ensure we have all the data in meta
+        assert "account" in meta
+        assert "memokey" in meta
+        assert "block" in meta
+        assert "timestamp" in meta
+
+        # Load account from blockchain
+        account = Account(meta.get("account"), peerplays_instance=self)
+
+        # Test if memo key is the same as on the blockchain
+        if not account["options"]["memo_key"] == meta["memokey"]:
+            log.error(
+                "Memo Key of account {} on the Blockchain".format(account["name"]) +
+                "differs from memo key in the message: {} != {}".format(
+                    account["options"]["memo_key"], meta["memokey"]
+                )
+            )
+
+        # Reformat message
+        message = encoded.format(**locals())
+
+        pubkey = verify_message(message, unhexlify(signature))
+        pk = PublicKey(hexlify(pubkey).decode("ascii"))
+        if str(pk) != meta["memokey"]:
+            raise InvalidMessageSignature
