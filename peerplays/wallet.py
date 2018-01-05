@@ -7,7 +7,8 @@ from .exceptions import (
     InvalidWifError,
     WalletExists,
     WrongMasterPasswordException,
-    NoWalletException
+    NoWalletException,
+    KeyNotFound
 )
 
 log = logging.getLogger(__name__)
@@ -223,8 +224,10 @@ class Wallet():
             if not self.created():
                 raise NoWalletException
 
-            return self.decrypt_wif(
-                self.keyStorage.getPrivateKeyForPublicKey(pub))
+            encwif = self.keyStorage.getPrivateKeyForPublicKey(pub)
+            if not encwif:
+                raise KeyNotFound("No private key for {} found".format(pub))
+            return self.decrypt_wif(encwif)
 
     def removePrivateKeyFromPublicKey(self, pub):
         """ Remove a key from the wallet database
