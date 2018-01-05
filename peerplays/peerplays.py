@@ -27,7 +27,6 @@ from .transactionbuilder import TransactionBuilder, ProposalBuilder
 from .utils import formatTime, test_proposal_in_buffer
 
 log = logging.getLogger(__name__)
-GRAPHENE_BETTING_ODDS_PRECISION = 10000
 
 
 class PeerPlays(object):
@@ -1626,6 +1625,7 @@ class PeerPlays(object):
             :param str account: (optional) the account to bet (defaults
                         to ``default_account``)
         """
+        from . import GRAPHENE_BETTING_ODDS_PRECISION
         assert isinstance(amount_to_bet, Amount)
         assert back_or_lay in ["back", "lay"]
         if not account:
@@ -1672,20 +1672,20 @@ class PeerPlays(object):
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     def sign_message(self, message, account=None, **kwargs):
+        """ Sign a message with an account's memo key
+
+            :param str message: Message to sign
+            :param str account: (optional) the account that owns the bet
+                (defaults to ``default_account``)
+
+            :returns: the signed message encapsulated in a known format
+        """
         from graphenebase.ecdsa import sign_message
         from binascii import hexlify
-        encoded = """{message}
------BEGIN META-----
-account={account[name]}
-memokey={account[options][memo_key]}
-block={info[head_block_number]}
-timestamp={info[time]} """
-        signed_message = """
------BEGIN BITSHARES SIGNED MESSAGE-----
-{encoded}
------BEGIN SIGNATURE-----
-{signature}
------END BITSHARES SIGNED MESSAGE-----"""
+        from . import (
+            SIGNED_MESSAGE_META,
+            SIGNED_MESSAGE_ENCAPSULATED
+        )
         if not account:
             if "default_account" in config:
                 account = config["default_account"]
@@ -1695,30 +1695,43 @@ timestamp={info[time]} """
         # Data for message
         account = Account(account, peerplays_instance=self)
         info = self.info()
-        encoded = encoded.format(**locals())
         message = message.strip()
+        meta = dict(
+            timestamp=info["time"],
+            block=info["head_block_number"],
+            memokey=account["options"]["memo_key"],
+            account=account["name"])
 
         # wif key
         wif = self.wallet.getPrivateKeyForPublicKey(
             account["options"]["memo_key"]
         )
 
-        # signature
-        signature = hexlify(sign_message(encoded, wif)).decode("ascii")
+        message = SIGNED_MESSAGE_META.format(**locals())
 
-        return signed_message.format(**locals())
+        # signature
+        signature = hexlify(sign_message(
+            message, wif
+        )).decode("ascii")
+
+        return SIGNED_MESSAGE_ENCAPSULATED.format(**locals())
 
     def verify_message(self, message, **kwargs):
+        """ Verify a message with an account's memo key
+
+            :param str message: Ecapsulated Message to verify
+            :param str account: (optional) the account that owns the bet
+                (defaults to ``default_account``)
+
+            :returns: the signed message encapsulated in a known format
+        """
         import re
         from graphenebase.ecdsa import verify_message
         from binascii import hexlify, unhexlify
-        encoded = """{message}
------BEGIN META-----
-account={meta[account]}
-memokey={meta[memokey]}
-block={meta[block]}
-timestamp={meta[timestamp]} """
-
+        from . import (
+            SIGNED_MESSAGE_META,
+            SIGNED_MESSAGE_ENCAPSULATED
+        )
         # Split message into its parts
         obj = re.split(
             (
@@ -1755,9 +1768,9 @@ timestamp={meta[timestamp]} """
             )
 
         # Reformat message
-        message = encoded.format(**locals())
+        message = SIGNED_MESSAGE_META.format(**locals())
 
         pubkey = verify_message(message, unhexlify(signature))
         pk = PublicKey(hexlify(pubkey).decode("ascii"))
-        if str(pk) != meta["memokey"]:
+        if format(pk, self.rpc.chain_params["prefix"]) != meta["memokey"]:
             raise InvalidMessageSignature

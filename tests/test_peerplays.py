@@ -1,3 +1,4 @@
+import mock
 import string
 import unittest
 import random
@@ -227,5 +228,16 @@ class Testcases(unittest.TestCase):
             op["new_options"]["votes"])
 
     def test_sign_message(self):
-        p = self.ppy.sign_message("message foobar")
-        self.ppy.verify_message(p)
+        def new_refresh(self):
+            dict.__init__(
+                self, {"name": "init0",
+                 "options": {
+                     "memo_key": "PPY6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
+                 }})
+
+        with mock.patch(
+            "peerplays.account.Account.refresh",
+            new=new_refresh
+        ):
+            p = self.ppy.sign_message("message foobar")
+            self.ppy.verify_message(p)
