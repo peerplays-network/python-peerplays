@@ -4,11 +4,11 @@ from graphenebase import bip38
 from peerplaysbase.account import PrivateKey, GPHPrivateKey
 from .account import Account
 from .exceptions import (
+    KeyNotFound,
     InvalidWifError,
     WalletExists,
     WrongMasterPasswordException,
-    NoWalletException,
-    KeyNotFound
+    NoWalletException
 )
 
 log = logging.getLogger(__name__)
