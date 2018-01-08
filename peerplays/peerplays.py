@@ -178,6 +178,10 @@ class PeerPlays(object):
 
         self.rpc = PeerPlaysNodeRPC(node, rpcuser, rpcpassword, **kwargs)
 
+    @property
+    def prefix(self):
+        return self.rpc.chain_params["prefix"]
+
     def newWallet(self, pwd):
         """ Create a new wallet. This method is basically only calls
             :func:`peerplays.wallet.create`.
@@ -439,7 +443,7 @@ class PeerPlays(object):
                 "asset_id": amount.asset["id"]
             },
             "memo": memoObj.encrypt(memo),
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account, "active", **kwargs)
 
@@ -547,18 +551,18 @@ class PeerPlays(object):
                 self.wallet.addPrivateKey(memo_privkey)
         elif (owner_key and active_key and memo_key):
             active_pubkey = PublicKey(
-                active_key, prefix=self.rpc.chain_params["prefix"])
+                active_key, prefix=self.prefix)
             owner_pubkey = PublicKey(
-                owner_key, prefix=self.rpc.chain_params["prefix"])
+                owner_key, prefix=self.prefix)
             memo_pubkey = PublicKey(
-                memo_key, prefix=self.rpc.chain_params["prefix"])
+                memo_key, prefix=self.prefix)
         else:
             raise ValueError(
                 "Call incomplete! Provide either a password or public keys!"
             )
-        owner = format(owner_pubkey, self.rpc.chain_params["prefix"])
-        active = format(active_pubkey, self.rpc.chain_params["prefix"])
-        memo = format(memo_pubkey, self.rpc.chain_params["prefix"])
+        owner = format(owner_pubkey, self.prefix)
+        active = format(active_pubkey, self.prefix)
+        memo = format(memo_pubkey, self.prefix)
 
         owner_key_authority = [[owner, 1]]
         active_key_authority = [[active, 1]]
@@ -604,7 +608,7 @@ class PeerPlays(object):
                         "extensions": []
                         },
             "extensions": {},
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         }
         op = operations.Account_create(**op)
         return self.finalizeOp(op, registrar, "active", **kwargs)
@@ -625,7 +629,7 @@ class PeerPlays(object):
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "account_to_upgrade": account["id"],
             "upgrade_to_lifetime_member": True,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -683,7 +687,7 @@ class PeerPlays(object):
 
         authority = deepcopy(account[permission])
         try:
-            pubkey = PublicKey(foreign, prefix=self.rpc.chain_params["prefix"])
+            pubkey = PublicKey(foreign, prefix=self.prefix)
             authority["key_auths"].append([
                 str(pubkey),
                 weight
@@ -708,7 +712,7 @@ class PeerPlays(object):
             "account": account["id"],
             permission: authority,
             "extensions": {},
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         if permission == "owner":
             return self.finalizeOp(op, account["name"], "owner", **kwargs)
@@ -744,7 +748,7 @@ class PeerPlays(object):
         authority = account[permission]
 
         try:
-            pubkey = PublicKey(foreign, prefix=self.rpc.chain_params["prefix"])
+            pubkey = PublicKey(foreign, prefix=self.prefix)
             affected_items = list(
                 filter(lambda x: x[0] == str(pubkey),
                        authority["key_auths"]))
@@ -814,7 +818,7 @@ class PeerPlays(object):
         if not account:
             raise ValueError("You need to provide an account")
 
-        PublicKey(key, prefix=self.rpc.chain_params["prefix"])
+        PublicKey(key, prefix=self.prefix)
 
         account = Account(account, peerplays_instance=self)
         account["options"]["memo_key"] = key
@@ -862,7 +866,7 @@ class PeerPlays(object):
             "account": account["id"],
             "new_options": options,
             "extensions": {},
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -900,7 +904,7 @@ class PeerPlays(object):
             "account": account["id"],
             "new_options": options,
             "extensions": {},
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -937,7 +941,7 @@ class PeerPlays(object):
             "account": account["id"],
             "new_options": options,
             "extensions": {},
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -975,7 +979,7 @@ class PeerPlays(object):
             "account": account["id"],
             "new_options": options,
             "extensions": {},
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -995,7 +999,7 @@ class PeerPlays(object):
         if not account:
             raise ValueError("You need to provide an account")
         account = Account(account)
-        is_key = approver and approver[:3] == self.rpc.chain_params["prefix"]
+        is_key = approver and approver[:3] == self.prefix
         if not approver and not is_key:
             approver = account
         elif approver and not is_key:
@@ -1014,7 +1018,7 @@ class PeerPlays(object):
                 'fee_paying_account': account["id"],
                 'proposal': proposal["id"],
                 'active_approvals_to_add': [approver["id"]],
-                "prefix": self.rpc.chain_params["prefix"]
+                "prefix": self.prefix
             }
             if is_key:
                 update_dict.update({
@@ -1061,7 +1065,7 @@ class PeerPlays(object):
                 'fee_paying_account': account["id"],
                 'proposal': proposal["id"],
                 'active_approvals_to_remove': [approver["id"]],
-                "prefix": self.rpc.chain_params["prefix"]
+                "prefix": self.prefix
             }))
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1086,7 +1090,7 @@ class PeerPlays(object):
         op = operations.Sport_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "name": names,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1111,7 +1115,7 @@ class PeerPlays(object):
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "sport_id": sport["id"],
             "new_name": names,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1147,7 +1151,7 @@ class PeerPlays(object):
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "name": names,
             "sport_id": sport_id,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1187,7 +1191,7 @@ class PeerPlays(object):
             "event_group_id": event_group["id"],
             "new_name": names,
             "new_sport_id": sport_id,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1236,7 +1240,7 @@ class PeerPlays(object):
             "season": season,
             "start_time": formatTime(start_time),
             "event_group_id": event_group_id,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1289,7 +1293,7 @@ class PeerPlays(object):
             "new_season": season,
             "new_start_time": formatTime(start_time),
             "new_event_group_id": event_group_id,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1318,7 +1322,7 @@ class PeerPlays(object):
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "name": names,
             "description": descriptions,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1350,7 +1354,7 @@ class PeerPlays(object):
             "betting_market_rules_id": rule["id"],
             "new_name": names,
             "new_description": descriptions,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1408,7 +1412,7 @@ class PeerPlays(object):
             "event_id": event_id,
             "rules_id": rules_id,
             "asset_id": asset["id"],
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1470,7 +1474,7 @@ class PeerPlays(object):
             "new_rules_id": rules_id,
             "freeze": freeze,
             "delay_bets": delay_bets,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1514,7 +1518,7 @@ class PeerPlays(object):
             "group_id": group_id,
             "description": description,
             "payout_condition": payout_condition,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1562,7 +1566,7 @@ class PeerPlays(object):
             "new_group_id": group_id,
             "new_description": description,
             "new_payout_condition": payout_condition,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1599,7 +1603,7 @@ class PeerPlays(object):
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "betting_market_group_id": betting_market_group_id,
             "resolutions": results,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1644,7 +1648,7 @@ class PeerPlays(object):
                 int(backer_multiplier) * GRAPHENE_BETTING_ODDS_PRECISION
             ),
             "back_or_lay": back_or_lay,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1667,110 +1671,6 @@ class PeerPlays(object):
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "bettor_id": account["id"],
             "bet_to_cancel": bet["id"],
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
-
-    def sign_message(self, message, account=None, **kwargs):
-        """ Sign a message with an account's memo key
-
-            :param str message: Message to sign
-            :param str account: (optional) the account that owns the bet
-                (defaults to ``default_account``)
-
-            :returns: the signed message encapsulated in a known format
-        """
-        from graphenebase.ecdsa import sign_message
-        from binascii import hexlify
-        from . import (
-            SIGNED_MESSAGE_META,
-            SIGNED_MESSAGE_ENCAPSULATED
-        )
-        if not account:
-            if "default_account" in config:
-                account = config["default_account"]
-        if not account:
-            raise ValueError("You need to provide an account")
-
-        # Data for message
-        account = Account(account, peerplays_instance=self)
-        info = self.info()
-        message = message.strip()
-        meta = dict(
-            timestamp=info["time"],
-            block=info["head_block_number"],
-            memokey=account["options"]["memo_key"],
-            account=account["name"])
-
-        # wif key
-        wif = self.wallet.getPrivateKeyForPublicKey(
-            account["options"]["memo_key"]
-        )
-
-        message = SIGNED_MESSAGE_META.format(**locals())
-
-        # signature
-        signature = hexlify(sign_message(
-            message, wif
-        )).decode("ascii")
-
-        return SIGNED_MESSAGE_ENCAPSULATED.format(**locals())
-
-    def verify_message(self, message, **kwargs):
-        """ Verify a message with an account's memo key
-
-            :param str message: Ecapsulated Message to verify
-            :param str account: (optional) the account that owns the bet
-                (defaults to ``default_account``)
-
-            :returns: the signed message encapsulated in a known format
-        """
-        import re
-        from graphenebase.ecdsa import verify_message
-        from binascii import hexlify, unhexlify
-        from . import (
-            SIGNED_MESSAGE_META,
-            SIGNED_MESSAGE_ENCAPSULATED
-        )
-        # Split message into its parts
-        obj = re.split(
-            (
-                "-----BEGIN BITSHARES SIGNED MESSAGE-----|"
-                "-----BEGIN META-----|"
-                "-----BEGIN SIGNATURE-----|"
-                "-----END BITSHARES SIGNED MESSAGE-----"
-            ),
-            message)
-        parts = [o.strip() for o in obj]
-        assert len(parts) == 5
-
-        message = parts[1]
-        signature = parts[3]
-        # Parse the meta data
-        meta = dict(re.findall(r'(\S+)=(".*?"|\S+)', parts[2]))
-
-        # Ensure we have all the data in meta
-        assert "account" in meta
-        assert "memokey" in meta
-        assert "block" in meta
-        assert "timestamp" in meta
-
-        # Load account from blockchain
-        account = Account(meta.get("account"), peerplays_instance=self)
-
-        # Test if memo key is the same as on the blockchain
-        if not account["options"]["memo_key"] == meta["memokey"]:
-            log.error(
-                "Memo Key of account {} on the Blockchain".format(account["name"]) +
-                "differs from memo key in the message: {} != {}".format(
-                    account["options"]["memo_key"], meta["memokey"]
-                )
-            )
-
-        # Reformat message
-        message = SIGNED_MESSAGE_META.format(**locals())
-
-        pubkey = verify_message(message, unhexlify(signature))
-        pk = PublicKey(hexlify(pubkey).decode("ascii"))
-        if format(pk, self.rpc.chain_params["prefix"]) != meta["memokey"]:
-            raise InvalidMessageSignature

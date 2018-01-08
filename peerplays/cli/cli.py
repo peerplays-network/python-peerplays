@@ -31,7 +31,8 @@ from . import (
     wallet,
     witness,
     committee,
-    bookie
+    bookie,
+    message
 )
 
 log = logging.getLogger(__name__)
