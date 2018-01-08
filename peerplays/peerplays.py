@@ -20,7 +20,6 @@ from .bet import Bet
 
 from .exceptions import (
     AccountExistsException,
-    InvalidMessageSignature
 )
 from .wallet import Wallet
 from .transactionbuilder import TransactionBuilder, ProposalBuilder

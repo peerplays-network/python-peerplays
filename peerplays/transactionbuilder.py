@@ -210,7 +210,7 @@ class TransactionBuilder(dict):
             r = []
             for authority in account[perm]["key_auths"]:
                 try:
-                    wif = self.bitshares.wallet.getPrivateKeyForPublicKey(
+                    wif = self.peerplays.wallet.getPrivateKeyForPublicKey(
                         authority[0])
                     r.append([wif, authority[1]])
                 except Exception:
