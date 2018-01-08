@@ -23,6 +23,7 @@ class Testcases(unittest.TestCase):
             # Overwrite wallet to use this list of wifs only
             wif=[wif]
         )
+        self.ppy.set_default_account("init0")
         set_shared_peerplays_instance(self.ppy)
 
     def test_account(self):

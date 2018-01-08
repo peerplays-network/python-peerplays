@@ -26,7 +26,10 @@ __all__ = [
     "wallet",
     "witness",
     "notify",
+    "message",
 ]
 base58.known_prefixes.append("PPY")
 base58.known_prefixes.append("PPY1")
 base58.known_prefixes.append("PPYTEST")
+
+GRAPHENE_BETTING_ODDS_PRECISION = 10000

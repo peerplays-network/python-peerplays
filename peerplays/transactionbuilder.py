@@ -168,6 +168,11 @@ class TransactionBuilder(dict):
     def __str__(self):
         return str(self.json())
 
+    def __getitem__(self, key):
+        if key not in self:
+            self.constructTx()
+        return dict(self).__getitem__(key)
+
     def get_parent(self):
         """ TransactionBuilders don't have parents, they are their own parent
         """
@@ -204,10 +209,12 @@ class TransactionBuilder(dict):
                 return []
             r = []
             for authority in account[perm]["key_auths"]:
-                wif = self.peerplays.wallet.getPrivateKeyForPublicKey(
-                    authority[0])
-                if wif:
+                try:
+                    wif = self.bitshares.wallet.getPrivateKeyForPublicKey(
+                        authority[0])
                     r.append([wif, authority[1]])
+                except Exception:
+                    pass
 
             if sum([x[1] for x in r]) < required_treshold:
                 # go one level deeper
@@ -353,6 +360,7 @@ class TransactionBuilder(dict):
             if self.peerplays.blocking:
                 ret = self.peerplays.rpc.broadcast_transaction_synchronous(
                     ret, api="network_broadcast")
+                ret.update(**ret["trx"])
             else:
                 self.peerplays.rpc.broadcast_transaction(
                     ret, api="network_broadcast")

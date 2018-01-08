@@ -31,6 +31,7 @@ class Testcases(unittest.TestCase):
             wif=[wif]
         )
         set_shared_peerplays_instance(self.ppy)
+        self.ppy.set_default_account("init0")
 
     def test_bet_place(self):
         def new_refresh(self):

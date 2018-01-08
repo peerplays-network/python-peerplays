@@ -37,7 +37,8 @@ class ObjectCache(dict):
         return False
 
     def __str__(self):
-        return "ObjectCache(n={}, default_expiration={})".format(len(self.keys()), self.default_expiration)
+        return "ObjectCache(n={}, default_expiration={})".format(
+            len(self.keys()), self.default_expiration)
 
 
 class BlockchainObject(dict):
@@ -51,18 +52,23 @@ class BlockchainObject(dict):
     def __init__(
         self,
         data,
-        *args,
         klass=None,
         space_id=1,
         object_id=None,
         lazy=False,
         use_cache=True,
         peerplays_instance=None,
+        *args,
         **kwargs
     ):
         self.peerplays = peerplays_instance or shared_peerplays_instance()
         self.cached = False
         self.identifier = None
+
+        # We don't read lists, sets, or tuples
+        if isinstance(data, (list, set, tuple)):
+            raise ValueError(
+                "Cannot interpret lists! Please load elements individually!")
 
         if klass and isinstance(data, klass):
             self.identifier = data.get("id")
@@ -81,17 +87,9 @@ class BlockchainObject(dict):
             self.identifier = data
         else:
             self.identifier = data
-            parts = self.identifier.split(".")
-            if len(parts) == 3:
-                valid_objectid = False
-                try:
-                    [int(x) for x in parts]
-                    valid_objectid = True
-                except:
-                    pass
-                if valid_objectid:
-                    # Here we assume we deal with an id
-                    self.testid(self.identifier)
+            if self.test_valid_objectid(self.identifier):
+                # Here we assume we deal with an id
+                self.testid(self.identifier)
             if self.iscached(data):
                 super().__init__(self.getcache(data))
             elif not lazy and not self.cached:
@@ -101,16 +99,32 @@ class BlockchainObject(dict):
             self.cache()
             self.cached = True
 
+    def test_valid_objectid(self, i):
+        if "." not in i:
+            return False
+        parts = i.split(".")
+        if len(parts) == 3:
+            try:
+                [int(x) for x in parts]
+                return True
+            except:
+                pass
+            return False
+
     def testid(self, id):
         parts = id.split(".")
+        if not self.type_id:
+            return
 
         if not self.type_ids:
             self.type_ids = [self.type_id]
 
         assert int(parts[0]) == self.space_id,\
-            "Valid id's for {} are {}.{}.x".format(self.__class__.__name__, self.space_id, self.type_id)
+            "Valid id's for {} are {}.{}.x".format(
+                self.__class__.__name__, self.space_id, self.type_id)
         assert int(parts[1]) in self.type_ids,\
-            "Valid id's for {} are {}.{}.x".format(self.__class__.__name__, self.space_id, self.type_ids)
+            "Valid id's for {} are {}.{}.x".format(
+                self.__class__.__name__, self.space_id, self.type_ids)
 
     def cache(self):
         # store in cache
@@ -139,4 +153,5 @@ class BlockchainObject(dict):
         return super().__contains__(key)
 
     def __repr__(self):
-        return "<%s %s>" % (self.__class__.__name__, str(self.identifier))
+        return "<%s %s>" % (
+            self.__class__.__name__, str(self.identifier))

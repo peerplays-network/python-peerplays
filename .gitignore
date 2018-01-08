@@ -58,3 +58,5 @@ target/
 
 # Vim temp files
 *.swp
+
+.ropeproject/

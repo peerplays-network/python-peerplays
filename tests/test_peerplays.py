@@ -1,3 +1,4 @@
+import mock
 import string
 import unittest
 import random
@@ -6,6 +7,7 @@ from peerplays import PeerPlays
 from peerplaysbase.operationids import getOperationNameForId
 from peerplays.amount import Amount
 from peerplaysbase.account import PrivateKey
+from peerplays.instance import set_shared_peerplays_instance
 
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
 core_unit = "PPY"
@@ -22,9 +24,14 @@ class Testcases(unittest.TestCase):
         )
         # from getpass import getpass
         # self.ppy.wallet.unlock(getpass())
+        set_shared_peerplays_instance(self.ppy)
+        self.ppy.set_default_account("init0")
 
     def test_connect(self):
         self.ppy.connect()
+
+    def test_set_default_account(self):
+        self.ppy.set_default_account("init0")
 
     def test_info(self):
         info = self.ppy.info()
@@ -220,3 +227,17 @@ class Testcases(unittest.TestCase):
             "0:11",
             op["new_options"]["votes"])
 
+    def test_sign_message(self):
+        def new_refresh(self):
+            dict.__init__(
+                self, {"name": "init0",
+                 "options": {
+                     "memo_key": "PPY6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
+                 }})
+
+        with mock.patch(
+            "peerplays.account.Account.refresh",
+            new=new_refresh
+        ):
+            p = self.ppy.sign_message("message foobar")
+            self.ppy.verify_message(p)

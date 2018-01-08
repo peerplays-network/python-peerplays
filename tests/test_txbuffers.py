@@ -2,6 +2,7 @@ import unittest
 from pprint import pprint
 from peerplays import PeerPlays
 from peerplaysbase import transactions, operations
+from peerplays.instance import set_shared_peerplays_instance
 
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
 
@@ -17,6 +18,8 @@ class Testcases(unittest.TestCase):
                 # Force signing with this key
                 "active": wif
             })
+        set_shared_peerplays_instance(self.ppy)
+        self.ppy.set_default_account("init0")
 
     def test_add_one_proposal_one_op(self):
         ppy = self.ppy

@@ -18,13 +18,15 @@ from .bettingmarketgroup import BettingMarketGroup
 from .bettingmarket import BettingMarket
 from .bet import Bet
 
-from .exceptions import AccountExistsException
+from .exceptions import (
+    AccountExistsException,
+    InvalidMessageSignature
+)
 from .wallet import Wallet
 from .transactionbuilder import TransactionBuilder, ProposalBuilder
-from .utils import formatTime
+from .utils import formatTime, test_proposal_in_buffer
 
 log = logging.getLogger(__name__)
-GRAPHENE_BETTING_ODDS_PRECISION = 10000
 
 
 class PeerPlays(object):
@@ -160,13 +162,13 @@ class PeerPlays(object):
                 rpcuser="",
                 rpcpassword="",
                 **kwargs):
-        """ Connect to Steem network (internal use only)
+        """ Connect to PeerPlays network (internal use only)
         """
         if not node:
             if "node" in config:
                 node = config["node"]
             else:
-                raise ValueError("A Steem node needs to be provided!")
+                raise ValueError("A PeerPlays node needs to be provided!")
 
         if not rpcuser and "rpcuser" in config:
             rpcuser = config["rpcuser"]
@@ -175,6 +177,10 @@ class PeerPlays(object):
             rpcpassword = config["rpcpassword"]
 
         self.rpc = PeerPlaysNodeRPC(node, rpcuser, rpcpassword, **kwargs)
+
+    @property
+    def prefix(self):
+        return self.rpc.chain_params["prefix"]
 
     def newWallet(self, pwd):
         """ Create a new wallet. This method is basically only calls
@@ -185,6 +191,12 @@ class PeerPlays(object):
                 wallet created
         """
         self.wallet.create(pwd)
+
+    def set_default_account(self, account):
+        """ Set the default account to be used
+        """
+        Account(account)
+        config["default_account"] = account
 
     def finalizeOp(self, ops, account, permission, **kwargs):
         """ This method obtains the required private keys if present in
@@ -431,7 +443,7 @@ class PeerPlays(object):
                 "asset_id": amount.asset["id"]
             },
             "memo": memoObj.encrypt(memo),
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account, "active", **kwargs)
 
@@ -539,18 +551,18 @@ class PeerPlays(object):
                 self.wallet.addPrivateKey(memo_privkey)
         elif (owner_key and active_key and memo_key):
             active_pubkey = PublicKey(
-                active_key, prefix=self.rpc.chain_params["prefix"])
+                active_key, prefix=self.prefix)
             owner_pubkey = PublicKey(
-                owner_key, prefix=self.rpc.chain_params["prefix"])
+                owner_key, prefix=self.prefix)
             memo_pubkey = PublicKey(
-                memo_key, prefix=self.rpc.chain_params["prefix"])
+                memo_key, prefix=self.prefix)
         else:
             raise ValueError(
                 "Call incomplete! Provide either a password or public keys!"
             )
-        owner = format(owner_pubkey, self.rpc.chain_params["prefix"])
-        active = format(active_pubkey, self.rpc.chain_params["prefix"])
-        memo = format(memo_pubkey, self.rpc.chain_params["prefix"])
+        owner = format(owner_pubkey, self.prefix)
+        active = format(active_pubkey, self.prefix)
+        memo = format(memo_pubkey, self.prefix)
 
         owner_key_authority = [[owner, 1]]
         active_key_authority = [[active, 1]]
@@ -596,7 +608,7 @@ class PeerPlays(object):
                         "extensions": []
                         },
             "extensions": {},
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         }
         op = operations.Account_create(**op)
         return self.finalizeOp(op, registrar, "active", **kwargs)
@@ -612,12 +624,12 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account)
+        account = Account(account, peerplays_instance=self)
         op = operations.Account_upgrade(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "account_to_upgrade": account["id"],
             "upgrade_to_lifetime_member": True,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -675,7 +687,7 @@ class PeerPlays(object):
 
         authority = deepcopy(account[permission])
         try:
-            pubkey = PublicKey(foreign, prefix=self.rpc.chain_params["prefix"])
+            pubkey = PublicKey(foreign, prefix=self.prefix)
             authority["key_auths"].append([
                 str(pubkey),
                 weight
@@ -700,7 +712,7 @@ class PeerPlays(object):
             "account": account["id"],
             permission: authority,
             "extensions": {},
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         if permission == "owner":
             return self.finalizeOp(op, account["name"], "owner", **kwargs)
@@ -736,7 +748,7 @@ class PeerPlays(object):
         authority = account[permission]
 
         try:
-            pubkey = PublicKey(foreign, prefix=self.rpc.chain_params["prefix"])
+            pubkey = PublicKey(foreign, prefix=self.prefix)
             affected_items = list(
                 filter(lambda x: x[0] == str(pubkey),
                        authority["key_auths"]))
@@ -806,7 +818,7 @@ class PeerPlays(object):
         if not account:
             raise ValueError("You need to provide an account")
 
-        PublicKey(key, prefix=self.rpc.chain_params["prefix"])
+        PublicKey(key, prefix=self.prefix)
 
         account = Account(account, peerplays_instance=self)
         account["options"]["memo_key"] = key
@@ -854,7 +866,7 @@ class PeerPlays(object):
             "account": account["id"],
             "new_options": options,
             "extensions": {},
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -892,7 +904,7 @@ class PeerPlays(object):
             "account": account["id"],
             "new_options": options,
             "extensions": {},
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -929,7 +941,7 @@ class PeerPlays(object):
             "account": account["id"],
             "new_options": options,
             "extensions": {},
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -967,7 +979,7 @@ class PeerPlays(object):
             "account": account["id"],
             "new_options": options,
             "extensions": {},
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -987,10 +999,13 @@ class PeerPlays(object):
         if not account:
             raise ValueError("You need to provide an account")
         account = Account(account)
-        if not approver:
+        is_key = approver and approver[:3] == self.prefix
+        if not approver and not is_key:
             approver = account
+        elif approver and not is_key:
+            approver = Account(approver, peerplays_instance=self)
         else:
-            approver = Account(approver)
+            approver = PublicKey(approver)
 
         if not isinstance(proposal_ids, (list, set, tuple)):
             proposal_ids = {proposal_ids}
@@ -998,21 +1013,32 @@ class PeerPlays(object):
         op = []
         for proposal_id in proposal_ids:
             proposal = Proposal(proposal_id, peerplays_instance=self)
-            op.append(operations.Proposal_update(**{
+            update_dict = {
                 "fee": {"amount": 0, "asset_id": "1.3.0"},
                 'fee_paying_account': account["id"],
                 'proposal': proposal["id"],
                 'active_approvals_to_add': [approver["id"]],
-                "prefix": self.rpc.chain_params["prefix"]
-            }))
-        return self.finalizeOp(op, account["name"], "active", **kwargs)
+                "prefix": self.prefix
+            }
+            if is_key:
+                update_dict.update({
+                    'key_approvals_to_add': [str(approver)],
+                })
+            else:
+                update_dict.update({
+                    'active_approvals_to_add': [approver["id"]],
+                })
+            op.append(operations.Proposal_update(**update_dict))
+        if is_key:
+            self.txbuffer.appendSigner(account["name"], "active")
+        return self.finalizeOp(op, approver["name"], "active", **kwargs)
 
     def disapproveproposal(
         self, proposal_ids, account=None, approver=None, **kwargs
     ):
         """ Disapprove Proposal
 
-            :param list proposal_ids: Id of the proposals
+            :param list proposal_ids: Ids of the proposals
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
@@ -1022,11 +1048,11 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account)
+        account = Account(account, peerplays_instance=self)
         if not approver:
             approver = account
         else:
-            approver = Account(approver)
+            approver = Account(approver, peerplays_instance=self)
 
         if not isinstance(proposal_ids, (list, set, tuple)):
             proposal_ids = {proposal_ids}
@@ -1039,7 +1065,7 @@ class PeerPlays(object):
                 'fee_paying_account': account["id"],
                 'proposal': proposal["id"],
                 'active_approvals_to_remove': [approver["id"]],
-                "prefix": self.rpc.chain_params["prefix"]
+                "prefix": self.prefix
             }))
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1064,7 +1090,7 @@ class PeerPlays(object):
         op = operations.Sport_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "name": names,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1089,7 +1115,7 @@ class PeerPlays(object):
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "sport_id": sport["id"],
             "new_name": names,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1111,12 +1137,21 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
+        if sport_id[0] == "1":
+            # Test if object exists
+            Sport(sport_id)
+        else:
+            # Test if object is proposed
+            test_proposal_in_buffer(
+                kwargs.get("append_to", self.propbuffer),
+                "sport_create",
+                sport_id)
         account = Account(account)
         op = operations.Event_group_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "name": names,
             "sport_id": sport_id,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1140,6 +1175,15 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
+        if sport_id[0] == "1":
+            # Test if object exists
+            Sport(sport_id)
+        else:
+            # Test if object is proposed
+            test_proposal_in_buffer(
+                kwargs.get("append_to", self.propbuffer),
+                "sport_create",
+                sport_id)
         account = Account(account)
         event_group = EventGroup(event_group_id)
         op = operations.Event_group_update(**{
@@ -1147,7 +1191,7 @@ class PeerPlays(object):
             "event_group_id": event_group["id"],
             "new_name": names,
             "new_sport_id": sport_id,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1181,13 +1225,22 @@ class PeerPlays(object):
         if not account:
             raise ValueError("You need to provide an account")
         account = Account(account)
+        if event_group_id[0] == "1":
+            # Test if object exists
+            EventGroup(event_group_id)
+        else:
+            # Test if object is proposed
+            test_proposal_in_buffer(
+                kwargs.get("append_to", self.propbuffer),
+                "event_group_create",
+                event_group_id)
         op = operations.Event_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "name": name,
             "season": season,
             "start_time": formatTime(start_time),
             "event_group_id": event_group_id,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1224,6 +1277,15 @@ class PeerPlays(object):
             raise ValueError("You need to provide an account")
         account = Account(account)
         event = Event(event_id)
+        if event_group_id[0] == "1":
+            # Test if object exists
+            EventGroup(event_group_id)
+        else:
+            # Test if object is proposed
+            test_proposal_in_buffer(
+                kwargs.get("append_to", self.propbuffer),
+                "event_group_create",
+                event_group_id)
         op = operations.Event_update(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "event_id": event["id"],
@@ -1231,7 +1293,7 @@ class PeerPlays(object):
             "new_season": season,
             "new_start_time": formatTime(start_time),
             "new_event_group_id": event_group_id,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1260,7 +1322,7 @@ class PeerPlays(object):
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "name": names,
             "description": descriptions,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1292,7 +1354,7 @@ class PeerPlays(object):
             "betting_market_rules_id": rule["id"],
             "new_name": names,
             "new_description": descriptions,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1326,13 +1388,31 @@ class PeerPlays(object):
             raise ValueError("You need to provide an account")
         account = Account(account, peerplays_instance=self)
         asset = Asset(asset, peerplays_instance=self)
+        if event_id[0] == "1":
+            # Test if object exists
+            Event(event_id)
+        else:
+            # Test if object is proposed
+            test_proposal_in_buffer(
+                kwargs.get("append_to", self.propbuffer),
+                "event_create",
+                event_id)
+        if rules_id[0] == "1":
+            # Test if object exists
+            Rule(rules_id)
+        else:
+            # Test if object is proposed
+            test_proposal_in_buffer(
+                kwargs.get("append_to", self.propbuffer),
+                "betting_market_rules_create",
+                rules_id)
         op = operations.Betting_market_group_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "description": description,
             "event_id": event_id,
             "rules_id": rules_id,
             "asset_id": asset["id"],
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1368,6 +1448,24 @@ class PeerPlays(object):
             raise ValueError("You need to provide an account")
         account = Account(account, peerplays_instance=self)
         bmg = BettingMarketGroup(betting_market_group_id)
+        if event_id[0] == "1":
+            # Test if object exists
+            Event(event_id)
+        else:
+            # Test if object is proposed
+            test_proposal_in_buffer(
+                kwargs.get("append_to", self.propbuffer),
+                "event_create",
+                event_id)
+        if rules_id[0] == "1":
+            # Test if object exists
+            Rule(rules_id)
+        else:
+            # Test if object is proposed
+            test_proposal_in_buffer(
+                kwargs.get("append_to", self.propbuffer),
+                "betting_market_rules_create",
+                rules_id)
         op = operations.Betting_market_group_update(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "betting_market_group_id": bmg["id"],
@@ -1376,7 +1474,7 @@ class PeerPlays(object):
             "new_rules_id": rules_id,
             "freeze": freeze,
             "delay_bets": delay_bets,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1406,12 +1504,21 @@ class PeerPlays(object):
         if not account:
             raise ValueError("You need to provide an account")
         account = Account(account)
+        if group_id[0] == "1":
+            # Test if object exists
+            BettingMarketGroup(group_id)
+        else:
+            # Test if object is proposed
+            test_proposal_in_buffer(
+                kwargs.get("append_to", self.propbuffer),
+                "betting_market_group_create",
+                group_id)
         op = operations.Betting_market_create(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "group_id": group_id,
             "description": description,
             "payout_condition": payout_condition,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1419,7 +1526,7 @@ class PeerPlays(object):
         self,
         betting_market_id,
         payout_condition,
-        descriptions,
+        description,
         group_id="0.0.0",
         account=None,
         **kwargs
@@ -1429,7 +1536,7 @@ class PeerPlays(object):
             :param str betting_market_id: Id of the betting market to update
             :param list payout_condition: Internationalized names, e.g.
                 ``[['de', 'Foo'], ['en', 'bar']]``
-            :param list descriptions: Internationalized descriptions, e.g.
+            :param list description: Internationalized descriptions, e.g.
                 ``[['de', 'Foo'], ['en', 'bar']]``
             :param str group_id: Group ID to create the market for (defaults to
                 *relative* id ``0.0.0``)
@@ -1444,13 +1551,22 @@ class PeerPlays(object):
             raise ValueError("You need to provide an account")
         account = Account(account)
         market = BettingMarket(betting_market_id)
+        if group_id[0] == "1":
+            # Test if object exists
+            BettingMarketGroup(group_id)
+        else:
+            # Test if object is proposed
+            test_proposal_in_buffer(
+                kwargs.get("append_to", self.propbuffer),
+                "betting_market_group_create",
+                group_id)
         op = operations.Betting_market_update(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "betting_market_id": market["id"],
             "new_group_id": group_id,
-            "new_description": descriptions,
+            "new_description": description,
             "new_payout_condition": payout_condition,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1481,11 +1597,13 @@ class PeerPlays(object):
         if not account:
             raise ValueError("You need to provide an account")
         account = Account(account)
+        # Test if object exists
+        BettingMarketGroup(betting_market_group_id)
         op = operations.Betting_market_group_resolve(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "betting_market_group_id": betting_market_group_id,
             "resolutions": results,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1511,6 +1629,7 @@ class PeerPlays(object):
             :param str account: (optional) the account to bet (defaults
                         to ``default_account``)
         """
+        from . import GRAPHENE_BETTING_ODDS_PRECISION
         assert isinstance(amount_to_bet, Amount)
         assert back_or_lay in ["back", "lay"]
         if not account:
@@ -1529,7 +1648,7 @@ class PeerPlays(object):
                 int(backer_multiplier) * GRAPHENE_BETTING_ODDS_PRECISION
             ),
             "back_or_lay": back_or_lay,
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1552,6 +1671,6 @@ class PeerPlays(object):
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "bettor_id": account["id"],
             "bet_to_cancel": bet["id"],
-            "prefix": self.rpc.chain_params["prefix"]
+            "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
