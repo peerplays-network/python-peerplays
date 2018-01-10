@@ -181,3 +181,75 @@ class BettingMarketResolution(Enum):
         "cancel",
         "BETTING_MARKET_RESOLUTION_COUNT",
     ]
+
+
+class AssetOptions(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+                self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(OrderedDict([
+                ('max_supply', Int64(kwargs["max_supply"])),
+                ('market_fee_percent', Uint16(kwargs["market_fee_percent"])),
+                ('max_market_fee', Int64(kwargs["max_market_fee"])),
+                ('issuer_permissions', Uint16(kwargs["issuer_permissions"])),
+                ('flags', Uint16(kwargs["flags"])),
+                ('core_exchange_rate', Price(kwargs["core_exchange_rate"])),
+                ('whitelist_authorities',
+                    Array([ObjectId(x, "account") for x in kwargs["whitelist_authorities"]])),
+                ('blacklist_authorities',
+                    Array([ObjectId(x, "account") for x in kwargs["blacklist_authorities"]])),
+                ('whitelist_markets',
+                    Array([ObjectId(x, "asset") for x in kwargs["whitelist_markets"]])),
+                ('blacklist_markets',
+                    Array([ObjectId(x, "asset") for x in kwargs["blacklist_markets"]])),
+                ('description', String(kwargs["description"])),
+                ('extensions', Set([])),
+            ]))
+
+
+class BitAssetOptions(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+                self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(OrderedDict([
+                ('feed_lifetime_sec', Uint32(kwargs["feed_lifetime_sec"])),
+                ('minimum_feeds', Uint8(kwargs["minimum_feeds"])),
+                ('force_settlement_delay_sec', Uint32(kwargs["force_settlement_delay_sec"])),
+                ('force_settlement_offset_percent', Uint16(kwargs["force_settlement_offset_percent"])),
+                ('maximum_force_settlement_volume', Uint16(kwargs["maximum_force_settlement_volume"])),
+                ('short_backing_asset', ObjectId(kwargs["short_backing_asset"], "asset")),
+                ('extensions', Set([])),
+            ]))
+
+
+class DividendAssetOptions(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+                self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+
+            if "next_payout_time" in kwargs:
+                next_payout_time = Optional(PointInTime(kwargs["next_payout_time"]))
+            else:
+                next_payout_time = Optional(None)
+
+            if "payout_interval" in kwargs:
+                payout_interval = Optional(Uint32(kwargs["payout_interval"]))
+            else:
+                payout_interval = Optional(None)
+
+            super().__init__(OrderedDict([
+                ('next_payout_time', next_payout_time),
+                ('payout_interval', payout_interval),
+                ('minimum_fee_percentage', Uint64(kwargs["minimum_fee_percentage"])),
+                ('minimum_distribution_interval', Uint32(kwargs["minimum_distribution_interval"])),
+                ('extensions', Set([])),
+            ]))

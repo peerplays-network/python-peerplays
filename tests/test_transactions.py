@@ -447,15 +447,144 @@ class Testcases(unittest.TestCase):
                    "02ddeb1ee739489921805f1326")
         self.doit()
 
+    def test_asset_create(self):
+        self.op = operations.Asset_create(**{
+            "fee": {
+                "amount": 0,
+                "asset_id": "1.3.0"
+            },
+            "issuer": "1.2.0",
+            "symbol": "THING",
+            "precision": 0,
+            "common_options": {
+                "max_supply": "1000000000000000",
+                "market_fee_percent": 0,
+                "max_market_fee": "1000000000000000",
+                "issuer_permissions": 79,
+                "flags": 0,
+                "core_exchange_rate": {
+                    "base": {
+                        "amount": 0,
+                        "asset_id": "1.3.0"
+                    },
+                    "quote": {
+                        "amount": 0,
+                        "asset_id": "1.3.0"
+                    }
+                },
+                "whitelist_authorities": ["1.2.0"],
+                "blacklist_authorities": ["1.2.1"],
+                "whitelist_markets": ["1.3.0"],
+                "blacklist_markets": ["1.3.1"],
+                "description": "Foobar think",
+                "extensions": []
+            },
+            "bitasset_opts": {
+                "feed_lifetime_sec": 86400,
+                "minimum_feeds": 7,
+                "force_settlement_delay_sec": 86400,
+                "force_settlement_offset_percent": 100,
+                "maximum_force_settlement_volume": 50,
+                "short_backing_asset": "1.3.0",
+                "extensions": []
+            },
+            "is_prediction_market": False,
+            "extensions": []
+        })
+        self.cm = ("f68585abf4dce7c80457010a000000000000000000000554484"
+                   "94e47000080c6a47e8d030000000080c6a47e8d03004f000000"
+                   "000000000000000000000000000000000000010001010100010"
+                   "10c466f6f626172207468696e6b000180510100078051010064"
+                   "0032000000000000011f1b8ac491bb327921d9346d543e530d8"
+                   "8acb68bade58296a7a27b0a74a28eaca762260dbb905a6415f6"
+                   "225a8028a810de6290badc29d16fea0ffd88bc8c0cbec4")
+        self.doit()
+
+    def test_asset_update(self):
+        self.op = operations.Asset_update(**{
+            "fee": {
+                "amount": 0,
+                "asset_id": "1.3.0"
+            },
+            "issuer": "1.2.0",
+            "asset_to_update": "1.3.0",
+            "new_options": {
+                "max_supply": "1000000000000000",
+                "market_fee_percent": 0,
+                "max_market_fee": "1000000000000000",
+                "issuer_permissions": 79,
+                "flags": 0,
+                "core_exchange_rate": {
+                    "base": {
+                        "amount": 0,
+                        "asset_id": "1.3.0"
+                    },
+                    "quote": {
+                        "amount": 0,
+                        "asset_id": "1.3.0"
+                    }
+                },
+                "whitelist_authorities": [],
+                "blacklist_authorities": [],
+                "whitelist_markets": [],
+                "blacklist_markets": [],
+                "description": "",
+                "extensions": []
+            },
+            "extensions": []
+        })
+        self.cm = ("f68585abf4dce7c80457010b000000000000000000000000008"
+                   "0c6a47e8d030000000080c6a47e8d03004f0000000000000000"
+                   "000000000000000000000000000000000000000000011f51477"
+                   "1af6ac47a12a387979b6452afcd3f50514277efd7938f5227a7"
+                   "fe7287db529d251e2b7c31d4a2d8ed59035b78b64f95e6011d9"
+                   "58ab9504008a56c83cbb6")
+        self.doit()
+
+    def test_asset_update_bitasset(self):
+        self.op = operations.Asset_update_bitasset(**{
+            "fee": {
+                "amount": 0,
+                "asset_id": "1.3.0"
+            },
+            "issuer": "1.2.0",
+            "asset_to_update": "1.3.0",
+            "new_options": {
+                "feed_lifetime_sec": 86400,
+                "minimum_feeds": 1,
+                "force_settlement_delay_sec": 86400,
+                "force_settlement_offset_percent": 0,
+                "maximum_force_settlement_volume": 2000,
+                "short_backing_asset": "1.3.0",
+                "extensions": []
+            },
+            "extensions": []
+        })
+        self.cm = ("f68585abf4dce7c80457010c000000000000000000000080510"
+                   "10001805101000000d0070000000001205e7fed2110783b4fe9"
+                   "ec1f1a71ad0325fce04fd11d03a534baac5cf18c52c91e6fdae"
+                   "b76cff9d480a96500cbfde214cadd436e8f66aa61ad3f14973e"
+                   "42406eca")
+        self.doit()
+
     def compareConstructedTX(self):
-        self.op = operations.Bet_place(**{
-            "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "bettor_id": "1.2.1241",
-            "betting_market_id": "1.21.1",
-            "amount_to_bet": {"amount": 1000, "asset_id": "1.3.1"},
-            "backer_multiplier": 2 * GRAPHENE_BETTING_ODDS_PRECISION,
-            "back_or_lay": "lay",
-            "prefix": prefix,
+        self.op = operations.Asset_update_bitasset(**{
+            "fee": {
+                "amount": 0,
+                "asset_id": "1.3.0"
+            },
+            "issuer": "1.2.0",
+            "asset_to_update": "1.3.0",
+            "new_options": {
+                "feed_lifetime_sec": 86400,
+                "minimum_feeds": 1,
+                "force_settlement_delay_sec": 86400,
+                "force_settlement_offset_percent": 0,
+                "maximum_force_settlement_volume": 2000,
+                "short_backing_asset": "1.3.0",
+                "extensions": []
+            },
+            "extensions": []
         })
         ops = [Operation(self.op)]
 
@@ -480,8 +609,8 @@ class Testcases(unittest.TestCase):
         from grapheneapi.grapheneapi import GrapheneAPI
         rpc = GrapheneAPI("localhost", 8092)
         self.cm = rpc.serialize_transaction(tx.json())
-        print("soll: %s" % self.cm[:-130])
-        print("ist:  %s" % txWire[:-130])
+        print("soll: %s" % self.cm)
+        print("ist:  %s" % txWire)
         print(txWire[:-130] == self.cm[:-130])
         self.assertEqual(self.cm[:-130], txWire[:-130])
 

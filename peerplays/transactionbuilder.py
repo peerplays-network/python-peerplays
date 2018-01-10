@@ -6,7 +6,8 @@ from peerplaysbase import transactions, operations
 from .exceptions import (
     InsufficientAuthorityError,
     MissingKeyError,
-    InvalidWifError
+    InvalidWifError,
+    WalletLocked
 )
 from peerplays.instance import shared_peerplays_instance
 import logging
@@ -203,6 +204,9 @@ class TransactionBuilder(dict):
         assert permission in ["active", "owner"], "Invalid permission"
         account = Account(account, peerplays_instance=self.peerplays)
         required_treshold = account[permission]["weight_threshold"]
+
+        if self.peerplays.wallet.locked():
+            raise WalletLocked()
 
         def fetchkeys(account, perm, level=0):
             if level > 2:
