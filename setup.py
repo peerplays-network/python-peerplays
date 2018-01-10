@@ -11,7 +11,7 @@ except LookupError:
     ascii = codecs.lookup('ascii')
     codecs.register(lambda name, enc=ascii: {True: enc}.get(name == 'mbcs'))
 
-VERSION = '0.1.6'
+VERSION = '0.1.7'
 
 setup(
     name='peerplays',
@@ -46,7 +46,7 @@ setup(
         ],
     },
     install_requires=[
-        "graphenelib>=0.5.4",
+        "graphenelib>=0.5.6",
         "appdirs",
         "prettytable",
         "events==0.3",
