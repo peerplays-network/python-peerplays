@@ -20,9 +20,9 @@ setup(
     long_description=open('README.md').read(),
     download_url='https://github.com/PBSA/python-peerplays/tarball/' + VERSION,
     author='Fabian Schuh',
-    author_email='Fabian@chainsquad.com',
+    author_email='Fabian.Schuh@BlockchainProjectsBV.com',
     maintainer='Fabian Schuh',
-    maintainer_email='Fabian@chainsquad.com',
+    maintainer_email='Fabian.Schuh@BlockchainProjectsBV.com',
     url='https://github.com/PBSA/peerplays-python',
     keywords=['peerplays', 'library', 'api', 'rpc'],
     packages=[
@@ -52,6 +52,7 @@ setup(
         "events==0.3",
         "scrypt",
         "pycryptodome",  # for AES, installed through graphenelib already
+        "click",  # for the CLI tool
     ],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
