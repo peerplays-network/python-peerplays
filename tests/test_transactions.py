@@ -567,23 +567,73 @@ class Testcases(unittest.TestCase):
                    "42406eca")
         self.doit()
 
-    def compareConstructedTX(self):
-        self.op = operations.Asset_update_bitasset(**{
+    def test_asset_issue(self):
+        message = "abcdefgABCDEFG0123456789"
+        nonce = "5862723643998573708"
+        pub = format(account.PrivateKey(wif).pubkey, prefix)
+        encrypted_memo = memo.encode_memo(
+            account.PrivateKey(wif),
+            account.PublicKey(pub, prefix=prefix),
+            nonce,
+            message
+        )
+        self.op = operations.Asset_issue(**{
             "fee": {
                 "amount": 0,
                 "asset_id": "1.3.0"
             },
             "issuer": "1.2.0",
-            "asset_to_update": "1.3.0",
-            "new_options": {
-                "feed_lifetime_sec": 86400,
-                "minimum_feeds": 1,
-                "force_settlement_delay_sec": 86400,
-                "force_settlement_offset_percent": 0,
-                "maximum_force_settlement_volume": 2000,
-                "short_backing_asset": "1.3.0",
-                "extensions": []
+            "asset_to_issue": {
+                "amount": 0,
+                "asset_id": "1.3.0"
             },
+            "memo": {
+                "from": pub,
+                "to": pub,
+                "nonce": nonce,
+                "message": encrypted_memo,
+            },
+            "issue_to_account": "1.2.0",
+            "extensions": []
+        })
+        self.cm = ("f68585abf4dce7c80457010e000000000000000000000000000"
+                   "00000000000000102c0ded2bc1f1305fb0faac5e6c03ee3a192"
+                   "4234985427b6167ca569d13df435cf02c0ded2bc1f1305fb0fa"
+                   "ac5e6c03ee3a1924234985427b6167ca569d13df435cf8c94d1"
+                   "9817945c5120fa5b6e83079a878e499e2e52a76a7739e9de409"
+                   "86a8e3bd8a68ce316cee50b210000012055139900ea2ae7db9d"
+                   "4ef0d5d4015d2d993d0590ad32662bda94daba74a5e13411aef"
+                   "4de6f847e9e4300e5c8c36aa8e5f9032d25fd8ca01abd58c7e9"
+                   "528677e4")
+        self.doit()
+
+    def compareConstructedTX(self):
+        message = "abcdefgABCDEFG0123456789"
+        nonce = "5862723643998573708"
+        pub = format(account.PrivateKey(wif).pubkey, prefix)
+        encrypted_memo = memo.encode_memo(
+            account.PrivateKey(wif),
+            account.PublicKey(pub, prefix=prefix),
+            nonce,
+            message
+        )
+        self.op = operations.Asset_issue(**{
+            "fee": {
+                "amount": 0,
+                "asset_id": "1.3.0"
+            },
+            "issuer": "1.2.0",
+            "asset_to_issue": {
+                "amount": 0,
+                "asset_id": "1.3.0"
+            },
+            "memo": {
+                "from": pub,
+                "to": pub,
+                "nonce": nonce,
+                "message": encrypted_memo,
+            },
+            "issue_to_account": "1.2.0",
             "extensions": []
         })
         ops = [Operation(self.op)]

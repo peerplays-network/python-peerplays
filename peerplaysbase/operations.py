@@ -177,6 +177,29 @@ class Asset_update_bitasset(GrapheneObject):
             ]))
 
 
+class Asset_issue(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            prefix = kwargs.get("prefix", default_prefix)
+
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            if "memo" in kwargs and kwargs["memo"]:
+                memo = Optional(Memo(prefix=prefix, **kwargs["memo"]))
+            else:
+                memo = Optional(None)
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('issuer', ObjectId(kwargs["issuer"], "account")),
+                ('asset_to_issue', Asset(kwargs["asset_to_issue"])),
+                ('issue_to_account', ObjectId(kwargs["issue_to_account"], "account")),
+                ('memo', memo),
+                ('extensions', Set([])),
+            ]))
+
+
 class Op_wrapper(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
