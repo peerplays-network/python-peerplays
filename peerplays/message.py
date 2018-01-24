@@ -112,7 +112,9 @@ class Message():
         assert "timestamp" in meta
 
         # Load account from blockchain
-        account = Account(meta.get("account"), peerplays_instance=self.peerplays)
+        account = Account(
+            meta.get("account"),
+            peerplays_instance=self.peerplays)
 
         # Test if memo key is the same as on the blockchain
         if not account["options"]["memo_key"] == meta["memokey"]:
