@@ -4,6 +4,8 @@ import click
 from pprint import pprint
 from prettytable import PrettyTable
 from peerplays.block import Block
+from peerplays.amount import Amount
+from peerplays.blockchain import Blockchain
 from peerplays.account import Account
 from peerplays.asset import Asset
 from peerplays.storage import configStorage as config
@@ -102,3 +104,32 @@ def info(ctx, objects):
                 click.echo("Account %s unknown" % obj)
         else:
             click.echo("Couldn't identify object to read")
+
+
+@main.command()
+@click.pass_context
+@onlineChain
+def fees(ctx):
+    """ List fees
+    """
+    from peerplaysbase.operationids import getOperationNameForId
+
+    chain = Blockchain(peerplays_instance=ctx.peerplays)
+    feesObj = chain.chainParameters().get("current_fees")
+    fees = feesObj["parameters"]
+
+    t = PrettyTable(["Operation", "Type", "Fee"])
+    t.align = "l"
+    t.align["Fee"] = "r"
+
+    for fee in fees:
+        for f in fee[1]:
+            t.add_row([
+                getOperationNameForId(fee[0]),
+                f,
+                str(Amount({
+                    "amount": fee[1].get(f, 0),
+                    "asset_id": "1.3.0"
+                }))
+            ])
+    click.echo(t)
