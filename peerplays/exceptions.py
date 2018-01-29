@@ -148,3 +148,9 @@ class KeyNotFound(Exception):
     """ Key not found
     """
     pass
+
+
+class InvalidMemoKeyException(Exception):
+    """ Memo key in message is invalid
+    """
+    pass

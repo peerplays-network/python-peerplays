@@ -32,7 +32,7 @@ def sign(ctx, file, account):
     """ Sign a message with an account
     """
     if not file:
-        click.echo("Prompting for message. Terminate with CTRL-D")
+        # click.echo("Prompting for message. Terminate with CTRL-D")
         file = click.get_text_stream('stdin')
     m = Message(file.read(), peerplays_instance=ctx.peerplays)
     click.echo(m.sign(account))
@@ -55,7 +55,7 @@ def verify(ctx, file, account):
     """ Verify a signed message
     """
     if not file:
-        click.echo("Prompting for message. Terminate with CTRL-D")
+        # click.echo("Prompting for message. Terminate with CTRL-D")
         file = click.get_text_stream('stdin')
     m = Message(file.read(), peerplays_instance=ctx.peerplays)
     click.echo("Verified" if m.verify() else "not verified")
