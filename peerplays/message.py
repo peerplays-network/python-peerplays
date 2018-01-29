@@ -1,16 +1,28 @@
 import re
+import json
 import logging
 from binascii import hexlify, unhexlify
 from graphenebase.ecdsa import verify_message, sign_message
 from peerplaysbase.account import PublicKey
 from peerplays.instance import shared_peerplays_instance
 from peerplays.account import Account
-from .exceptions import InvalidMessageSignature
+from .exceptions import (
+    InvalidMessageSignature,
+    AccountDoesNotExistsException
+)
 from .storage import configStorage as config
 
 
 log = logging.getLogger(__name__)
 
+MESSAGE_SPLIT = (
+    "-----BEGIN PEERPLAYS SIGNED MESSAGE-----",
+    "-----BEGIN META-----",
+    "-----BEGIN SIGNATURE-----",
+    "-----END PEERPLAYS SIGNED MESSAGE-----"
+)
+
+# This is the message that is actually signed
 SIGNED_MESSAGE_META = """{message}
 account={meta[account]}
 memokey={meta[memokey]}
@@ -18,23 +30,17 @@ block={meta[block]}
 timestamp={meta[timestamp]}"""
 
 SIGNED_MESSAGE_ENCAPSULATED = """
------BEGIN PEERPLAYS SIGNED MESSAGE-----
+{MESSAGE_SPLIT[0]}
 {message}
------BEGIN META-----
+{MESSAGE_SPLIT[1]}
 account={meta[account]}
 memokey={meta[memokey]}
 block={meta[block]}
 timestamp={meta[timestamp]}
------BEGIN SIGNATURE-----
+{MESSAGE_SPLIT[2]}
 {signature}
------END PEERPLAYS SIGNED MESSAGE-----"""
-
-MESSAGE_SPLIT = (
-    "-----BEGIN PEERPLAYS SIGNED MESSAGE-----\\n|"
-    "\\n-----BEGIN META-----|"
-    "-----BEGIN SIGNATURE-----|"
-    "-----END PEERPLAYS SIGNED MESSAGE-----"
-)
+{MESSAGE_SPLIT[3]}
+"""
 
 
 class Message():
@@ -48,6 +54,7 @@ class Message():
 
             :param str account: (optional) the account that owns the bet
                 (defaults to ``default_account``)
+            :raises ValueError: If not account for signing is provided
 
             :returns: the signed message encapsulated in a known format
         """
@@ -71,15 +78,22 @@ class Message():
             account["options"]["memo_key"]
         )
 
+        # We strip the message here so we know for sure there are no trailing
+        # whitespaces or returns
+        message = self.message.strip()
+
+        enc_message = SIGNED_MESSAGE_META.format(**locals())
+
         # signature
-        message = self.message
         signature = hexlify(sign_message(
-            SIGNED_MESSAGE_META.format(**locals()),
+            enc_message,
             wif
         )).decode("ascii")
 
-        message = self.message
-        return SIGNED_MESSAGE_ENCAPSULATED.format(**locals())
+        return SIGNED_MESSAGE_ENCAPSULATED.format(
+            MESSAGE_SPLIT=MESSAGE_SPLIT,
+            **locals()
+        )
 
     def verify(self, **kwargs):
         """ Verify a message with an account's memo key
@@ -91,42 +105,67 @@ class Message():
             :raises InvalidMessageSignature if the signature is not ok
         """
         # Split message into its parts
-        parts = re.split(MESSAGE_SPLIT, self.message)
-        assert len(parts) == 5
+        parts = re.split("|".join(MESSAGE_SPLIT), self.message)
+        parts = [x for x in parts if x.strip()]
 
-        message = parts[1]
-        signature = parts[3].rstrip().strip()
+        assert len(parts) > 2, "Incorrect number of message parts"
+
+        # Strip away all whitespaces before and after the message
+        message = parts[0].strip()
+        signature = parts[2].strip()
         # Parse the meta data
-        meta = dict(re.findall(r'(\S+)=(.*)', parts[2]))
+        meta = dict(re.findall(r'(\S+)=(.*)', parts[1]))
+
+        log.info("Message is: {}".format(message))
+        log.info("Meta is: {}".format(json.dumps(meta)))
+        log.info("Signature is: {}".format(signature))
 
         # Ensure we have all the data in meta
-        assert "account" in meta
-        assert "memokey" in meta
-        assert "block" in meta
-        assert "timestamp" in meta
+        assert "account" in meta, "No 'account' could be found in meta data"
+        assert "memokey" in meta, "No 'memokey' could be found in meta data"
+        assert "block" in meta, "No 'block' could be found in meta data"
+        assert "timestamp" in meta, "No 'timestamp' could be found in meta data"
+
+        account_name = meta.get("account").strip()
+        memo_key = meta["memokey"].strip()
+
+        try:
+            PublicKey(memo_key)
+        except Exception:
+            raise InvalidMemoKeyException(
+                "The memo key in the message is invalid"
+            )
 
         # Load account from blockchain
-        account = Account(meta.get("account"), peerplays_instance=self.peerplays)
+        try:
+            account = Account(
+                account_name,
+                peerplays_instance=self.peerplays)
+        except AccountDoesNotExistsException:
+            raise AccountDoesNotExistsException(
+                "Could not find account {}. Are you connected to the right chain?".format(
+                    account_name
+                ))
 
         # Test if memo key is the same as on the blockchain
-        if not account["options"]["memo_key"] == meta["memokey"]:
+        if not account["options"]["memo_key"] == memo_key:
             log.error(
                 "Memo Key of account {} on the Blockchain".format(
                     account["name"]) +
                 "differs from memo key in the message: {} != {}".format(
-                    account["options"]["memo_key"], meta["memokey"]
+                    account["options"]["memo_key"], memo_key
                 )
             )
 
         # Reformat message
-        message = SIGNED_MESSAGE_META.format(**locals())
+        enc_message = SIGNED_MESSAGE_META.format(**locals())
 
         # Verify Signature
-        pubkey = verify_message(message, unhexlify(signature))
+        pubkey = verify_message(enc_message, unhexlify(signature))
 
         # Verify pubky
         pk = PublicKey(hexlify(pubkey).decode("ascii"))
-        if format(pk, self.peerplays.prefix) != meta["memokey"]:
+        if format(pk, self.peerplays.prefix) != memo_key:
             raise InvalidMessageSignature
 
         return True
