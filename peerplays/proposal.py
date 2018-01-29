@@ -25,6 +25,14 @@ class Proposal(BlockchainObject):
     def proposed_operations(self):
         yield from self["proposed_transaction"]["operations"]
 
+    @property
+    def proposer(self):
+        """ Return the proposer of the proposal if available in the backend,
+            else returns None
+        """
+        if "proposer" in self:
+            return self["proposer"]
+
 
 class Proposals(list):
     """ Obtain a list of pending proposals for an account

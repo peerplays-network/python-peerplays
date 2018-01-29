@@ -8,7 +8,9 @@ from peerplays.instance import shared_peerplays_instance
 from peerplays.account import Account
 from .exceptions import (
     InvalidMessageSignature,
-    AccountDoesNotExistsException
+    AccountDoesNotExistsException,
+    InvalidMemoKeyException,
+    WrongMemoKey
 )
 from .storage import configStorage as config
 
@@ -124,7 +126,8 @@ class Message():
         assert "account" in meta, "No 'account' could be found in meta data"
         assert "memokey" in meta, "No 'memokey' could be found in meta data"
         assert "block" in meta, "No 'block' could be found in meta data"
-        assert "timestamp" in meta, "No 'timestamp' could be found in meta data"
+        assert "timestamp" in meta, \
+            "No 'timestamp' could be found in meta data"
 
         account_name = meta.get("account").strip()
         memo_key = meta["memokey"].strip()
@@ -149,7 +152,7 @@ class Message():
 
         # Test if memo key is the same as on the blockchain
         if not account["options"]["memo_key"] == memo_key:
-            log.error(
+            raise WrongMemoKey(
                 "Memo Key of account {} on the Blockchain".format(
                     account["name"]) +
                 "differs from memo key in the message: {} != {}".format(
