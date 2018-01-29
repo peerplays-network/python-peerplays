@@ -69,6 +69,7 @@ def proposals(ctx, account):
     t = PrettyTable([
         "id",
         "expiration",
+        "proposer",
         "required approvals",
         "available approvals",
         "review period time",
@@ -79,6 +80,7 @@ def proposals(ctx, account):
         t.add_row([
             proposal["id"],
             proposal["expiration_time"],
+            proposal.proposer or "n/a",
             (
                 proposal["required_active_approvals"] +
                 proposal["required_owner_approvals"]
