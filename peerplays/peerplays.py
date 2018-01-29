@@ -148,10 +148,10 @@ class PeerPlays(object):
                          rpcpassword=rpcpassword,
                          **kwargs)
 
-        self.wallet = Wallet(self.rpc, **kwargs)
-
         # txbuffers/propbuffer are initialized and cleared
         self.clear()
+
+        self.wallet = Wallet(peerplays_instance=self, **kwargs)
 
     # -------------------------------------------------------------------------
     # Basic Calls
@@ -176,6 +176,9 @@ class PeerPlays(object):
             rpcpassword = config["rpcpassword"]
 
         self.rpc = PeerPlaysNodeRPC(node, rpcuser, rpcpassword, **kwargs)
+
+    def is_connected(self):
+        return bool(self.rpc)
 
     @property
     def prefix(self):

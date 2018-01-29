@@ -2,14 +2,18 @@ import logging
 import os
 from graphenebase import bip38
 from peerplaysbase.account import PrivateKey, GPHPrivateKey
+from peerplays.instance import shared_peerplays_instance
 from .account import Account
 from .exceptions import (
     KeyNotFound,
     InvalidWifError,
     WalletExists,
     WrongMasterPasswordException,
-    NoWalletException
+    NoWalletException,
+    OfflineHasNoRPCException
 )
+from .storage import configStorage as config
+
 
 log = logging.getLogger(__name__)
 
@@ -45,7 +49,6 @@ class Wallet():
     masterpassword = None
 
     # Keys from database
-    configStorage = None
     MasterPassword = None
     keyStorage = None
 
@@ -53,19 +56,8 @@ class Wallet():
     keys = {}  # struct with pubkey as key and wif as value
     keyMap = {}  # type:wif pairs to force certain keys
 
-    def __init__(self, rpc, *args, **kwargs):
-        from .storage import configStorage
-        self.configStorage = configStorage
-
-        # RPC
-        Wallet.rpc = rpc
-
-        # Prefix?
-        if Wallet.rpc:
-            self.prefix = Wallet.rpc.chain_params["prefix"]
-        else:
-            # If not connected, load prefix from config
-            self.prefix = self.configStorage["prefix"]
+    def __init__(self, *args, peerplays_instance=None, **kwargs):
+        self.peerplays = peerplays_instance or shared_peerplays_instance()
 
         # Compatibility after name change from wif->keys
         if "wif" in kwargs and "keys" not in kwargs:
@@ -82,6 +74,21 @@ class Wallet():
             self.MasterPassword = MasterPassword
             self.keyStorage = keyStorage
 
+    @property
+    def prefix(self):
+        if self.peerplays.is_connected():
+            prefix = self.peerplays.prefix
+        else:
+            # If not connected, load prefix from config
+            prefix = config["prefix"]
+        return prefix or "PPY"   # default prefix is PPY
+
+    @property
+    def rpc(self):
+        if not self.peerplays.is_connected():
+            raise OfflineHasNoRPCException("No RPC available in offline mode!")
+        return self.peerplays.rpc
+
     def setKeys(self, loadkeys):
         """ This method is strictly only for in memory keys that are
             passed to Wallet/PeerPlays with the ``keys`` argument
@@ -95,11 +102,8 @@ class Wallet():
             loadkeys = [loadkeys]
 
         for wif in loadkeys:
-            try:
-                key = PrivateKey(wif)
-            except:
-                raise InvalidWifError
-            Wallet.keys[format(key.pubkey, self.prefix)] = str(key)
+            pub = self._get_pub_from_wif(wif)
+            Wallet.keys[pub] = str(wif)
 
     def unlock(self, pwd=None):
         """ Unlock the wallet database
@@ -111,7 +115,7 @@ class Wallet():
             self.tryUnlockFromEnv()
         else:
             if (self.masterpassword is None and
-                    self.configStorage[self.MasterPassword.config_key]):
+                    config[self.MasterPassword.config_key]):
                 self.masterpwd = self.MasterPassword(pwd)
                 self.masterpassword = self.masterpwd.decrypted_master
 
@@ -150,7 +154,7 @@ class Wallet():
         if len(self.getPublicKeys()):
             # Already keys installed
             return True
-        elif self.MasterPassword.config_key in self.configStorage:
+        elif self.MasterPassword.config_key in config:
             # no keys but a master password
             return True
         else:
@@ -189,18 +193,23 @@ class Wallet():
         assert not self.locked()
         return format(bip38.decrypt(encwif, self.masterpassword), "wif")
 
-    def addPrivateKey(self, wif):
-        """ Add a private key to the wallet database
+    def _get_pub_from_wif(self, wif):
+        """ Get the pubkey as string, from the wif key as string
         """
         # it could be either graphenebase or peerplaysbase so we can't check
         # the type directly
-        if isinstance(wif, PrivateKey) or isinstance(wif, GPHPrivateKey):
-            wif = str(wif)
+        wif = str(wif)
         try:
-            pub = format(PrivateKey(wif).pubkey, self.prefix)
+            p = PrivateKey(wif)
         except:
             raise InvalidWifError(
                 "Invalid Private Key Format. Please use WIF!")
+        return format(p.pubkey, self.prefix)
+
+    def addPrivateKey(self, wif):
+        """ Add a private key to the wallet database
+        """
+        pub = self._get_pub_from_wif(wif)
 
         if self.keyStorage:
             # Test if wallet exists
@@ -296,7 +305,7 @@ class Wallet():
     def getAccountFromPrivateKey(self, wif):
         """ Obtain account name from private key
         """
-        pub = format(PrivateKey(wif).pubkey, self.prefix)
+        pub = self._get_pub_from_wif(wif)
         return self.getAccountFromPublicKey(pub)
 
     def getAccountsFromPublicKey(self, pub):
