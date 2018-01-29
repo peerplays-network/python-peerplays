@@ -4,6 +4,7 @@ from prettytable import PrettyTable
 from pprint import pprint
 from peerplays.proposal import Proposals
 from peerplays.storage import configStorage as config
+from peerplays.account import Account
 from .decorators import (
     onlineChain,
     unlockWallet
@@ -77,10 +78,18 @@ def proposals(ctx, account):
     ])
     t.align = 'l'
     for proposal in proposals:
+        if proposal.proposer:
+            proposer = Account(
+                proposal.proposer,
+                peerplays_instance=ctx.peerplays
+            )["name"]
+        else:
+            proposer = "n/a"
+
         t.add_row([
             proposal["id"],
             proposal["expiration_time"],
-            proposal.proposer or "n/a",
+            proposer,
             (
                 proposal["required_active_approvals"] +
                 proposal["required_owner_approvals"]
