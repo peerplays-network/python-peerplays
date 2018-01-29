@@ -90,10 +90,10 @@ def proposals(ctx, account):
             proposal["id"],
             proposal["expiration_time"],
             proposer,
-            (
+            [Account(x)["name"] for x in (
                 proposal["required_active_approvals"] +
                 proposal["required_owner_approvals"]
-            ),
+            )],
             (
                 proposal["available_active_approvals"] +
                 proposal["available_key_approvals"] +
