@@ -13,7 +13,7 @@ import unittest
 from pprint import pprint
 from binascii import hexlify
 
-TEST_AGAINST_CLI_WALLET = False
+TEST_AGAINST_CLI_WALLET = True
 
 prefix = "PPY"
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
@@ -266,14 +266,16 @@ class Testcases(unittest.TestCase):
             "event_id": "1.0.1241",
             "rules_id": "1.22.11",
             "asset_id": "1.3.124",
+            "never_in_play": False,
+            "delay_before_settling": 60,
             "prefix": prefix,
         })
         self.cm = ("f68585abf4dce7c8045701370000000000000000000202646"
                    "5084675c39f62616c6c02656e08466f6f7462616c6cd90400"
-                   "00000000010b000000000016017c0000011f2603de0504424"
-                   "dfab0b120e4a258ffe15ee5be333ce8e1404986ea10f1d28e"
-                   "e033ae6b3d2eea9202b4a18bf3e3bff6ae5ddfe3b4b9d7713"
-                   "fb2ec11f123eaaa39")
+                   "00000000010b000000000016017c003c000000000001204a5"
+                   "182e5c97b042a61b743eae2f3dc91bfbd323b34043d6a0c5c"
+                   "fc06fffbb7837648447501de8cdd214eb1e55eabd394cb4af"
+                   "152c9846f1819ec0b483fa2d275")
         self.doit()
 
     def test_betting_market_create(self):
@@ -363,15 +365,15 @@ class Testcases(unittest.TestCase):
             "new_name": [["en", "My Event name"]],
             "new_season": [["en", "2016-17"]],
             "new_start_time": "2017-03-29T09:15:05",
-            "is_live_market": True,
+            "new_status": "settled",
             "prefix": prefix,
         })
         self.cm = ("f68585abf4dce7c804570134000000000000000000fe6001d90"
                    "4000000000001010102656e0d4d79204576656e74206e616d65"
-                   "010102656e07323031362d313701197bdb580101000001207e7"
-                   "3251603500baea831cda528dfcbec55fa34994f8fca23fe2b2a"
-                   "21e0edbb2c033df02e267129c29a61a74588b21b16539be116f"
-                   "97e1f477ef0203d77a46046")
+                   "010102656e07323031362d313701197bdb5800000001203ccd4"
+                   "e36894c6a2ee84023bf65fa0d9a6c19c278f410db12747d877a"
+                   "6b5d5df11389daf631ef323162e5c43f22024dd009ca6e388ba"
+                   "44878db3507327d0220a7")
         self.doit()
 
     def test_event_group_update(self):
@@ -417,16 +419,15 @@ class Testcases(unittest.TestCase):
             "new_description": [["en", "Football"], ["de", "Fußball"]],
             "new_event_id": "1.0.1241",
             "new_rules_id": "1.22.11",
-            "freeze": False,
-            "delay_bets": False,
+            "status": "canceled",
             "prefix": prefix,
         })
         self.cm = ("f68585abf4dce7c804570146000000000000000000bcbc01010"
                    "2026465084675c39f62616c6c02656e08466f6f7462616c6c01"
-                   "0b00000000001601010001000000011f50b9bc677bcdfd5eb44"
-                   "d22ae8ebd0ad1a14b30edeeece0caffeee5ae884bb6836ba454"
-                   "35314d7c74720ebd9512e86624e28fa47096e23ab2adc543ac1"
-                   "064dc35")
+                   "0b00000000001601010e0000011f4a452ef1b716eeb23ad1868"
+                   "46dda66efc61162427bb1570ec205dc3266398bc944b92a9f44"
+                   "96d6a21c9f8a0a1b8afdcd55d2ad1cb48c9fa1e2efd1a3c72a9"
+                   "3b0")
         self.doit()
 
     def test_betting_market_update(self):
@@ -608,36 +609,18 @@ class Testcases(unittest.TestCase):
         self.doit()
 
     def compareConstructedTX(self):
-        message = "abcdefgABCDEFG0123456789"
-        nonce = "5862723643998573708"
-        pub = format(account.PrivateKey(wif).pubkey, prefix)
-        encrypted_memo = memo.encode_memo(
-            account.PrivateKey(wif),
-            account.PublicKey(pub, prefix=prefix),
-            nonce,
-            message
-        )
-        self.op = operations.Asset_issue(**{
-            "fee": {
-                "amount": 0,
-                "asset_id": "1.3.0"
-            },
-            "issuer": "1.2.0",
-            "asset_to_issue": {
-                "amount": 0,
-                "asset_id": "1.3.0"
-            },
-            "memo": {
-                "from": pub,
-                "to": pub,
-                "nonce": nonce,
-                "message": encrypted_memo,
-            },
-            "issue_to_account": "1.2.0",
-            "extensions": []
+        self.op = operations.Event_update(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "event_id": "1.18.12414",
+            "new_event_group_id": "1.0.1241",
+            "new_name": [["en", "My Event name"]],
+            "new_season": [["en", "2016-17"]],
+            "new_start_time": "2017-03-29T09:15:05",
+            "new_status": "settled",
+            "prefix": prefix,
         })
-        ops = [Operation(self.op)]
 
+        ops = [Operation(self.op)]
         """
         from peerplays import PeerPlays
         ppy = PeerPlays()
