@@ -13,7 +13,7 @@ import unittest
 from pprint import pprint
 from binascii import hexlify
 
-TEST_AGAINST_CLI_WALLET = True
+TEST_AGAINST_CLI_WALLET = False
 
 prefix = "PPY"
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
