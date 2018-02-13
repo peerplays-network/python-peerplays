@@ -37,4 +37,8 @@ dist:
 	python3 setup.py sdist upload -r pypi
 	python3 setup.py bdist_wheel upload
 
+docs:
+	sphinx-apidoc -d 6 -e -f -o docs peerplays*
+	make -C docs clean html
+
 release: clean check dist git
