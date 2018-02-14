@@ -1253,8 +1253,8 @@ class PeerPlays(object):
         season=None,
         start_time=None,
         event_group_id=None,
-        account=None,
         status=None,
+        account=None,
         **kwargs
     ):
         """ Update an event. This needs to be **proposed**.
@@ -1308,6 +1308,40 @@ class PeerPlays(object):
             op_data.update({"new_status": status})
 
         op = operations.Event_update(**op_data)
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
+
+    def event_update_status(
+        self,
+        event_id,
+        status,
+        scores,
+        account=None,
+        **kwargs
+    ):
+        """ Update the status of an event. This needs to be **proposed**.
+
+            :param str event_id: Id of the event to update
+            :param str status: Event status (:doc:`event_status`)
+            :param list scores: List of strings that represent the scores of a
+                match
+            :param str account: (optional) the account to allow access
+                to (defaults to ``default_account``)
+        """
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account)
+        event = Event(event_id)
+
+        op = operations.Event_update_status(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "event_id": event["id"],
+            "status": status,
+            "scores": scores,
+            "prefix": self.prefix,
+        })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     def betting_market_rules_create(

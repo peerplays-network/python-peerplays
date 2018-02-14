@@ -5,7 +5,7 @@ from pprint import pprint
 from peerplays import PeerPlays, exceptions
 from peerplays.amount import Amount
 from peerplays.utils import parse_time
-from peerplaysbase.operationids import getOperationNameForId
+from peerplaysbase.operationids import getOperationNameForId, operations
 from peerplays.instance import set_shared_peerplays_instance
 from peerplays.sport import Sport, Sports
 from peerplays.eventgroup import EventGroup, EventGroups
@@ -236,3 +236,34 @@ class Testcases(unittest.TestCase):
         self.assertIsInstance(BettingMarketGroups("1.18.2"), list)
         self.assertIsInstance(Rules(), list)
         self.assertIsInstance(BettingMarkets("1.20.2"), list)
+
+    def test_event_status_update(self):
+        def get_object(self, *args, **kwargs):
+            return {"id": "1.18.1234"}
+
+        with mock.patch(
+            "peerplaysapi.node.PeerPlaysNodeRPC.get_object",
+            new=get_object
+        ):
+            tx = self.ppy.event_update_status(
+                "1.18.1234",
+                "settled",
+                ["0-0"]
+            )
+            self.assertEqual(
+                tx["operations"][0][0],
+                operations["event_update_status"]
+            )
+
+            self.assertEqual(
+                tx["operations"][0][1]["event_id"],
+                "1.18.1234",
+            )
+            self.assertEqual(
+                tx["operations"][0][1]["status"],
+                "settled",
+            )
+            self.assertEqual(
+                tx["operations"][0][1]["scores"],
+                ["0-0"],
+            )
