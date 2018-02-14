@@ -71,6 +71,7 @@ ops = [
     "tournament_leave",
     "betting_market_group_update",
     "betting_market_update",
+    "event_update_status",
 ]
 operations = {o: ops.index(o) for o in ops}
 

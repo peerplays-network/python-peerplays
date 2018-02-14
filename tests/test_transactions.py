@@ -608,15 +608,26 @@ class Testcases(unittest.TestCase):
                    "528677e4")
         self.doit()
 
-    def compareConstructedTX(self):
-        self.op = operations.Event_update(**{
+    def test_event_status_update(self):
+        self.op = operations.Event_update_status(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "event_id": "1.18.12414",
-            "new_event_group_id": "1.0.1241",
-            "new_name": [["en", "My Event name"]],
-            "new_season": [["en", "2016-17"]],
-            "new_start_time": "2017-03-29T09:15:05",
-            "new_status": "settled",
+            "status": "settled",
+            "scores": ["0:0"],
+            "prefix": prefix,
+        })
+        self.cm = ("f68585abf4dce7c804570148000000000000000000fe600a010"
+                   "3303a30000001207abe21307c8715896660958f41a85b3b681b"
+                   "dca01b89acf6d0e4c2ea97f758dc73cb85f833d2a74d7d6f0c0"
+                   "8f872c3b038b8f3844eebedaf82788b94e21f486c")
+        self.doit()
+
+    def compareConstructedTX(self):
+        self.op = operations.Event_update_status(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "event_id": "1.18.12414",
+            "status": "settled",
+            "scores": ["0:0"],
             "prefix": prefix,
         })
 
