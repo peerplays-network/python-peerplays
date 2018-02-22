@@ -1,4 +1,4 @@
-import peerplays
+import peerplays as ppy
 
 
 class SharedInstance():
@@ -13,7 +13,7 @@ def shared_peerplays_instance():
     """
     if not SharedInstance.instance:
         clear_cache()
-        SharedInstance.instance = peerplays.PeerPlays(**SharedInstance.config)
+        SharedInstance.instance = ppy.PeerPlays(**SharedInstance.config)
     return SharedInstance.instance
 
 
