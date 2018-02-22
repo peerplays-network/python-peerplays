@@ -1314,7 +1314,7 @@ class PeerPlays(object):
         self,
         event_id,
         status,
-        scores,
+        scores=[],
         account=None,
         **kwargs
     ):
@@ -1323,7 +1323,7 @@ class PeerPlays(object):
             :param str event_id: Id of the event to update
             :param str status: Event status (:doc:`event_status`)
             :param list scores: List of strings that represent the scores of a
-                match
+                match (defaults to [])
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
