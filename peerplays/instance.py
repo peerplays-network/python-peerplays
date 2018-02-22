@@ -1,24 +1,44 @@
-import peerplays as ppy
+import peerplays
 
-_shared_peerplays_instance = None
+
+class SharedInstance():
+    instance = None
+    config = {}
 
 
 def shared_peerplays_instance():
-    """ This method will initialize ``_shared_peerplays_instance`` and return it.
+    """ This method will initialize ``SharedInstance.instance`` and return it.
         The purpose of this method is to have offer single default
         peerplays instance that can be reused by multiple classes.
     """
-    global _shared_peerplays_instance
-    if not _shared_peerplays_instance:
-        _shared_peerplays_instance = ppy.PeerPlays()
-    return _shared_peerplays_instance
+    if not SharedInstance.instance:
+        clear_cache()
+        SharedInstance.instance = peerplays.PeerPlays(**SharedInstance.config)
+    return SharedInstance.instance
 
 
 def set_shared_peerplays_instance(peerplays_instance):
-    """ This method allows us to override default peerplays instance for all users of
-        ``_shared_peerplays_instance``.
+    """ This method allows us to override default peerplays instance for all
+        users of ``SharedInstance.instance``.
 
-        :param peerplays.peerplays.PeerPlays peerplays_instance: PeerPlays instance
+        :param peerplays.Peerplays peerplays_instance: Peerplays
+            instance
     """
-    global _shared_peerplays_instance
-    _shared_peerplays_instance = peerplays_instance
+    clear_cache()
+    SharedInstance.instance = peerplays_instance
+
+
+def clear_cache():
+    """ Clear Caches
+    """
+    from .blockchainobject import BlockchainObject
+    BlockchainObject.clear_cache()
+
+
+def set_shared_config(config):
+    """ This allows to set a config that will be used when calling
+        ``shared_bitshares_instance`` and allows to define the configuration
+        without requiring to actually create an instance
+    """
+    assert isinstance(config, dict)
+    SharedInstance.config = config
