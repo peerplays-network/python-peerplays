@@ -494,8 +494,8 @@ class Event_update(GrapheneObject):
             else:
                 start_time = Optional(None)
 
-            if "status" in kwargs:
-                status = Optional(EventStatus(kwargs["status"]))
+            if "new_status" in kwargs:
+                status = Optional(EventStatus(kwargs["new_status"]))
             else:
                 status = Optional(None)
 
