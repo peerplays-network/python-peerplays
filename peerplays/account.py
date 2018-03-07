@@ -67,12 +67,18 @@ class Account(BlockchainObject):
         if self.full:
             account = self.peerplays.rpc.get_full_accounts(
                 [account["id"]], False)[0][1]
-            super(Account, self).__init__(account["account"])
+            super(Account, self).__init__(
+                    account["account"],
+                    peerplays_instance=self.peerplays
+                )
             for k, v in account.items():
                 if k != "account":
                     self[k] = v
         else:
-            super(Account, self).__init__(account)
+            super(Account, self).__init__(
+                account, 
+                peerplays_instance=self.peerplays
+            )
 
     @property
     def name(self):
