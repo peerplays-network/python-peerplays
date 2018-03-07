@@ -1414,9 +1414,9 @@ class PeerPlays(object):
         event_id="0.0.0",
         rules_id="0.0.0",
         asset=None,
-        account=None,
         delay_before_settling=60 * 5,
         never_in_play=False,
+        account=None,
         **kwargs
     ):
         """ Create an betting market. This needs to be **proposed**.
