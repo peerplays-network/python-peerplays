@@ -1708,7 +1708,7 @@ class PeerPlays(object):
             "betting_market_id": bm["id"],
             "amount_to_bet": amount_to_bet.json(),
             "backer_multiplier": (
-                int(backer_multiplier) * GRAPHENE_BETTING_ODDS_PRECISION
+                int(backer_multiplier * GRAPHENE_BETTING_ODDS_PRECISION)
             ),
             "back_or_lay": back_or_lay,
             "prefix": self.prefix
