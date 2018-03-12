@@ -15,6 +15,18 @@ class Amount(dict):
         :rtype: dict
         :raises ValueError: if the data provided is not recognized
 
+        .. code-block:: python
+
+            from peerplays.amount import Amount
+            from peerplays.asset import Asset
+            a = Amount("1 USD")
+            b = Amount(1, "USD")
+            c = Amount("20", Asset("USD"))
+            a + b
+            a * 2
+            a += b
+            a /= 2.0
+
         Way to obtain a proper instance:
 
             * ``args`` can be a string, e.g.:  "1 USD"

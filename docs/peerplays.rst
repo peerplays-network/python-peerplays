@@ -1,11 +1,50 @@
-PeerPlays
-~~~~~~~~~
+peerplays package
+=================
 
-The PeerPlays library has been designed to allow developers to easily
-access its routines and make use of the network without dealing with all
-the related blockchain technology and cryptography. This library can be
-used to do anything that is allowed according to the PeerPlays
-blockchain protocol.
+Subpackages
+-----------
 
-.. automodule:: peerplays.peerplays
-   :members:
+.. toctree::
+
+    peerplays.cli
+
+Submodules
+----------
+
+.. toctree::
+
+   peerplays.account
+   peerplays.aes
+   peerplays.amount
+   peerplays.asset
+   peerplays.bet
+   peerplays.bettingmarket
+   peerplays.bettingmarketgroup
+   peerplays.block
+   peerplays.blockchain
+   peerplays.blockchainobject
+   peerplays.committee
+   peerplays.event
+   peerplays.eventgroup
+   peerplays.exceptions
+   peerplays.instance
+   peerplays.memo
+   peerplays.message
+   peerplays.notify
+   peerplays.peerplays
+   peerplays.proposal
+   peerplays.rule
+   peerplays.sport
+   peerplays.storage
+   peerplays.transactionbuilder
+   peerplays.utils
+   peerplays.wallet
+   peerplays.witness
+
+Module contents
+---------------
+
+.. automodule:: peerplays
+    :members:
+    :undoc-members:
+    :show-inheritance:

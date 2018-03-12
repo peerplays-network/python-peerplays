@@ -17,10 +17,13 @@ from .objects import (
     AccountOptions,
     Memo,
     ObjectId,
-    BetType,
-    BettingMarketResolution,
     AssetOptions,
     BitAssetOptions,
+    BetType,
+    EventStatus,
+    BettingMarketResolution,
+    BettingMarketStatus,
+    BettingMarketGroupStatus,
 )
 default_prefix = "PPY"
 
@@ -491,10 +494,10 @@ class Event_update(GrapheneObject):
             else:
                 start_time = Optional(None)
 
-            if "is_live_market" in kwargs:
-                is_live_market = Optional(Bool(kwargs["is_live_market"]))
+            if "new_status" in kwargs:
+                status = Optional(EventStatus(kwargs["new_status"]))
             else:
-                is_live_market = Optional(None)
+                status = Optional(None)
 
             if "new_event_group_id" in kwargs:
                 new_event_group_id = Optional(FullObjectId(kwargs["new_event_group_id"]))
@@ -508,7 +511,25 @@ class Event_update(GrapheneObject):
                 ('new_name', name),
                 ('new_season', season),
                 ('new_start_time', start_time),
-                ('is_live_market', is_live_market),
+                ('new_status', status),
+                ('extensions', Set([])),
+            ]))
+
+
+class Event_update_status(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('event_id', ObjectId(kwargs["event_id"], "event")),
+                ('status', EventStatus(kwargs["status"])),
+                ('scores',
+                    Array([String(o) for o in kwargs["scores"]])),
                 ('extensions', Set([])),
             ]))
 
@@ -617,6 +638,8 @@ class Betting_market_group_create(GrapheneObject):
                 ('event_id', FullObjectId(kwargs["event_id"])),
                 ('rules_id', FullObjectId(kwargs["rules_id"])),
                 ('asset_id', ObjectId(kwargs["asset_id"], "asset")),
+                ('never_in_play', Bool(kwargs["never_in_play"])),
+                ('delay_before_settling', Uint32(kwargs["delay_before_settling"])),
                 ('extensions', Set([])),
             ]))
 
@@ -643,15 +666,10 @@ class Betting_market_group_update(GrapheneObject):
             else:
                 description = Optional(None)
 
-            if "freeze" in kwargs:
-                freeze = Optional(Bool(kwargs["freeze"]))
+            if "status" in kwargs:
+                status = Optional(BettingMarketGroupStatus(kwargs["status"]))
             else:
-                freeze = Optional(None)
-
-            if "delay_bets" in kwargs:
-                delay_bets = Optional(Bool(kwargs["delay_bets"]))
-            else:
-                delay_bets = Optional(None)
+                status = Optional(None)
 
             if "new_rules_id" in kwargs:
                 new_rules_id = Optional(FullObjectId(kwargs["new_rules_id"]))
@@ -663,8 +681,7 @@ class Betting_market_group_update(GrapheneObject):
                 ('betting_market_group_id', ObjectId(kwargs["betting_market_group_id"], "betting_market_group")),
                 ('new_description', description),
                 ('new_rules_id', new_rules_id),
-                ('freeze', freeze),
-                ('delay_bets', delay_bets),
+                ('status', status),
                 ('extensions', Set([])),
             ]))
 

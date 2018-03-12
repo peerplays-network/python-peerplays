@@ -243,7 +243,10 @@ class PeerPlays(object):
             assert isinstance(append_to, (TransactionBuilder, ProposalBuilder))
             append_to.appendOps(ops)
             # Add the signer to the buffer so we sign the tx properly
-            parent.appendSigner(account, permission)
+            if isinstance(append_to, ProposalBuilder):
+                parent.appendSigner(append_to.proposer, permission)
+            else:
+                parent.appendSigner(account, permission)
             # This returns as we used append_to, it does NOT broadcast, or sign
             return append_to.get_parent()
         elif self.proposer:
@@ -1249,10 +1252,11 @@ class PeerPlays(object):
     def event_update(
         self,
         event_id,
-        name,
-        season,
-        start_time,
-        event_group_id="0.0.0",
+        name=None,
+        season=None,
+        start_time=None,
+        event_group_id=None,
+        status=None,
         account=None,
         **kwargs
     ):
@@ -1266,6 +1270,7 @@ class PeerPlays(object):
             :param str event_group_id: Event group ID to create the event for
                 (defaults to *relative* id ``0.0.0``)
             :param datetime start_time: Time of the start of the event
+            :param str status: Event status (:doc:`event_status`)
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
@@ -1279,23 +1284,66 @@ class PeerPlays(object):
             raise ValueError("You need to provide an account")
         account = Account(account)
         event = Event(event_id)
-        if event_group_id[0] == "1":
-            # Test if object exists
-            EventGroup(event_group_id)
-        else:
-            # Test if object is proposed
-            test_proposal_in_buffer(
-                kwargs.get("append_to", self.propbuffer),
-                "event_group_create",
-                event_group_id)
-        op = operations.Event_update(**{
+        op_data = {
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "event_id": event["id"],
-            "new_name": name,
-            "new_season": season,
-            "new_start_time": formatTime(start_time),
-            "new_event_group_id": event_group_id,
             "prefix": self.prefix
+        }
+
+        if event_group_id:
+            if event_group_id[0] == "1":
+                # Test if object exists
+                EventGroup(event_group_id)
+            else:
+                # Test if object is proposed
+                test_proposal_in_buffer(
+                    kwargs.get("append_to", self.propbuffer),
+                    "event_group_create",
+                    event_group_id)
+            op_data.update({"new_event_group_id": event_group_id})
+        if name:
+            op_data.update({"new_name": name})
+        if season:
+            op_data.update({"new_season": season})
+        if start_time:
+            op_data.update({"new_start_time": formatTime(start_time)})
+        if status:
+            op_data.update({"new_status": status})
+
+        op = operations.Event_update(**op_data)
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
+
+    def event_update_status(
+        self,
+        event_id,
+        status,
+        scores=[],
+        account=None,
+        **kwargs
+    ):
+        """ Update the status of an event. This needs to be **proposed**.
+
+            :param str event_id: Id of the event to update
+            :param str status: Event status (:doc:`event_status`)
+            :param list scores: List of strings that represent the scores of a
+                match (defaults to [])
+            :param str account: (optional) the account to allow access
+                to (defaults to ``default_account``)
+        """
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account)
+        event = Event(event_id)
+
+        op = operations.Event_update_status(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "event_id": event["id"],
+            "status": status,
+            "scores": scores,
+            "prefix": self.prefix,
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
@@ -1366,6 +1414,8 @@ class PeerPlays(object):
         event_id="0.0.0",
         rules_id="0.0.0",
         asset=None,
+        delay_before_settling=60 * 5,
+        never_in_play=False,
         account=None,
         **kwargs
     ):
@@ -1378,6 +1428,10 @@ class PeerPlays(object):
                 *relative* id ``0.0.0``)
             :param peerplays.asset.Asset asset: Asset to be used for this
                 market
+            :param int delay_before_settling: Delay in seconds before settling
+                (defaults to 5 minutes)
+            :param bool never_in_play: Set this market group as *never in play*
+                (defaults to *False*)
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
@@ -1414,6 +1468,8 @@ class PeerPlays(object):
             "event_id": event_id,
             "rules_id": rules_id,
             "asset_id": asset["id"],
+            "never_in_play": bool(never_in_play),
+            "delay_before_settling": int(delay_before_settling),
             "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
@@ -1421,11 +1477,10 @@ class PeerPlays(object):
     def betting_market_group_update(
         self,
         betting_market_group_id,
-        description,
-        event_id="0.0.0",
-        rules_id="0.0.0",
-        freeze=False,
-        delay_bets=False,
+        description=None,
+        event_id=None,
+        rules_id=None,
+        status=None,
         account=None,
         **kwargs
     ):
@@ -1434,12 +1489,9 @@ class PeerPlays(object):
             :param str betting_market_group_id: Id of the betting market group
                 to update
             :param list description: Internationalized list of descriptions
-            :param str event_id: Event ID to create this for (defaults to
-                *relative* id ``0.0.0``)
-            :param str rule_id: Rule ID to create this with (defaults to
-                *relative* id ``0.0.0``)
-            :param bool freeze: Freeze the MBG
-            :param bool delay_bets: Delay betting
+            :param str event_id: Event ID to create this for
+            :param str rule_id: Rule ID to create this with
+            :param str status: New Status
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
@@ -1450,34 +1502,43 @@ class PeerPlays(object):
             raise ValueError("You need to provide an account")
         account = Account(account, peerplays_instance=self)
         bmg = BettingMarketGroup(betting_market_group_id)
-        if event_id[0] == "1":
-            # Test if object exists
-            Event(event_id)
-        else:
-            # Test if object is proposed
-            test_proposal_in_buffer(
-                kwargs.get("append_to", self.propbuffer),
-                "event_create",
-                event_id)
-        if rules_id[0] == "1":
-            # Test if object exists
-            Rule(rules_id)
-        else:
-            # Test if object is proposed
-            test_proposal_in_buffer(
-                kwargs.get("append_to", self.propbuffer),
-                "betting_market_rules_create",
-                rules_id)
-        op = operations.Betting_market_group_update(**{
+
+        op_data = {
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "betting_market_group_id": bmg["id"],
-            "new_description": description,
-            "new_event_id": event_id,
-            "new_rules_id": rules_id,
-            "freeze": freeze,
-            "delay_bets": delay_bets,
             "prefix": self.prefix
-        })
+        }
+        if event_id:
+            if event_id[0] == "1":
+                # Test if object exists
+                Event(event_id)
+            else:
+                # Test if object is proposed
+                test_proposal_in_buffer(
+                    kwargs.get("append_to", self.propbuffer),
+                    "event_create",
+                    event_id)
+            op_data.update({"new_event_id": event_id})
+
+        if rules_id:
+            if rules_id[0] == "1":
+                # Test if object exists
+                Rule(rules_id)
+            else:
+                # Test if object is proposed
+                test_proposal_in_buffer(
+                    kwargs.get("append_to", self.propbuffer),
+                    "betting_market_rules_create",
+                    rules_id)
+            op_data.update({"new_rules_id": rules_id})
+
+        if description:
+            op_data.update({"new_description": description})
+
+        if status:
+            op_data.update({"status": status})
+
+        op = operations.Betting_market_group_update(**op_data)
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     def betting_market_create(
@@ -1647,7 +1708,7 @@ class PeerPlays(object):
             "betting_market_id": bm["id"],
             "amount_to_bet": amount_to_bet.json(),
             "backer_multiplier": (
-                int(backer_multiplier) * GRAPHENE_BETTING_ODDS_PRECISION
+                int(backer_multiplier * GRAPHENE_BETTING_ODDS_PRECISION)
             ),
             "back_or_lay": back_or_lay,
             "prefix": self.prefix

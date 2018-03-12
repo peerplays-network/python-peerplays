@@ -218,7 +218,7 @@ class Configuration(DataDir):
 
     #: Default configuration
     config_defaults = {
-        "node": "wss://peerplays-dev.blocktrades.info/ws",
+        "node": "wss://peerplays-dev.blocktrades.info/alpha/ws",
         "rpcpassword": "",
         "rpcuser": "",
     }

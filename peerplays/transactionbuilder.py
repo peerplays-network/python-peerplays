@@ -364,7 +364,7 @@ class TransactionBuilder(dict):
             if self.peerplays.blocking:
                 ret = self.peerplays.rpc.broadcast_transaction_synchronous(
                     ret, api="network_broadcast")
-                ret.update(**ret["trx"])
+                ret.update(**ret.get("trx"))
             else:
                 self.peerplays.rpc.broadcast_transaction(
                     ret, api="network_broadcast")

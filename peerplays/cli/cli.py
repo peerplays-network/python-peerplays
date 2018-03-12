@@ -32,7 +32,8 @@ from . import (
     witness,
     committee,
     bookie,
-    message
+    message,
+    rpc
 )
 
 log = logging.getLogger(__name__)

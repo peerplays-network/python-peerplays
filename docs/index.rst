@@ -88,6 +88,7 @@ General
    tutorials
    contribute
    support
+   stati
 
 Command Line Tool
 -----------------
@@ -97,54 +98,24 @@ Command Line Tool
 
    cli
 
-Python-PeerPlays Libraries
---------------------------
+Packages
+--------
 
-General Classes
-~~~~~~~~~~~~~~~
+peerplays
+~~~~~~~~~
+
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 3
 
    peerplays
-   instances
-   account
-   amount
-   asset
-   block
-   blockchain
-   exceptions
-   notify
-   witness
-   proposal
-   configuration
 
-Gaming/Tournament specific modules
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+peerplaysbase
+~~~~~~~~~~~~~
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 3
 
-   sport
-   eventgroup
-   event
-   bettingmarketgroup
-   bettingmarket
-   bet
-
-Low Level Classes
------------------
-
-.. toctree::
-   :maxdepth: 1
-
-   storage
-   utils
-   transactionbuilder
-   wallet
-   websocket
-   websocketrpc
-   transactions
-   memo
+   peerplaysbase
 
 Tutorials
 ---------
