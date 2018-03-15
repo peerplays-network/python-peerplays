@@ -67,23 +67,7 @@ def events(ctx, eventgroup):
         :param str eventgroup: Event Group id
     """
     eg = EventGroup(eventgroup, peerplays_instance=ctx.peerplays)
-    t = PrettyTable([
-        "id",
-        "name",
-        "season",
-        "start_time",
-        "status",
-    ])
-    t.align = "l"
-    for event in eg.events:
-        t.add_row([
-            event["id"],
-            "\n".join(["{}: {}".format(v[0], v[1]) for v in event["name"]]),
-            "\n".join(["{}: {}".format(v[0], v[1]) for v in event["season"]]),
-            event["start_time"],
-            event["status"],
-        ])
-    click.echo(str(t))
+    click.echo(pretty_print(eg.events))
 
 
 @bookie.command()
@@ -96,27 +80,7 @@ def bmgs(ctx, event):
         :param str event: Event id
     """
     eg = Event(event, peerplays_instance=ctx.peerplays)
-    t = PrettyTable([
-        "id",
-        "description",
-        "event_id",
-        "rules_id",
-        "matched_amount",
-    ])
-    t.align = "l"
-    for bmg in eg.bettingmarketgroups:
-        asset = Asset(bmg["asset_id"])
-        t.add_row([
-            bmg["id"],
-            "\n".join(["{}: {}".format(v[0], v[1]) for v in bmg["description"]]),
-            bmg["event_id"],
-            bmg["rules_id"],
-            "{} {}".format(
-                bmg["total_matched_bets_amount"] / 10 ** asset["precision"],
-                asset["symbol"]
-            ),
-        ])
-    click.echo(str(t))
+    click.echo(pretty_print(eg.bettingmarketgroups))
 
 
 @bookie.command()
@@ -129,20 +93,7 @@ def bettingmarkets(ctx, bmg):
         :param str bmg: Betting market id
     """
     bmg = BettingMarketGroup(bmg, peerplays_instance=ctx.peerplays)
-    t = PrettyTable([
-        "id",
-        "description",
-        "group_id",
-    ])
-    t.align = "l"
-    for market in bmg.bettingmarkets:
-        asset = Asset(bmg["asset_id"])
-        t.add_row([
-            market["id"],
-            "\n".join(["{}: {}".format(v[0], v[1]) for v in market["description"]]),
-            market["group_id"],
-        ])
-    click.echo(str(t))
+    click.echo(pretty_print(bmg.bettingmarkets))
 
 
 @bookie.command()
@@ -152,17 +103,7 @@ def rules(ctx):
     """ [bookie] List all rules
     """
     rules = Rules(peerplays_instance=ctx.peerplays)
-    t = PrettyTable([
-        "id",
-        "name",
-    ])
-    t.align = "l"
-    for rule in rules:
-        t.add_row([
-            rule["id"],
-            "\n".join(["{}: {}".format(v[0], v[1]) for v in rule["name"]]),
-        ])
-    click.echo(str(t))
+    click.echo(pretty_print(rules))
 
 
 @bookie.command()
