@@ -19,20 +19,29 @@ def bookie():
     pass
 
 
+def pretty_print(o):
+    t = PrettyTable(o[0].keys())
+    for items in o:
+        r = list()
+        for item in items.values():
+            if isinstance(item, list):
+                r.append(
+                    "\n".join(["{}: {}".format(v[0], v[1]) for v in item])
+                )
+            else:
+                r.append(item)
+        t.add_row(r)
+    t.align = "l"
+    return str(t)
+
+
 @bookie.command()
 @click.pass_context
 @onlineChain
 def sports(ctx):
     """ [bookie] List sports """
     sports = Sports(peerplays_instance=ctx.peerplays)
-    t = PrettyTable(["id", "name"])
-    t.align = "l"
-    for sport in sports:
-        t.add_row([
-            sport["id"],
-            "\n".join(["{}: {}".format(v[0], v[1]) for v in sport["name"]])
-        ])
-    click.echo(str(t))
+    click.echo(pretty_print(sports))
 
 
 @bookie.command()
@@ -45,14 +54,7 @@ def eventgroups(ctx, sport):
         :param str sport: Sports id
     """
     sport = Sport(sport, peerplays_instance=ctx.peerplays)
-    t = PrettyTable(["id", "name"])
-    t.align = "l"
-    for eg in sport.eventgroups:
-        t.add_row([
-            eg["id"],
-            "\n".join(["{}: {}".format(v[0], v[1]) for v in eg["name"]])
-        ])
-    click.echo(str(t))
+    click.echo(pretty_print(sport.eventgroups))
 
 
 @bookie.command()
