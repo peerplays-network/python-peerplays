@@ -1,5 +1,7 @@
+import yaml
 import os
 from peerplays import PeerPlays
+from bitshares.exceptions import WrongMasterPasswordException
 from peerplays.instance import set_shared_peerplays_instance
 from functools import update_wrapper
 import click
@@ -110,12 +112,18 @@ def unlock(f):
     def new_func(ctx, *args, **kwargs):
         if not ctx.obj.get("unsigned", False):
             if ctx.peerplays.wallet.created():
-                if "UNLOCK" in os.environ:
-                    pwd = os.environ["UNLOCK"]
-                else:
-                    pwd = click.prompt(
-                        "Current Wallet Passphrase", hide_input=True)
-                ctx.peerplays.wallet.unlock(pwd)
+                while True:
+                    if "UNLOCK" in os.environ:
+                        pwd = os.environ["UNLOCK"]
+                    else:
+                        pwd = click.prompt(
+                            "Current Wallet Passphrase", hide_input=True)
+                    try:
+                        ctx.peerplays.wallet.unlock(pwd)
+                    except WrongMasterPasswordException:
+                        click.echo("Incorrect Wallet passphrase!")
+                        continue
+                    break
             else:
                 click.echo("No wallet installed yet. Creating ...")
                 pwd = click.prompt(
