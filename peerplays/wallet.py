@@ -8,6 +8,7 @@ from .exceptions import (
     KeyNotFound,
     InvalidWifError,
     WalletExists,
+    WalletLocked,
     WrongMasterPasswordException,
     NoWalletException,
     OfflineHasNoRPCException
@@ -49,6 +50,7 @@ class Wallet():
     masterpassword = None
 
     # Keys from database
+    configStorage = None
     MasterPassword = None
     keyStorage = None
 
@@ -131,6 +133,11 @@ class Wallet():
         """
         self.masterpassword = None
 
+    def unlocked(self):
+        """ Is the wallet database unlocked?
+        """
+        return not self.locked()
+
     def locked(self):
         """ Is the wallet database locked?
         """
@@ -198,9 +205,10 @@ class Wallet():
         """
         # it could be either graphenebase or peerplaysbase so we can't check
         # the type directly
-        wif = str(wif)
+        if isinstance(wif, PrivateKey) or isinstance(wif, GPHPrivateKey):
+            wif = str(wif)
         try:
-            p = PrivateKey(wif)
+            pub = format(PrivateKey(wif).pubkey, self.prefix)
         except:
             raise InvalidWifError(
                 "Invalid Private Key Format. Please use WIF!")
@@ -234,6 +242,9 @@ class Wallet():
             # Test if wallet exists
             if not self.created():
                 raise NoWalletException
+
+            if not self.unlocked():
+                raise WalletLocked
 
             encwif = self.keyStorage.getPrivateKeyForPublicKey(pub)
             if not encwif:
@@ -334,7 +345,7 @@ class Wallet():
         """
         for id in self.getAccountsFromPublicKey(pub):
             try:
-                account = Account(id)
+                account = Account(id, peerplays_instance=self.peerplays)
             except:
                 continue
             yield {"name": account["name"],
@@ -351,7 +362,7 @@ class Wallet():
             return {"name": None, "type": None, "pubkey": pub}
         else:
             try:
-                account = Account(name)
+                account = Account(name, peerplays_instance=self.peerplays)
             except:
                 return
             return {"name": account["name"],
@@ -388,3 +399,19 @@ class Wallet():
             return self.keyStorage.getPublicKeys()
         else:
             return list(Wallet.keys.keys())
+
+    def wipe(self, sure=False):
+        if not sure:
+            log.error(
+                "You need to confirm that you are sure "
+                "and understand the implications of "
+                "wiping your wallet!"
+            )
+            return
+        else:
+            from .storage import (
+                keyStorage,
+                MasterPassword
+            )
+            MasterPassword.wipe(sure)
+            keyStorage.wipe(sure)
