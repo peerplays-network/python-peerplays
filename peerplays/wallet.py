@@ -208,11 +208,10 @@ class Wallet():
         if isinstance(wif, PrivateKey) or isinstance(wif, GPHPrivateKey):
             wif = str(wif)
         try:
-            pub = format(PrivateKey(wif).pubkey, self.prefix)
+            return format(PrivateKey(wif).pubkey, self.prefix)
         except:
             raise InvalidWifError(
                 "Invalid Private Key Format. Please use WIF!")
-        return format(p.pubkey, self.prefix)
 
     def addPrivateKey(self, wif):
         """ Add a private key to the wallet database
