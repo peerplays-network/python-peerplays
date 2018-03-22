@@ -243,7 +243,11 @@ class PeerPlays(object):
             assert isinstance(append_to, (TransactionBuilder, ProposalBuilder))
             append_to.appendOps(ops)
             # Add the signer to the buffer so we sign the tx properly
-            parent.appendSigner(account, permission)
+
+            if isinstance(append_to, ProposalBuilder):
+                parent.appendSigner(append_to.proposer, permission)
+            else:
+                parent.appendSigner(account, permission)
             # This returns as we used append_to, it does NOT broadcast, or sign
             return append_to.get_parent()
         elif self.proposer:
@@ -306,6 +310,24 @@ class PeerPlays(object):
         """ Returns the global properties
         """
         return self.rpc.get_dynamic_global_properties()
+
+    # -------------------------------------------------------------------------
+    # Wallet stuff
+    # -------------------------------------------------------------------------
+    def newWallet(self, pwd):
+        """ Create a new wallet. This method is basically only calls
+            :func:`peerplays.wallet.create`.
+
+            :param str pwd: Password to use for the new wallet
+            :raises peerplays.exceptions.WalletExists: if there is already a
+                wallet created
+        """
+        return self.wallet.create(pwd)
+
+    def unlock(self, *args, **kwargs):
+        """ Unlock the internal wallet
+        """
+        return self.wallet.unlock(*args, **kwargs)
 
     # -------------------------------------------------------------------------
     # Transaction Buffers
@@ -1314,7 +1336,7 @@ class PeerPlays(object):
         self,
         event_id,
         status,
-        scores,
+        scores=[],
         account=None,
         **kwargs
     ):
@@ -1323,7 +1345,7 @@ class PeerPlays(object):
             :param str event_id: Id of the event to update
             :param str status: Event status (:doc:`event_status`)
             :param list scores: List of strings that represent the scores of a
-                match
+                match (defaults to [])
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
@@ -1411,9 +1433,9 @@ class PeerPlays(object):
         event_id="0.0.0",
         rules_id="0.0.0",
         asset=None,
-        account=None,
         delay_before_settling=60 * 5,
         never_in_play=False,
+        account=None,
         **kwargs
     ):
         """ Create an betting market. This needs to be **proposed**.
@@ -1705,7 +1727,7 @@ class PeerPlays(object):
             "betting_market_id": bm["id"],
             "amount_to_bet": amount_to_bet.json(),
             "backer_multiplier": (
-                int(backer_multiplier) * GRAPHENE_BETTING_ODDS_PRECISION
+                int(backer_multiplier * GRAPHENE_BETTING_ODDS_PRECISION)
             ),
             "back_or_lay": back_or_lay,
             "prefix": self.prefix

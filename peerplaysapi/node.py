@@ -1,21 +1,36 @@
 import re
 from grapheneapi.graphenewsrpc import GrapheneWebsocketRPC
+from grapheneapi.graphenehttprpc import GrapheneHTTPRPC
 from peerplaysbase.chains import known_chains
 from . import exceptions
 import logging
 log = logging.getLogger(__name__)
 
 
-class PeerPlaysNodeRPC(GrapheneWebsocketRPC):
+class PeerPlaysNodeRPC(GrapheneWebsocketRPC, GrapheneHTTPRPC):
 
-    def __init__(self, *args, **kwargs):
-        super(PeerPlaysNodeRPC, self).__init__(*args, **kwargs)
+    def __init__(self,
+                 urls,
+                 user="",
+                 password="",
+                 **kwargs):
+        self._urls = urls
+        self.rpc.__init__(self, urls, **kwargs)
         self.chain_params = self.get_network()
 
-    def register_apis(self):
-        self.api_id["database"] = self.database(api_id=1)
-        self.api_id["history"] = self.history(api_id=1)
-        self.api_id["network_broadcast"] = self.network_broadcast(api_id=1)
+    @property
+    def rpc(self):
+        if isinstance(self._urls, (list, set)):
+            first_url = self._urls[0]
+        else:
+            first_url = self._urls
+
+        if first_url[:2] == "ws":
+            # Websocket connection
+            return GrapheneWebsocketRPC
+        else:
+            # RPC/HTTP connection
+            return GrapheneHTTPRPC
 
     def rpcexec(self, payload):
         """ Execute a call by sending the payload.
@@ -23,12 +38,13 @@ class PeerPlaysNodeRPC(GrapheneWebsocketRPC):
             In here, we mostly deal with PeerPlays specific error handling
 
             :param json payload: Payload data
-            :raises ValueError: if the server does not respond in proper JSON format
+            :raises ValueError: if the server does not respond in proper JSON
+                   format
             :raises RPCError: if the server returns an error
         """
         try:
             # Forward call to GrapheneWebsocketRPC and catch+evaluate errors
-            return super(PeerPlaysNodeRPC, self).rpcexec(payload)
+            return self.rpc.rpcexec(self, payload)
         except exceptions.RPCError as e:
             msg = exceptions.decodeRPCErrorMsg(e).strip()
             if msg == "missing required active authority":
@@ -79,3 +95,9 @@ class PeerPlaysNodeRPC(GrapheneWebsocketRPC):
             if v["chain_id"] == chain_id:
                 return v
         raise Exception("Connecting to unknown network!")
+
+    def __getattr__(self, name):
+        """ Map all methods to RPC calls and pass through the arguments.
+            It makes use of the GrapheneRPC library.
+        """
+        return self.rpc.__getattr__(self, name)

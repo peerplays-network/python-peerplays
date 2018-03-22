@@ -370,10 +370,10 @@ class Testcases(unittest.TestCase):
         })
         self.cm = ("f68585abf4dce7c804570134000000000000000000fe6001d90"
                    "4000000000001010102656e0d4d79204576656e74206e616d65"
-                   "010102656e07323031362d313701197bdb5800000001203ccd4"
-                   "e36894c6a2ee84023bf65fa0d9a6c19c278f410db12747d877a"
-                   "6b5d5df11389daf631ef323162e5c43f22024dd009ca6e388ba"
-                   "44878db3507327d0220a7")
+                   "010102656e07323031362d313701197bdb58010a00000120153"
+                   "d94cdc2a2d88bd53e475d86525fd40d02143fd15b70a657d19b"
+                   "e20151e583130be1adab65a4a907c9cb26d1e2f19653ae28b7f"
+                   "baeb98c2fc6aefc3d84a9a0")
         self.doit()
 
     def test_event_group_update(self):

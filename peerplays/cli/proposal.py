@@ -94,11 +94,11 @@ def proposals(ctx, account):
                 proposal["required_active_approvals"] +
                 proposal["required_owner_approvals"]
             )],
-            (
-                proposal["available_active_approvals"] +
+            json.dumps(
+                [Account(x)["name"] for x in proposal["available_active_approvals"]] +
                 proposal["available_key_approvals"] +
-                proposal["available_owner_approvals"]
-            ),
+                proposal["available_owner_approvals"],
+                indent=1),
             proposal.get("review_period_time", None),
             json.dumps(proposal["proposed_transaction"], indent=4),
         ])

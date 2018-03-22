@@ -1,7 +1,6 @@
 import click
 from peerplays.storage import configStorage as config
 from peerplays.account import Account
-from pprint import pprint
 from prettytable import PrettyTable
 from .decorators import (
     onlineChain,
@@ -80,14 +79,15 @@ def addkey(ctx, key):
     installedKeys = ctx.peerplays.wallet.getPublicKeys()
     if len(installedKeys) == 1:
         name = ctx.peerplays.wallet.getAccountFromPublicKey(installedKeys[0])
-        account = Account(name, peerplays_instance=ctx.peerplays)
-        click.echo("=" * 30)
-        click.echo("Setting new default user: %s" % account["name"])
-        click.echo()
-        click.echo("You can change these settings with:")
-        click.echo("    uptick set default_account <account>")
-        click.echo("=" * 30)
-        config["default_account"] = account["name"]
+        if name:  # only if a name to the key was found
+            account = Account(name, peerplays_instance=ctx.peerplays)
+            click.echo("=" * 30)
+            click.echo("Setting new default user: %s" % account["name"])
+            click.echo()
+            click.echo("You can change these settings with:")
+            click.echo("    uptick set default_account <account>")
+            click.echo("=" * 30)
+            config["default_account"] = account["name"]
 
 
 @main.command()
@@ -209,3 +209,16 @@ def importaccount(ctx, account, role):
 
     if not imported:
         click.echo("No matching key(s) found. Password correct?")
+
+
+@main.command()
+@click.pass_context
+@click.option(
+    '--ignore-warning/--no-ignore-warning',
+    prompt="Are you sure you want to wipe your wallet? This action is irreversible!",
+)
+@offlineChain
+def wipewallet(ctx, ignore_warning):
+    """ Wipe the wallet (keep configuration)
+    """
+    ctx.peerplays.wallet.wipe(ignore_warning)
