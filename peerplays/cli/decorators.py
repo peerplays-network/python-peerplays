@@ -1,7 +1,7 @@
 import yaml
 import os
 from peerplays import PeerPlays
-from bitshares.exceptions import WrongMasterPasswordException
+from peerplays.exceptions import WrongMasterPasswordException
 from peerplays.instance import set_shared_peerplays_instance
 from functools import update_wrapper
 import click

@@ -8,7 +8,7 @@ class Blockchain(object):
     """ This class allows to access the blockchain and read data
         from it
 
-        :param bitshares.bitshares.BitShares bitshares_instance: BitShares
+        :param peerplays.peerplays.PeerPlays peerplays_instance: Peerplays
                  instance
         :param str mode: (default) Irreversible block (``irreversible``) or
                  actual head block (``head``)
@@ -169,14 +169,14 @@ class Blockchain(object):
             if repetition > blocks_waiting_for * self.max_block_wait_repetition:
                 raise Exception("Wait time for new block exceeded, aborting")
         # block has to be returned properly
-        block = self.bitshares.rpc.get_block(block_number)
+        block = self.peerplays.rpc.get_block(block_number)
         repetition = 0
         while not block:
             repetition += 1
             time.sleep(self.block_interval)
             if repetition > self.max_block_wait_repetition:
                 raise Exception("Wait time for new block exceeded, aborting")
-            block = self.bitshares.rpc.get_block(block_number)
+            block = self.peerplays.rpc.get_block(block_number)
         return block
 
     def ops(self, start=None, stop=None, **kwargs):
@@ -235,7 +235,7 @@ class Blockchain(object):
             included into a block
 
             .. note:: If you want instant confirmation, you need to instantiate
-                      class:`bitshares.blockchain.Blockchain` with
+                      class:`peerplays.blockchain.Blockchain` with
                       ``mode="head"``, otherwise, the call will wait until
                       confirmed in an irreversible block.
 

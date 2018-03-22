@@ -37,7 +37,7 @@ def clear_cache():
 
 def set_shared_config(config):
     """ This allows to set a config that will be used when calling
-        ``shared_bitshares_instance`` and allows to define the configuration
+        ``shared_peerplays_instance`` and allows to define the configuration
         without requiring to actually create an instance
     """
     assert isinstance(config, dict)
