@@ -7,7 +7,7 @@ import logging
 log = logging.getLogger(__name__)
 
 
-class PeerPlaysNodeRPC(GrapheneWebsocketRPC):
+class PeerPlaysNodeRPC(GrapheneWebsocketRPC, GrapheneHTTPRPC):
 
     def __init__(self,
                  urls,
@@ -38,7 +38,8 @@ class PeerPlaysNodeRPC(GrapheneWebsocketRPC):
             In here, we mostly deal with PeerPlays specific error handling
 
             :param json payload: Payload data
-            :raises ValueError: if the server does not respond in proper JSON format
+            :raises ValueError: if the server does not respond in proper JSON
+                   format
             :raises RPCError: if the server returns an error
         """
         try:

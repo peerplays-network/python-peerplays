@@ -311,6 +311,24 @@ class PeerPlays(object):
         return self.rpc.get_dynamic_global_properties()
 
     # -------------------------------------------------------------------------
+    # Wallet stuff
+    # -------------------------------------------------------------------------
+    def newWallet(self, pwd):
+        """ Create a new wallet. This method is basically only calls
+            :func:`peerplays.wallet.create`.
+
+            :param str pwd: Password to use for the new wallet
+            :raises peerplays.exceptions.WalletExists: if there is already a
+                wallet created
+        """
+        return self.wallet.create(pwd)
+
+    def unlock(self, *args, **kwargs):
+        """ Unlock the internal wallet
+        """
+        return self.wallet.unlock(*args, **kwargs)
+
+    # -------------------------------------------------------------------------
     # Transaction Buffers
     # -------------------------------------------------------------------------
     @property

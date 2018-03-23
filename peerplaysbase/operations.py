@@ -523,13 +523,14 @@ class Event_update_status(GrapheneObject):
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
+            scores = [str(x) for x in kwargs["scores"]]
 
             super().__init__(OrderedDict([
                 ('fee', Asset(kwargs["fee"])),
                 ('event_id', ObjectId(kwargs["event_id"], "event")),
                 ('status', EventStatus(kwargs["status"])),
                 ('scores',
-                    Array([String(o) for o in kwargs["scores"]])),
+                    Array([String(o) for o in scores])),
                 ('extensions', Set([])),
             ]))
 

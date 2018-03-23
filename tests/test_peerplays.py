@@ -174,6 +174,8 @@ class Testcases(unittest.TestCase):
             op["owner"]["key_auths"])
         self.assertEqual(op["owner"]["weight_threshold"], 1)
 
+    """ Disable this test until we can test with an actual setup on the
+        main/testnet
     def test_disallow(self):
         ppy = self.ppy
         with self.assertRaisesRegex(ValueError, ".*Changes nothing.*"):
@@ -190,6 +192,7 @@ class Testcases(unittest.TestCase):
                 threshold=1,
                 permission="owner"
             )
+    """
 
     def test_update_memo_key(self):
         ppy = self.ppy
