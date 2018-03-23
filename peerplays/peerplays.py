@@ -243,7 +243,6 @@ class PeerPlays(object):
             assert isinstance(append_to, (TransactionBuilder, ProposalBuilder))
             append_to.appendOps(ops)
             # Add the signer to the buffer so we sign the tx properly
-
             if isinstance(append_to, ProposalBuilder):
                 parent.appendSigner(append_to.proposer, permission)
             else:
