@@ -3,6 +3,7 @@ from pprint import pprint
 from prettytable import PrettyTable
 from .decorators import onlineChain
 from .main import main
+from .ui import pretty_print
 
 from peerplays.asset import Asset
 from peerplays.sport import Sport, Sports
@@ -19,29 +20,13 @@ def bookie():
     pass
 
 
-def pretty_print(o):
-    t = PrettyTable(o[0].keys())
-    for items in o:
-        r = list()
-        for item in items.values():
-            if isinstance(item, list):
-                r.append(
-                    "\n".join(["{}: {}".format(v[0], v[1]) for v in item])
-                )
-            else:
-                r.append(item)
-        t.add_row(r)
-    t.align = "l"
-    return str(t)
-
-
 @bookie.command()
 @click.pass_context
 @onlineChain
 def sports(ctx):
     """ [bookie] List sports """
     sports = Sports(peerplays_instance=ctx.peerplays)
-    click.echo(pretty_print(sports))
+    click.echo(pretty_print(sports, ctx=ctx))
 
 
 @bookie.command()
@@ -54,7 +39,7 @@ def eventgroups(ctx, sport):
         :param str sport: Sports id
     """
     sport = Sport(sport, peerplays_instance=ctx.peerplays)
-    click.echo(pretty_print(sport.eventgroups))
+    click.echo(pretty_print(sport.eventgroups, ctx=ctx))
 
 
 @bookie.command()
@@ -67,7 +52,7 @@ def events(ctx, eventgroup):
         :param str eventgroup: Event Group id
     """
     eg = EventGroup(eventgroup, peerplays_instance=ctx.peerplays)
-    click.echo(pretty_print(eg.events))
+    click.echo(pretty_print(eg.events, ctx=ctx))
 
 
 @bookie.command()
@@ -80,7 +65,7 @@ def bmgs(ctx, event):
         :param str event: Event id
     """
     eg = Event(event, peerplays_instance=ctx.peerplays)
-    click.echo(pretty_print(eg.bettingmarketgroups))
+    click.echo(pretty_print(eg.bettingmarketgroups, ctx=ctx))
 
 
 @bookie.command()
@@ -93,7 +78,7 @@ def bettingmarkets(ctx, bmg):
         :param str bmg: Betting market id
     """
     bmg = BettingMarketGroup(bmg, peerplays_instance=ctx.peerplays)
-    click.echo(pretty_print(bmg.bettingmarkets))
+    click.echo(pretty_print(bmg.bettingmarkets, ctx=ctx))
 
 
 @bookie.command()
@@ -103,7 +88,7 @@ def rules(ctx):
     """ [bookie] List all rules
     """
     rules = Rules(peerplays_instance=ctx.peerplays)
-    click.echo(pretty_print(rules))
+    click.echo(pretty_print(rules, ctx=ctx))
 
 
 @bookie.command()
