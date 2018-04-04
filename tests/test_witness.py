@@ -6,12 +6,6 @@ from peerplays.witness import Witnesses
 
 class Testcases(unittest.TestCase):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.ppy = PeerPlays()
-        self.ppy.set_default_account("init0")
-        set_shared_peerplays_instance(self.ppy)
-
     def test__contains__(self):
         witnesses = Witnesses()
         self.assertIn("init0", witnesses)
