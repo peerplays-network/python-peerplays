@@ -103,7 +103,8 @@ class BlockchainObject(dict):
     def clear_cache():
         BlockchainObject._cache = ObjectCache()
 
-    def test_valid_objectid(self, i):
+    @staticmethod
+    def objectid_valid(i):
         if "." not in i:
             return False
         parts = i.split(".")
@@ -114,6 +115,9 @@ class BlockchainObject(dict):
             except:
                 pass
             return False
+
+    def test_valid_objectid(self, i):
+        return BlockchainObject.objectid_valid(i)
 
     def testid(self, id):
         parts = id.split(".")
