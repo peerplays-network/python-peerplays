@@ -58,7 +58,7 @@ class Witnesses(list):
         if BlockchainObject.objectid_valid(item):
             id = item
         elif isinstance(item, Account):
-            id = account["id"]
+            id = item["id"]
         else:
             account = Account(item, peerplays_instance=self.peerplays)
             id = account["id"]
