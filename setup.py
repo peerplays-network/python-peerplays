@@ -52,7 +52,9 @@ setup(
         "events==0.3",
         "scrypt",
         "pycryptodome",  # for AES, installed through graphenelib already
-        "click",  # for the CLI tool
+        # for the CLI tool
+        "click",
+        "treelib",
     ],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],

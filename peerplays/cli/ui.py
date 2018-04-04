@@ -82,3 +82,9 @@ def pretty_print(o, ctx):
         t.add_row(r)
     t.align = "l"
     return str(t)
+
+
+def maplist2dict(dlist):
+    """ Convert a list of tuples into a dictionary
+    """
+    return {k[0]: k[1] for k in dlist}

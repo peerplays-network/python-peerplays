@@ -114,3 +114,66 @@ def rule(ctx, rule):
     click.echo(
         "\n".join(["{}: {}".format(v[0], v[1]) for v in rule["description"]])
     )
+
+
+@bookie.command()
+@click.argument("sport")
+@click.pass_context
+@onlineChain
+def list(ctx, sport):
+    """ [bookie] list the entire thing
+    """
+    from .ui import maplist2dict
+    from tqdm import tqdm
+    from treelib import Node, Tree
+    tree = Tree()
+    tree.create_node("sports", "root")
+
+    def formatname(o):
+        if "name" in o:
+            name = o.get("name")
+        elif "description" in o:
+            name = o.get("description")
+        else:
+            name = []
+        return "{} ({})".format(
+            maplist2dict(name).get("en"),
+            o["id"]
+        )
+
+    if sport:
+        sports = [Sport(sport, peerplays_instance=ctx.peerplays)]
+    else:
+        sports = Sports()
+
+    for sport in tqdm(sports):
+        tree.create_node(
+            formatname(sport),
+            sport["id"],
+            parent="root")
+
+        for eg in tqdm(sport.eventgroups):
+            tree.create_node(
+                formatname(eg),
+                eg["id"],
+                parent=sport["id"])
+
+            for e in tqdm(eg.events):
+                tree.create_node(
+                    formatname(e),
+                    e["id"],
+                    parent=eg["id"])
+
+                for bmg in tqdm(e.bettingmarketgroups):
+                    tree.create_node(
+                        formatname(bmg),
+                        bmg["id"],
+                        parent=e["id"])
+
+                    for bm in tqdm(bmg.bettingmarkets):
+                        tree.create_node(
+                            formatname(bm),
+                            bm["id"],
+                            parent=bmg["id"])
+
+    tree.show()
