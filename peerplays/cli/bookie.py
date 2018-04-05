@@ -117,7 +117,7 @@ def rule(ctx, rule):
 
 
 @bookie.command()
-@click.argument("sport")
+@click.argument("sport", default=None, required=False)
 @click.pass_context
 @onlineChain
 def list(ctx, sport):
