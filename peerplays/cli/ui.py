@@ -1,6 +1,4 @@
-import os
 import json
-import sys
 from peerplays.account import Account
 from prettytable import PrettyTable, ALL as allBorders
 import pkg_resources
@@ -20,16 +18,22 @@ def print_version(ctx, param, value):
 
 
 def print_permissions(account):
-    t = PrettyTable(["Permission", "Threshold", "Key/Account"], hrules=allBorders)
+    t = PrettyTable(
+        ["Permission", "Threshold", "Key/Account"],
+        hrules=allBorders
+    )
     t.align = "r"
     for permission in ["owner", "active"]:
         auths = []
         # account auths:
         for authority in account[permission]["account_auths"]:
-            auths.append("%s (%d)" % (Account(authority[0])["name"], authority[1]))
+            auths.append(
+                "%s (%d)" % (Account(authority[0])["name"],
+                             authority[1]))
         # key auths:
         for authority in account[permission]["key_auths"]:
-            auths.append("%s (%d)" % (authority[0], authority[1]))
+            auths.append(
+                "%s (%d)" % (authority[0], authority[1]))
         t.add_row([
             permission,
             account[permission]["weight_threshold"],
@@ -60,3 +64,27 @@ def get_terminal(text="Password", confirm=False, allowedempty=False):
 
 def pprintOperation(op):
     return json.dumps(op["op"][1], indent=4)
+
+
+def pretty_print(o, ctx):
+    t = PrettyTable(
+        o[0].keys(),
+    )
+    for items in o:
+        r = list()
+        for item in items.values():
+            if isinstance(item, list):
+                r.append(
+                    "\n".join(["{}: {}".format(v[0], v[1]) for v in item])
+                )
+            else:
+                r.append(item)
+        t.add_row(r)
+    t.align = "l"
+    return str(t)
+
+
+def maplist2dict(dlist):
+    """ Convert a list of tuples into a dictionary
+    """
+    return {k[0]: k[1] for k in dlist}

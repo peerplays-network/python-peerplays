@@ -3,6 +3,7 @@ from pprint import pprint
 from prettytable import PrettyTable
 from .decorators import onlineChain
 from .main import main
+from .ui import pretty_print
 
 from peerplays.asset import Asset
 from peerplays.sport import Sport, Sports
@@ -19,29 +20,13 @@ def bookie():
     pass
 
 
-def pretty_print(o):
-    t = PrettyTable(o[0].keys())
-    for items in o:
-        r = list()
-        for item in items.values():
-            if isinstance(item, list):
-                r.append(
-                    "\n".join(["{}: {}".format(v[0], v[1]) for v in item])
-                )
-            else:
-                r.append(item)
-        t.add_row(r)
-    t.align = "l"
-    return str(t)
-
-
 @bookie.command()
 @click.pass_context
 @onlineChain
 def sports(ctx):
     """ [bookie] List sports """
     sports = Sports(peerplays_instance=ctx.peerplays)
-    click.echo(pretty_print(sports))
+    click.echo(pretty_print(sports, ctx=ctx))
 
 
 @bookie.command()
@@ -54,7 +39,7 @@ def eventgroups(ctx, sport):
         :param str sport: Sports id
     """
     sport = Sport(sport, peerplays_instance=ctx.peerplays)
-    click.echo(pretty_print(sport.eventgroups))
+    click.echo(pretty_print(sport.eventgroups, ctx=ctx))
 
 
 @bookie.command()
@@ -67,7 +52,7 @@ def events(ctx, eventgroup):
         :param str eventgroup: Event Group id
     """
     eg = EventGroup(eventgroup, peerplays_instance=ctx.peerplays)
-    click.echo(pretty_print(eg.events))
+    click.echo(pretty_print(eg.events, ctx=ctx))
 
 
 @bookie.command()
@@ -80,7 +65,7 @@ def bmgs(ctx, event):
         :param str event: Event id
     """
     eg = Event(event, peerplays_instance=ctx.peerplays)
-    click.echo(pretty_print(eg.bettingmarketgroups))
+    click.echo(pretty_print(eg.bettingmarketgroups, ctx=ctx))
 
 
 @bookie.command()
@@ -93,7 +78,7 @@ def bettingmarkets(ctx, bmg):
         :param str bmg: Betting market id
     """
     bmg = BettingMarketGroup(bmg, peerplays_instance=ctx.peerplays)
-    click.echo(pretty_print(bmg.bettingmarkets))
+    click.echo(pretty_print(bmg.bettingmarkets, ctx=ctx))
 
 
 @bookie.command()
@@ -103,7 +88,7 @@ def rules(ctx):
     """ [bookie] List all rules
     """
     rules = Rules(peerplays_instance=ctx.peerplays)
-    click.echo(pretty_print(rules))
+    click.echo(pretty_print(rules, ctx=ctx))
 
 
 @bookie.command()
@@ -129,3 +114,66 @@ def rule(ctx, rule):
     click.echo(
         "\n".join(["{}: {}".format(v[0], v[1]) for v in rule["description"]])
     )
+
+
+@bookie.command()
+@click.argument("sport", default=None, required=False)
+@click.pass_context
+@onlineChain
+def list(ctx, sport):
+    """ [bookie] list the entire thing
+    """
+    from .ui import maplist2dict
+    from tqdm import tqdm
+    from treelib import Node, Tree
+    tree = Tree()
+    tree.create_node("sports", "root")
+
+    def formatname(o):
+        if "name" in o:
+            name = o.get("name")
+        elif "description" in o:
+            name = o.get("description")
+        else:
+            name = []
+        return "{} ({})".format(
+            maplist2dict(name).get("en"),
+            o["id"]
+        )
+
+    if sport:
+        sports = [Sport(sport, peerplays_instance=ctx.peerplays)]
+    else:
+        sports = Sports()
+
+    for sport in tqdm(sports):
+        tree.create_node(
+            formatname(sport),
+            sport["id"],
+            parent="root")
+
+        for eg in tqdm(sport.eventgroups):
+            tree.create_node(
+                formatname(eg),
+                eg["id"],
+                parent=sport["id"])
+
+            for e in tqdm(eg.events):
+                tree.create_node(
+                    formatname(e),
+                    e["id"],
+                    parent=eg["id"])
+
+                for bmg in tqdm(e.bettingmarketgroups):
+                    tree.create_node(
+                        formatname(bmg),
+                        bmg["id"],
+                        parent=e["id"])
+
+                    for bm in tqdm(bmg.bettingmarkets):
+                        tree.create_node(
+                            formatname(bm),
+                            bm["id"],
+                            parent=bmg["id"])
+
+    tree.show()

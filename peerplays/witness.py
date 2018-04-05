@@ -52,3 +52,18 @@ class Witnesses(list):
                 for x in self.schedule
             ]
         )
+
+    def __contains__(self, item):
+        from .account import Account
+        if BlockchainObject.objectid_valid(item):
+            id = item
+        elif isinstance(item, Account):
+            id = item["id"]
+        else:
+            account = Account(item, peerplays_instance=self.peerplays)
+            id = account["id"]
+
+        return (
+            any([id == x["id"] for x in self]) or
+            any([id == x["witness_account"] for x in self])
+        )
