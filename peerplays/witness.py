@@ -38,20 +38,32 @@ class Witness(BlockchainObject):
 class Witnesses(list):
     """ Obtain a list of **active** witnesses and the current schedule
 
+        :param bool only_active: (False) Only return witnesses that are
+            actively producing blocks
         :param peerplays peerplays_instance: PeerPlays() instance to use when
             accesing a RPC
     """
-    def __init__(self, peerplays_instance=None):
+    def __init__(self, only_active=False, peerplays_instance=None):
         self.peerplays = peerplays_instance or shared_peerplays_instance()
         self.schedule = self.peerplays.rpc.get_object(
             "2.12.0").get("current_shuffled_witnesses", [])
 
-        super(Witnesses, self).__init__(
-            [
-                Witness(x, lazy=True, peerplays_instance=self.peerplays)
-                for x in self.schedule
-            ]
-        )
+        witnesses = [
+            Witness(x, lazy=True, peerplays_instance=self.peerplays)
+            for x in self.schedule
+        ]
+
+        if only_active:
+            account = Account(
+                "witness-account",
+                peerplays_instance=self.peerplays)
+            filter_by = [x[0] for x in account["active"]["account_auths"]]
+            witnesses = list(
+                filter(
+                    lambda x: x["witness_account"] in filter_by,
+                    witnesses))
+
+        super(Witnesses, self).__init__(witnesses)
 
     def __contains__(self, item):
         from .account import Account
