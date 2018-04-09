@@ -15,4 +15,9 @@ known_chains = {
         "chain_id": "be6b79295e728406cbb7494bcb626e62ad278fa4018699cf8f75739f4c1a81fd",
         "core_symbol": "PPYTEST",
         "prefix": "PPYTEST"},
+    "PPYCHARLIE": {
+        "chain_id": "b7ae4b1e64e5b46b34afff9ba5782c6d7b2a93ecfaa00a376e60f1b72c5c6cc8",
+        "core_symbol": "PPY",
+        "prefix": "PPY"
+    }
 }
