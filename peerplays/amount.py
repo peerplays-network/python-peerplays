@@ -52,9 +52,9 @@ class Amount(dict):
     """
     def __init__(
         self,
-        *args,
         amount=None,
         asset=None,
+        *args,
         **kwargs,
     ):
         self["asset"] = {}
