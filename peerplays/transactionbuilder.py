@@ -97,6 +97,9 @@ class ProposalBuilder:
             return dict()
         return raw.json()
 
+    def __dict__(self):
+        return self.json()
+
     def get_raw(self):
         """ Returns an instance of base "Operations" for further processing
         """

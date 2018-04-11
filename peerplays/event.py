@@ -30,6 +30,14 @@ class Event(BlockchainObject):
         from .bettingmarketgroup import BettingMarketGroups
         return BettingMarketGroups(self["id"])
 
+    def set_status(self, status, scores=[], **kwargs):
+        return self.blockchain.event_update_status(
+            self["id"],
+            status,
+            scores=scores,
+            **kwargs
+        )
+
 
 class Events(list):
     """ List of all available events in an eventgroup

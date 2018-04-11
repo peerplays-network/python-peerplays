@@ -30,6 +30,10 @@ class BettingMarketGroup(BlockchainObject):
         from .bettingmarket import BettingMarkets
         return BettingMarkets(self["id"])
 
+    def resolve(self, results, **kwargs):
+        return self.blockchain.betting_market_resolve(
+            self["id"], results, **kwargs
+        )
 
 class BettingMarketGroups(list):
     """ List of all available BettingMarketGroups
