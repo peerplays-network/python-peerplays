@@ -10,7 +10,7 @@ class Asset(BlockchainObject):
         :param str Asset: Symbol name or object id of an asset
         :param bool lazy: Lazy loading
         :param bool full: Also obtain bitasset-data and dynamic asset dat
-        :param peerplays.peerplays.PeerPlays peerplays_instance: PeerPlays
+        :param peerplays.peerplays.PeerPlays blockchain_instance: PeerPlays
             instance
         :returns: All data of an asset
         :rtype: dict
@@ -21,33 +21,22 @@ class Asset(BlockchainObject):
     """
     type_id = 3
 
-    def __init__(
-        self,
-        asset,
-        lazy=False,
-        full=False,
-        peerplays_instance=None
-    ):
-        self.full = full
-        super().__init__(
-            asset,
-            lazy=lazy,
-            full=full,
-            peerplays_instance=peerplays_instance,
-        )
+    def __init__(self, *args, **kwargs):
+        self.full = kwargs.pop("full", False)
+        super().__init__(*args, **kwargs)
 
     def refresh(self):
         """ Refresh the data from the API server
         """
-        asset = self.peerplays.rpc.get_asset(self.identifier)
+        asset = self.blockchain.rpc.get_asset(self.identifier)
         if not asset:
             raise AssetDoesNotExistsException
         super(Asset, self).__init__(asset)
         if self.full:
             if "bitasset_data_id" in asset:
-                self["bitasset_data"] = self.peerplays.rpc.get_object(
+                self["bitasset_data"] = self.blockchain.rpc.get_object(
                     asset["bitasset_data_id"])
-            self["dynamic_asset_data"] = self.peerplays.rpc.get_object(
+            self["dynamic_asset_data"] = self.blockchain.rpc.get_object(
                 asset["dynamic_asset_data_id"])
 
         # Permissions and flags

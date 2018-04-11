@@ -1,4 +1,4 @@
-from peerplays.instance import shared_peerplays_instance
+from peerplays.instance import BlockchainInstance
 from .asset import Asset
 
 
@@ -10,7 +10,7 @@ class Amount(dict):
         :param list args: Allows to deal with different representations of an amount
         :param float amount: Let's create an instance with a specific amount
         :param str asset: Let's you create an instance with a specific asset (symbol)
-        :param peerplays.peerplays.PeerPlays peerplays_instance: PeerPlays instance
+        :param peerplays.peerplays.PeerPlays blockchain_instance: PeerPlays instance
         :returns: All data required to represent an Amount/Asset
         :rtype: dict
         :raises ValueError: if the data provided is not recognized
@@ -50,10 +50,16 @@ class Amount(dict):
             Amount("1 USD") * 2
             Amount("15 GOLD") + Amount("0.5 GOLD")
     """
-    def __init__(self, *args, amount=None, asset=None, peerplays_instance=None):
+    def __init__(
+        self,
+        *args,
+        amount=None,
+        asset=None,
+        **kwargs,
+    ):
         self["asset"] = {}
 
-        self.peerplays = peerplays_instance or shared_peerplays_instance()
+        BlockchainInstance.__init__(self, *args, **kwargs)
 
         if len(args) == 1 and isinstance(args[0], Amount):
             # Copy Asset object
@@ -63,13 +69,13 @@ class Amount(dict):
 
         elif len(args) == 1 and isinstance(args[0], str):
             self["amount"], self["symbol"] = args[0].split(" ")
-            self["asset"] = Asset(self["symbol"], peerplays_instance=self.peerplays)
+            self["asset"] = Asset(self["symbol"], blockchain_instance=self.blockchain)
 
         elif (len(args) == 1 and
                 isinstance(args[0], dict) and
                 "amount" in args[0] and
                 "asset_id" in args[0]):
-            self["asset"] = Asset(args[0]["asset_id"], peerplays_instance=self.peerplays)
+            self["asset"] = Asset(args[0]["asset_id"], blockchain_instance=self.blockchain)
             self["symbol"] = self["asset"]["symbol"]
             self["amount"] = int(args[0]["amount"]) / 10 ** self["asset"]["precision"]
 
@@ -77,7 +83,7 @@ class Amount(dict):
                 isinstance(args[0], dict) and
                 "amount" in args[0] and
                 "asset" in args[0]):
-            self["asset"] = Asset(args[0]["asset"], peerplays_instance=self.peerplays)
+            self["asset"] = Asset(args[0]["asset"], blockchain_instance=self.blockchain)
             self["symbol"] = self["asset"]["symbol"]
             self["amount"] = int(args[0]["amount"]) / 10 ** self["asset"]["precision"]
 
@@ -88,7 +94,7 @@ class Amount(dict):
 
         elif len(args) == 2 and isinstance(args[1], str):
             self["amount"] = args[0]
-            self["asset"] = Asset(args[1], peerplays_instance=self.peerplays)
+            self["asset"] = Asset(args[1], blockchain_instance=self.blockchain)
             self["symbol"] = self["asset"]["symbol"]
 
         elif isinstance(amount, (int, float)) and asset and isinstance(asset, Asset):
@@ -118,7 +124,7 @@ class Amount(dict):
         return Amount(
             amount=self["amount"],
             asset=self["asset"].copy(),
-            peerplays_instance=self.peerplays)
+            blockchain_instance=self.blockchain)
 
     @property
     def amount(self):

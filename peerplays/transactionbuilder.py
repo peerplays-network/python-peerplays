@@ -9,7 +9,7 @@ from .exceptions import (
     InvalidWifError,
     WalletLocked
 )
-from peerplays.instance import shared_peerplays_instance
+from .instance import BlockchainInstance
 import logging
 log = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class ProposalBuilder:
             proposal
         :param peerplays.transactionbuilder.TransactionBuilder: Specify
             your own instance of transaction builder (optional)
-        :param peerplays.peerplays.PeerPlays peerplays_instance: PeerPlays
+        :param peerplays.peerplays.PeerPlays blockchain_instance: PeerPlays
             instance
     """
     def __init__(
@@ -34,11 +34,10 @@ class ProposalBuilder:
         proposal_expiration=None,
         proposal_review=None,
         parent=None,
-        peerplays_instance=None,
         *args,
         **kwargs
     ):
-        self.peerplays = peerplays_instance or shared_peerplays_instance()
+        BlockchainInstance.__init__(self, *args, **kwargs)
 
         self.set_expiration(proposal_expiration or 2 * 24 * 60 * 60)
         self.set_review(proposal_review)
@@ -106,7 +105,7 @@ class ProposalBuilder:
         ops = [operations.Op_wrapper(op=o) for o in list(self.ops)]
         proposer = Account(
             self.proposer,
-            peerplays_instance=self.peerplays
+            blockchain_instance=self.blockchain
         )
         data = {
             "fee": {"amount": 0, "asset_id": "1.3.0"},
@@ -132,9 +131,9 @@ class TransactionBuilder(dict):
         self,
         tx={},
         proposer=None,
-        peerplays_instance=None
+        **kwargs
     ):
-        self.peerplays = peerplays_instance or shared_peerplays_instance()
+        BlockchainInstance.__init__(self, **kwargs)
         self.clear()
         if not isinstance(tx, dict):
             raise ValueError("Invalid TransactionBuilder Format")
@@ -202,10 +201,10 @@ class TransactionBuilder(dict):
             and permission is supposed to sign the transaction
         """
         assert permission in ["active", "owner"], "Invalid permission"
-        account = Account(account, peerplays_instance=self.peerplays)
+        account = Account(account, blockchain_instance=self.blockchain)
         required_treshold = account[permission]["weight_threshold"]
 
-        if self.peerplays.wallet.locked():
+        if self.blockchain.wallet.locked():
             raise WalletLocked()
 
         def fetchkeys(account, perm, level=0):
@@ -214,7 +213,7 @@ class TransactionBuilder(dict):
             r = []
             for authority in account[perm]["key_auths"]:
                 try:
-                    wif = self.peerplays.wallet.getPrivateKeyForPublicKey(
+                    wif = self.blockchain.wallet.getPrivateKeyForPublicKey(
                         authority[0])
                     r.append([wif, authority[1]])
                 except Exception:
@@ -224,7 +223,7 @@ class TransactionBuilder(dict):
                 # go one level deeper
                 for authority in account[perm]["account_auths"]:
                     auth_account = Account(
-                        authority[0], peerplays_instance=self.peerplays)
+                        authority[0], blockchain_instance=self.blockchain)
                     r.extend(fetchkeys(auth_account, perm, level + 1))
 
             return r
@@ -233,12 +232,12 @@ class TransactionBuilder(dict):
             # is the account an instance of public key?
             if isinstance(account, PublicKey):
                 self.wifs.add(
-                    self.peerplays.wallet.getPrivateKeyForPublicKey(
+                    self.blockchain.wallet.getPrivateKeyForPublicKey(
                         str(account)
                     )
                 )
             else:
-                account = Account(account, peerplays_instance=self.peerplays)
+                account = Account(account, blockchain_instance=self.blockchain)
                 required_treshold = account[permission]["weight_threshold"]
                 keys = fetchkeys(account, permission)
                 if permission != "owner":
@@ -275,10 +274,10 @@ class TransactionBuilder(dict):
                 ops.extend([Operation(op)])
 
         # We no wrap everything into an actual transaction
-        ops = transactions.addRequiredFees(self.peerplays.rpc, ops)
-        expiration = transactions.formatTimeFromNow(self.peerplays.expiration)
+        ops = transactions.addRequiredFees(self.blockchain.rpc, ops)
+        expiration = transactions.formatTimeFromNow(self.blockchain.expiration)
         ref_block_num, ref_block_prefix = transactions.getBlockParams(
-            self.peerplays.rpc)
+            self.blockchain.rpc)
         self.tx = Signed_Transaction(
             ref_block_num=ref_block_num,
             ref_block_prefix=ref_block_prefix,
@@ -304,19 +303,19 @@ class TransactionBuilder(dict):
 
         # Legacy compatibility!
         # If we are doing a proposal, obtain the account from the proposer_id
-        if self.peerplays.proposer:
+        if self.blockchain.proposer:
             proposer = Account(
-                self.peerplays.proposer,
-                peerplays_instance=self.peerplays)
+                self.blockchain.proposer,
+                blockchain_instance=self.blockchain)
             self.wifs = set()
             self.signing_accounts = list()
             self.appendSigner(proposer["id"], "active")
 
         # We need to set the default prefix, otherwise pubkeys are
         # presented wrongly!
-        if self.peerplays.rpc:
+        if self.blockchain.rpc:
             operations.default_prefix = (
-                self.peerplays.rpc.chain_params["prefix"])
+                self.blockchain.rpc.chain_params["prefix"])
         elif "blockchain" in self:
             operations.default_prefix = self["blockchain"]["prefix"]
 
@@ -328,14 +327,14 @@ class TransactionBuilder(dict):
         if not any(self.wifs):
             raise MissingKeyError
 
-        signedtx.sign(self.wifs, chain=self.peerplays.rpc.chain_params)
+        signedtx.sign(self.wifs, chain=self.blockchain.rpc.chain_params)
         self["signatures"].extend(signedtx.json().get("signatures"))
 
     def verify_authority(self):
         """ Verify the authority of the signed transaction
         """
         try:
-            if not self.peerplays.rpc.verify_authority(self.json()):
+            if not self.blockchain.rpc.verify_authority(self.json()):
                 raise InsufficientAuthorityError
         except Exception as e:
             raise e
@@ -354,19 +353,19 @@ class TransactionBuilder(dict):
 
         ret = self.json()
 
-        if self.peerplays.nobroadcast:
+        if self.blockchain.nobroadcast:
             log.warning("Not broadcasting anything!")
             self.clear()
             return ret
 
         # Broadcast
         try:
-            if self.peerplays.blocking:
-                ret = self.peerplays.rpc.broadcast_transaction_synchronous(
+            if self.blockchain.blocking:
+                ret = self.blockchain.rpc.broadcast_transaction_synchronous(
                     ret, api="network_broadcast")
                 ret.update(**ret.get("trx"))
             else:
-                self.peerplays.rpc.broadcast_transaction(
+                self.blockchain.rpc.broadcast_transaction(
                     ret, api="network_broadcast")
         except Exception as e:
             raise e
@@ -392,7 +391,7 @@ class TransactionBuilder(dict):
             FIXME: Does not work with owner keys!
         """
         self.constructTx()
-        self["blockchain"] = self.peerplays.rpc.chain_params
+        self["blockchain"] = self.blockchain.rpc.chain_params
 
         if isinstance(account, PublicKey):
             self["missing_signatures"] = [
@@ -421,7 +420,8 @@ class TransactionBuilder(dict):
             for account_auth in authority["account_auths"]:
                 account_auth_account = Account(account_auth[0])
                 self["missing_signatures"].extend(
-                    [x[0] for x in account_auth_account[permission]["key_auths"]]
+                    [x[0]
+                     for x in account_auth_account[permission]["key_auths"]]
                 )
 
     def appendMissingSignatures(self):
@@ -431,6 +431,6 @@ class TransactionBuilder(dict):
         """
         missing_signatures = self.get("missing_signatures", [])
         for pub in missing_signatures:
-            wif = self.peerplays.wallet.getPrivateKeyForPublicKey(pub)
+            wif = self.blockchain.wallet.getPrivateKeyForPublicKey(pub)
             if wif:
                 self.appendWif(wif)

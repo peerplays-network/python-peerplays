@@ -1,4 +1,4 @@
-from peerplays.instance import shared_peerplays_instance
+from peerplays.instance import BlockchainInstance
 from datetime import datetime, timedelta
 
 
@@ -53,7 +53,7 @@ class ObjectCache(dict):
             len(self.keys()), self.default_expiration)
 
 
-class BlockchainObject(dict):
+class BlockchainObject(dict, BlockchainInstance):
 
     space_id = 1
     type_id = None
@@ -69,11 +69,10 @@ class BlockchainObject(dict):
         object_id=None,
         lazy=False,
         use_cache=True,
-        peerplays_instance=None,
         *args,
         **kwargs
     ):
-        self.peerplays = peerplays_instance or shared_peerplays_instance()
+        BlockchainInstance.__init__(self, *args, **kwargs)
         self.cached = False
         self.identifier = None
 

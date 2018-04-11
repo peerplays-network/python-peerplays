@@ -1,7 +1,34 @@
 import peerplays as ppy
 
 
+class BlockchainInstance():
+    """ This is a class that allows compatibility with previous
+        naming conventions
+    """
+    def __init__(self, *args, **kwargs):
+        if "peerplays_instance" in kwargs and kwargs["peerplays_instance"]:
+            self.blockchain = kwargs["peerplays_instance"]
+        elif "blockchain_instance" in kwargs and kwargs["blockchain_instance"]:
+            self.blockchain = kwargs["blockchain_instance"]
+        else:
+            self.blockchain = shared_peerplays_instance()
+
+    @property
+    def peerplays(self):
+        """ Alias for the specific blockchain
+        """
+        return self.blockchain
+
+    @property
+    def chain(self):
+        """ Short form for blockchain (for the lazy)
+        """
+        return self.blockchain
+
+
 class SharedInstance():
+    """ This class merely offers a singelton for the Blockchain Instance
+    """
     instance = None
     config = {}
 

@@ -1,4 +1,4 @@
-from peerplays.instance import shared_peerplays_instance
+from .instance import BlockchainInstance
 from .account import Account
 from .exceptions import WitnessDoesNotExistsException
 from .blockchainobject import BlockchainObject
@@ -8,7 +8,7 @@ class Witness(BlockchainObject):
     """ Read data about a witness in the chain
 
         :param str account_name: Name of the witness
-        :param peerplays peerplays_instance: PeerPlays() instance to use when
+        :param peerplays blockchain_instance: PeerPlays() instance to use when
             accesing a RPC
 
     """
@@ -18,14 +18,14 @@ class Witness(BlockchainObject):
         if self.test_valid_objectid(self.identifier):
             _, i, _ = self.identifier.split(".")
             if int(i) == 6:
-                witness = self.peerplays.rpc.get_object(self.identifier)
+                witness = self.blockchain.rpc.get_object(self.identifier)
             else:
-                witness = self.peerplays.rpc.get_witness_by_account(
+                witness = self.blockchain.rpc.get_witness_by_account(
                     self.identifier)
         else:
             account = Account(
-                self.identifier, peerplays_instance=self.peerplays)
-            witness = self.peerplays.rpc.get_witness_by_account(account["id"])
+                self.identifier, blockchain_instance=self.blockchain)
+            witness = self.blockchain.rpc.get_witness_by_account(account["id"])
         if not witness:
             raise WitnessDoesNotExistsException
         super(Witness, self).__init__(witness)
@@ -40,23 +40,23 @@ class Witnesses(list):
 
         :param bool only_active: (False) Only return witnesses that are
             actively producing blocks
-        :param peerplays peerplays_instance: PeerPlays() instance to use when
+        :param peerplays blockchain_instance: PeerPlays() instance to use when
             accesing a RPC
     """
-    def __init__(self, only_active=False, peerplays_instance=None):
-        self.peerplays = peerplays_instance or shared_peerplays_instance()
-        self.schedule = self.peerplays.rpc.get_object(
+    def __init__(self, only_active=False, **kwargs):
+        BlockchainInstance.__init__(self, **kwargs)
+        self.schedule = self.blockchain.rpc.get_object(
             "2.12.0").get("current_shuffled_witnesses", [])
 
         witnesses = [
-            Witness(x, lazy=True, peerplays_instance=self.peerplays)
+            Witness(x, lazy=True, blockchain_instance=self.blockchain)
             for x in self.schedule
         ]
 
         if only_active:
             account = Account(
                 "witness-account",
-                peerplays_instance=self.peerplays)
+                blockchain_instance=self.blockchain)
             filter_by = [x[0] for x in account["active"]["account_auths"]]
             witnesses = list(
                 filter(
@@ -72,7 +72,7 @@ class Witnesses(list):
         elif isinstance(item, Account):
             id = item["id"]
         else:
-            account = Account(item, peerplays_instance=self.peerplays)
+            account = Account(item, blockchain_instance=self.blockchain)
             id = account["id"]
 
         return (

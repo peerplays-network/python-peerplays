@@ -2,7 +2,7 @@ import logging
 import os
 from graphenebase import bip38
 from peerplaysbase.account import PrivateKey, GPHPrivateKey
-from peerplays.instance import shared_peerplays_instance
+from .instance import BlockchainInstance
 from .account import Account
 from .exceptions import (
     KeyNotFound,
@@ -58,8 +58,8 @@ class Wallet():
     keys = {}  # struct with pubkey as key and wif as value
     keyMap = {}  # type:wif pairs to force certain keys
 
-    def __init__(self, *args, peerplays_instance=None, **kwargs):
-        self.peerplays = peerplays_instance or shared_peerplays_instance()
+    def __init__(self, *args, **kwargs):
+        BlockchainInstance.__init__(self, *args, **kwargs)
 
         # Compatibility after name change from wif->keys
         if "wif" in kwargs and "keys" not in kwargs:
@@ -78,8 +78,8 @@ class Wallet():
 
     @property
     def prefix(self):
-        if self.peerplays.is_connected():
-            prefix = self.peerplays.prefix
+        if self.blockchain.is_connected():
+            prefix = self.blockchain.prefix
         else:
             # If not connected, load prefix from config
             prefix = config["prefix"]
@@ -87,9 +87,9 @@ class Wallet():
 
     @property
     def rpc(self):
-        if not self.peerplays.is_connected():
+        if not self.blockchain.is_connected():
             raise OfflineHasNoRPCException("No RPC available in offline mode!")
-        return self.peerplays.rpc
+        return self.blockchain.rpc
 
     def setKeys(self, loadkeys):
         """ This method is strictly only for in memory keys that are
@@ -344,7 +344,7 @@ class Wallet():
         """
         for id in self.getAccountsFromPublicKey(pub):
             try:
-                account = Account(id, peerplays_instance=self.peerplays)
+                account = Account(id, blockchain_instance=self.blockchain)
             except:
                 continue
             yield {"name": account["name"],
@@ -361,7 +361,7 @@ class Wallet():
             return {"name": None, "type": None, "pubkey": pub}
         else:
             try:
-                account = Account(name, peerplays_instance=self.peerplays)
+                account = Account(name, blockchain_instance=self.blockchain)
             except:
                 return
             return {"name": account["name"],

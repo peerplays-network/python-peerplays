@@ -1,4 +1,4 @@
-from peerplays.instance import shared_peerplays_instance
+from peerplays.instance import BlockchainInstance
 from .exceptions import AccountDoesNotExistsException
 from .blockchainobject import BlockchainObject
 
@@ -7,7 +7,7 @@ class Account(BlockchainObject):
     """ This class allows to easily access Account data
 
         :param str account_name: Name of the account
-        :param peerplays.peerplays.PeerPlays peerplays_instance: PeerPlays
+        :param peerplays.peerplays.PeerPlays blockchain_instance: PeerPlays
         instance
         :param bool full: Obtain all account data including orders, positions, etc.
         :param bool lazy: Use lazy loading
@@ -38,46 +38,39 @@ class Account(BlockchainObject):
 
     def __init__(
         self,
-        account,
-        full=False,
-        lazy=False,
-        peerplays_instance=None
+        *args,
+        **kwargs
     ):
-        self.full = full
-        super().__init__(
-            account,
-            lazy=lazy,
-            full=full,
-            peerplays_instance=peerplays_instance,
-        )
+        self.full = kwargs.pop("full", False)
+        super().__init__(*args, **kwargs)
 
     def refresh(self):
         """ Refresh/Obtain an account's data from the API server
         """
         import re
         if re.match("^1\.2\.[0-9]*$", self.identifier):
-            account = self.peerplays.rpc.get_objects([self.identifier])[0]
+            account = self.blockchain.rpc.get_objects([self.identifier])[0]
         else:
-            account = self.peerplays.rpc.lookup_account_names(
+            account = self.blockchain.rpc.lookup_account_names(
                 [self.identifier])[0]
         if not account:
             raise AccountDoesNotExistsException(self.identifier)
         self.identifier = account["id"]
 
         if self.full:
-            account = self.peerplays.rpc.get_full_accounts(
+            account = self.blockchain.rpc.get_full_accounts(
                 [account["id"]], False)[0][1]
             super(Account, self).__init__(
-                    account["account"],
-                    peerplays_instance=self.peerplays
-                )
+                account["account"],
+                blockchain_instance=self.blockchain
+            )
             for k, v in account.items():
                 if k != "account":
                     self[k] = v
         else:
             super(Account, self).__init__(
-                account, 
-                peerplays_instance=self.peerplays
+                account,
+                blockchain_instance=self.blockchain
             )
 
     @property
@@ -90,9 +83,9 @@ class Account(BlockchainObject):
             :class:`peerplays.amount.Amount`.
         """
         from .amount import Amount
-        balances = self.peerplays.rpc.get_account_balances(self["id"], [])
+        balances = self.blockchain.rpc.get_account_balances(self["id"], [])
         return [
-            Amount(b, peerplays_instance=self.peerplays)
+            Amount(b, blockchain_instance=self.blockchain)
             for b in balances if int(b["amount"]) > 0
         ]
 
@@ -131,7 +124,7 @@ class Account(BlockchainObject):
         _limit = 100
         cnt = 0
 
-        mostrecent = self.peerplays.rpc.get_account_history(
+        mostrecent = self.blockchain.rpc.get_account_history(
             self["id"],
             "1.11.{}".format(0),
             1,
@@ -147,7 +140,7 @@ class Account(BlockchainObject):
 
         while True:
             # RPC call
-            txs = self.peerplays.rpc.get_account_history(
+            txs = self.blockchain.rpc.get_account_history(
                 self["id"],
                 "1.11.{}".format(last),
                 _limit,
@@ -174,10 +167,10 @@ class Account(BlockchainObject):
             first = int(txs[-1]["id"].split(".")[2])
 
     def upgrade(self):
-        return self.peerplays.upgrade_account(account=self)
+        return self.blockchain.upgrade_account(account=self)
 
 
-class AccountUpdate(dict):
+class AccountUpdate(dict, BlockchainInstance):
     """ This purpose of this class is to keep track of account updates
         as they are pushed through by :class:`peerplays.notify.Notify`.
 
@@ -200,15 +193,15 @@ class AccountUpdate(dict):
     def __init__(
         self,
         data,
-        peerplays_instance=None
+        *args,
+        **kwargs
     ):
-        self.peerplays = peerplays_instance or shared_peerplays_instance()
-
+        BlockchainInstance.__init__(self, *args, **kwargs)
         if isinstance(data, dict):
             super(AccountUpdate, self).__init__(data)
         else:
-            account = Account(data, peerplays_instance=self.peerplays)
-            update = self.peerplays.rpc.get_objects([
+            account = Account(data, blockchain_instance=self.blockchain)
+            update = self.blockchain.rpc.get_objects([
                 "2.6.%s" % (account["id"].split(".")[2])
             ])[0]
             super(AccountUpdate, self).__init__(update)

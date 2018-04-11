@@ -7,7 +7,7 @@ class Block(BlockchainObject):
     """ Read a single block from the chain
 
         :param int block: block number
-        :param peerplays.peerplays.PeerPlays peerplays_instance: PeerPlays
+        :param peerplays.peerplays.PeerPlays blockchain_instance: PeerPlays
             instance
         :param bool lazy: Use lazy loading
 
@@ -30,7 +30,7 @@ class Block(BlockchainObject):
         """ Even though blocks never change, you freshly obtain its contents
             from an API with this method
         """
-        block = self.peerplays.rpc.get_block(self.identifier)
+        block = self.blockchain.rpc.get_block(self.identifier)
         if not block:
             raise BlockDoesNotExistsException
         super(Block, self).__init__(block)
