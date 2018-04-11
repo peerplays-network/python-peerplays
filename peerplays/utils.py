@@ -64,3 +64,9 @@ def test_proposal_in_buffer(buf, operation_name, id):
                 id
             )
         )
+
+
+def map2dict(darray):
+    """ Reformat a list of maps to a dictionary
+    """
+    return {v[0]: v[1] for v in darray}

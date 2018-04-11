@@ -2,7 +2,17 @@ import time
 import unittest
 from peerplays import PeerPlays, exceptions
 from peerplays.instance import set_shared_peerplays_instance
-from peerplays.blockchainobject import ObjectCache
+from peerplays.blockchainobject import BlockchainObject, ObjectCache
+
+
+test_objects = [
+  {'id': '1.19.5',
+   "test": "passed"},
+  {'id': '1.2.0',
+   "name": "committee-account-passed"
+  }
+
+]
 
 
 class Testcases(unittest.TestCase):
@@ -31,3 +41,16 @@ class Testcases(unittest.TestCase):
 
         # Get
         self.assertEqual(cache.get("foo", "New"), "New")
+
+    def test_predefined_data(self):
+        from peerplays.account import Account
+        # Inject test data into cache
+        _cache = ObjectCache(default_expiration=60 * 60 * 1)
+        for i in test_objects:
+            _cache[i["id"]] = i
+        self.assertEqual(_cache['1.19.5']["test"], "passed")
+
+        BlockchainObject._cache = _cache
+
+        account = Account("1.2.0")
+        self.assertEqual(account["name"], "committee-account-passed")

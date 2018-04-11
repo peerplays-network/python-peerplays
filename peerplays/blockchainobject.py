@@ -4,13 +4,25 @@ from datetime import datetime, timedelta
 
 class ObjectCache(dict):
 
-    def __init__(self, initial_data={}, default_expiration=10):
+    def __init__(
+        self,
+        initial_data={},
+        default_expiration=10,
+        no_overwrite=False,
+    ):
         super().__init__(initial_data)
+
+        # Expiration
         self.default_expiration = default_expiration
 
+        # This allows nicer testing
+        self.no_overwrite = no_overwrite
+
     def __setitem__(self, key, value):
-        if key in self:
+        if key in self and not self.no_overwrite:
             del self[key]
+        elif key in self and self.no_overwrite:
+            return
         data = {
             "expires": datetime.utcnow() + timedelta(
                 seconds=self.default_expiration),

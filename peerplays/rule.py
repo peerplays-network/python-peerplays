@@ -20,6 +20,18 @@ class Rule(BlockchainObject):
             raise RuleDoesNotExistException
         super().__init__(rule)
 
+    @property
+    def grading(self):
+        import json
+        from .utils import map2dict
+        desc = map2dict(self["description"])
+        assert "grading" in desc, "Rule {} has no grading!".format(
+            self["id"])
+        grading = json.loads(desc.get("grading", {}))
+        assert "metric" in grading
+        assert "resolutions" in grading
+        return grading
+
 
 class Rules(list):
     """ List of all Rules
