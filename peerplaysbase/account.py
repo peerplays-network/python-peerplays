@@ -1,3 +1,6 @@
+import hashlib
+import sys
+from binascii import hexlify
 from graphenebase.account import (
     PasswordKey as GPHPasswordKey,
     BrainKey as GPHBrainKey,
@@ -16,6 +19,17 @@ class PasswordKey(GPHPasswordKey):
 
     def __init__(self, *args, **kwargs):
         super(PasswordKey, self).__init__(*args, **kwargs)
+
+    def get_private(self):
+        """ Derive private key from the brain key and the current sequence
+            number
+        """
+        if sys.version > '3':
+            a = bytes(self.password + self.account + self.role, 'utf8')
+        else:
+            a = bytes(self.password + self.account + self.role).encode('utf8')
+        s = hashlib.sha256(a).digest()
+        return PrivateKey(hexlify(s).decode('ascii'))
 
 
 class BrainKey(GPHBrainKey):
