@@ -52,12 +52,13 @@ class Amount(dict):
     """
     def __init__(
         self,
-        amount=None,
-        asset=None,
         *args,
-        **kwargs,
+        **kwargs
     ):
         self["asset"] = {}
+
+        amount = kwargs.get("amount", None)
+        asset = kwargs.get("asset", None)
 
         BlockchainInstance.__init__(self, *args, **kwargs)
 
