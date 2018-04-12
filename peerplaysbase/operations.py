@@ -24,6 +24,8 @@ from .objects import (
     BettingMarketResolution,
     BettingMarketStatus,
     BettingMarketGroupStatus,
+    TournamentOptions,
+    GameSpecificMoves
 )
 default_prefix = "PPY"
 
@@ -821,5 +823,69 @@ class Bet_cancel(GrapheneObject):
                 ('fee', Asset(kwargs["fee"])),
                 ('bettor_id', ObjectId(kwargs["bettor_id"], "account")),
                 ('bet_to_cancel', ObjectId(kwargs["bet_to_cancel"], "bet")),
+                ('extensions', Set([])),
+            ]))
+
+
+class Tournament_create(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('creator', ObjectId(kwargs["creator"], "account")),
+                ('options', TournamentOptions(kwargs["options"])),
+                ('extensions', Set([])),
+            ]))
+
+
+class Tournament_join(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('payer_account_id', ObjectId(kwargs["payer_account_id"], "account")),
+                ('player_account_id', ObjectId(kwargs["player_account_id"], "account")),
+                ('tournament_id', ObjectId(kwargs["tournament_id"], "tournament")),
+                ('buy_in', Asset(kwargs["buy_in"])),
+                ('extensions', Set([])),
+            ]))
+
+
+class Tournament_leave(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('canceling_account_id', ObjectId(kwargs["canceling_account_id"], "account")),
+                ('player_account_id', ObjectId(kwargs["player_account_id"], "account")),
+                ('tournament_id', ObjectId(kwargs["tournament_id"], "tournament")),
+                ('extensions', Set([])),
+            ]))
+
+
+class Game_move(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('game_id', ObjectId(kwargs["game_id"], "game")),
+                ('player_account_id', ObjectId(kwargs["player_account_id"], "account")),
+                ('move', GameSpecificMoves(kwargs["move"])),
                 ('extensions', Set([])),
             ]))
