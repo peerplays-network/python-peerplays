@@ -1,3 +1,4 @@
+from binascii import unhexlify
 from graphenebase.types import varint
 
 
@@ -33,3 +34,15 @@ class Enum(Signed_Int):
 
     def __str__(self):
         return str(self.options[self.data])
+
+
+class Sha256():
+    def __init__(self, d):
+        self.data = d
+        assert len(self.data) == 64
+
+    def __bytes__(self):
+        return unhexlify(bytes(self.data, 'ascii'))
+
+    def __str__(self):
+        return str(self.data)

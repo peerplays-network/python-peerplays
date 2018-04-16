@@ -14,7 +14,7 @@ from .objecttypes import object_type
 from .account import PublicKey
 from graphenebase.objects import Operation as GPHOperation
 from .operationids import operations
-from .types import Enum
+from .types import Enum, Sha256
 default_prefix = "PPY"
 
 
@@ -289,4 +289,121 @@ class DividendAssetOptions(GrapheneObject):
                 ('minimum_fee_percentage', Uint64(kwargs["minimum_fee_percentage"])),
                 ('minimum_distribution_interval', Uint32(kwargs["minimum_distribution_interval"])),
                 ('extensions', Set([])),
+            ]))
+
+
+class Rock_paper_scissors_gesture(Enum):
+    options = [
+        "rock",
+        "paper",
+        "scissors",
+        "spock",
+        "lizard"
+    ]
+
+
+class GameSpecificMoves(Static_variant):
+    def __init__(self, o):
+
+        class rock_paper_scissors_throw_commit(GrapheneObject):
+            def __init__(self, *args, **kwargs):
+                if isArgsThisClass(self, args):
+                    self.data = args[0].data
+                else:
+                    if len(args) == 1 and len(kwargs) == 0:
+                        kwargs = args[0]
+                    super().__init__(OrderedDict([
+                        ('nonce1',
+                         Uint64(kwargs["nonce1"])),
+                        ('throw_hash',
+                         Sha256(kwargs["throw_hash"])),
+                    ]))
+
+        class rock_paper_scissors_throw_reveal(GrapheneObject):
+            def __init__(self, *args, **kwargs):
+                if isArgsThisClass(self, args):
+                    self.data = args[0].data
+                else:
+                    if len(args) == 1 and len(kwargs) == 0:
+                        kwargs = args[0]
+                    super().__init__(OrderedDict([
+                        ('nonce2',
+                         Uint64(kwargs["nonce2"])),
+                        ('gesture',
+                         Rock_paper_scissors_gesture(kwargs["gesture"])),
+                    ]))
+
+        id = o[0]
+        if id == 0:
+            data = rock_paper_scissors_throw_commit(o[1])
+        elif id == 1:
+            data = rock_paper_scissors_throw_reveal(o[1])
+        else:
+            raise Exception(
+                "Unknown game-specific move: {}".format(id))
+        super().__init__(data, id)
+
+
+class GameSpecificOptions(Static_variant):
+    def __init__(self, o):
+
+        class rock_paper_scissors_game_options(GrapheneObject):
+            def __init__(self, *args, **kwargs):
+                if isArgsThisClass(self, args):
+                    self.data = args[0].data
+                else:
+                    if len(args) == 1 and len(kwargs) == 0:
+                        kwargs = args[0]
+                    super().__init__(OrderedDict([
+                        ('insurance_enabled',
+                         Bool(kwargs["insurance_enabled"])),
+                        ('time_per_commit_move',
+                         Uint32(kwargs["time_per_commit_move"])),
+                        ('time_per_reveal_move',
+                         Uint32(kwargs["time_per_reveal_move"])),
+                        ('number_of_gestures',
+                         Uint8(kwargs["number_of_gestures"])),
+                    ]))
+
+        id = o[0]
+        if id == 0:
+            data = rock_paper_scissors_game_options(o[1])
+        else:
+            raise Exception("Unknown game-specific options")
+        super().__init__(data, id)
+
+
+class TournamentOptions(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+                self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+
+            start_time = Optional(PointInTime(kwargs["start_time"])
+                                  if "start_time" in kwargs else
+                                  None)
+            start_delay = Optional(Uint32(kwargs["start_delay"])
+                                   if "start_delay" in kwargs else
+                                   None)
+
+            if "meta" in kwargs and kwargs["meta"]:
+                raise NotImplementedError('"meta" cannot yet be used with this library')
+
+            super().__init__(OrderedDict([
+                ('registration_deadline',
+                 PointInTime(kwargs["registration_deadline"])),
+                ('number_of_players',
+                 Uint32(kwargs["number_of_players"])),
+                ('buy_in', Asset(kwargs["buy_in"])),
+                ('whitelist',
+                    Array([ObjectId(x, "account")
+                           for x in kwargs["whitelist"]])),
+                ('start_time', start_time),
+                ('start_delay', start_delay),
+                ('round_delay', Uint32(kwargs["round_delay"])),
+                ('number_of_wins', Uint32(kwargs["number_of_wins"])),
+                ('meta', Optional(None)),
+                ('game_options', GameSpecificOptions(kwargs["game_options"])),
             ]))

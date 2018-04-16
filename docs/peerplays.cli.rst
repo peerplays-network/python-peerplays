@@ -15,6 +15,7 @@ Submodules
    peerplays.cli.main
    peerplays.cli.message
    peerplays.cli.proposal
+   peerplays.cli.rpc
    peerplays.cli.ui
    peerplays.cli.wallet
    peerplays.cli.witness

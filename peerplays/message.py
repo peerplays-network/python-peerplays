@@ -3,8 +3,8 @@ import json
 import logging
 from binascii import hexlify, unhexlify
 from graphenebase.ecdsa import verify_message, sign_message
+from .instance import BlockchainInstance
 from peerplaysbase.account import PublicKey
-from peerplays.instance import shared_peerplays_instance
 from peerplays.account import Account
 from .exceptions import (
     InvalidMessageSignature,
@@ -47,8 +47,8 @@ timestamp={meta[timestamp]}
 
 class Message():
 
-    def __init__(self, message, peerplays_instance=None):
-        self.peerplays = peerplays_instance or shared_peerplays_instance()
+    def __init__(self, message, **kwargs):
+        BlockchainInstance.__init__(self, **kwargs)
         self.message = message
 
     def sign(self, account=None, **kwargs):
@@ -67,8 +67,8 @@ class Message():
             raise ValueError("You need to provide an account")
 
         # Data for message
-        account = Account(account, peerplays_instance=self.peerplays)
-        info = self.peerplays.info()
+        account = Account(account, blockchain_instance=self.blockchain)
+        info = self.blockchain.info()
         meta = dict(
             timestamp=info["time"],
             block=info["head_block_number"],
@@ -76,7 +76,7 @@ class Message():
             account=account["name"])
 
         # wif key
-        wif = self.peerplays.wallet.getPrivateKeyForPublicKey(
+        wif = self.blockchain.wallet.getPrivateKeyForPublicKey(
             account["options"]["memo_key"]
         )
 
@@ -143,7 +143,7 @@ class Message():
         try:
             account = Account(
                 account_name,
-                peerplays_instance=self.peerplays)
+                blockchain_instance=self.blockchain)
         except AccountDoesNotExistsException:
             raise AccountDoesNotExistsException(
                 "Could not find account {}. Are you connected to the right chain?".format(
@@ -168,7 +168,7 @@ class Message():
 
         # Verify pubky
         pk = PublicKey(hexlify(pubkey).decode("ascii"))
-        if format(pk, self.peerplays.prefix) != memo_key:
+        if format(pk, self.blockchain.prefix) != memo_key:
             raise InvalidMessageSignature
 
         return True

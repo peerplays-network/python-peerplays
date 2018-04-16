@@ -622,13 +622,142 @@ class Testcases(unittest.TestCase):
                    "8f872c3b038b8f3844eebedaf82788b94e21f486c")
         self.doit()
 
+    def test_tournament_create(self):
+        self.op = operations.Tournament_create(**{
+            "fee": {
+                "amount": 0,
+                "asset_id": "1.3.0"
+            },
+            "creator": "1.2.0",
+            "options": {
+                "registration_deadline": "1970-01-01T00:00:00",
+                "number_of_players": 8,
+                "buy_in": {
+                    "amount": 9,
+                    "asset_id": "1.3.0"
+                },
+                "whitelist": [],
+                "round_delay": 2,
+                "number_of_wins": 4,
+                "meta": {},
+                "game_options": [
+                    0, {
+                        "insurance_enabled": False,
+                        "time_per_commit_move": 5,
+                        "time_per_reveal_move": 3,
+                        "number_of_gestures": 5
+                    }
+                ]
+            },
+            "extensions": []
+        })
+        self.cm = ("f68585abf4dce7c804570141000000000000000000000000000"
+                   "008000000090000000000000000000000020000000400000000"
+                   "00000500000003000000050000011f6d624fe31225a0af3b7d1"
+                   "33852ebfe36906d3dbd8d72a8e1746ddd96ab0a56f745ac10a0"
+                   "1a3b2fbd5f94f88c235fc374e462c3404d4da6fb9d9420e0d2c"
+                   "15fbc")
+        self.doit()
+
+    def test_tournament_join(self):
+        self.op = operations.Tournament_join(**{
+            "fee": {
+                "amount": 0,
+                "asset_id": "1.3.0"
+            },
+            "payer_account_id": "1.2.0",
+            "player_account_id": "1.2.0",
+            "tournament_id": "1.23.0",
+            "buy_in": {
+                "amount": 0,
+                "asset_id": "1.3.0"
+            },
+            "extensions": []
+        })
+        self.cm = ("f68585abf4dce7c804570142000000000000000000000000000"
+                   "0000000000000000000011f38faa1aa44f1af083ada58ed47a2"
+                   "db97d5798d5ac49202d96cd49acf5d61754456c0f33d619da29"
+                   "d662da14739f6829d7eddb8297cbb4ea96a24b1b96260c861")
+        self.doit()
+
+    def test_tournament_leave(self):
+        self.op = operations.Tournament_leave(**{
+            "fee": {
+                "amount": 0,
+                "asset_id": "1.3.0"
+            },
+            "canceling_account_id": "1.2.0",
+            "player_account_id": "1.2.0",
+            "tournament_id": "1.23.0",
+            "extensions": []
+        })
+        self.cm = ("f68585abf4dce7c804570145000000000000000000000000000"
+                   "0011f6bdc347553ddb982cc486b9554b833b76de62f5ace2391"
+                   "043c71c8bc8ec525311ea4e79b8936bddd52e6989c205e199b0"
+                   "e69829dedd4a96ef2d76b762f8ad796")
+        self.doit()
+
+    def test_game_move_commit(self):
+        self.op = operations.Game_move(**{
+            "fee": {
+                "amount": 0,
+                "asset_id": "1.3.0"
+            },
+            "game_id": "1.26.0",
+            "player_account_id": "1.2.0",
+            "move": [
+                0, {
+                    "nonce1": 0,
+                    "throw_hash": "0123456789abcdef000000000000000000000000000000000000000000000000"
+                }
+            ],
+            "extensions": []
+        })
+        self.cm = ("f68585abf4dce7c804570143000000000000000000000000000"
+                   "00000000000000123456789abcdef0000000000000000000000"
+                   "000000000000000000000000000000012043ff7a781a31805dd"
+                   "33c1b60ecfc320b41d5c3d931e596c53a73faf546b21c737d31"
+                   "10c0e08ceb73bc447bab40a0556f79b1b2b904f7482e5156438"
+                   "6fd419224")
+        self.doit()
+
+    def test_game_move_reveal(self):
+        self.op = operations.Game_move(**{
+            "fee": {
+                "amount": 0,
+                "asset_id": "1.3.0"
+            },
+            "game_id": "1.26.0",
+            "player_account_id": "1.2.0",
+            "move": [
+                1, {
+                    "nonce2": 1241214124,
+                    "gesture": "paper"
+                }
+            ],
+            "extensions": []
+        })
+        self.cm = ("f68585abf4dce7c804570143000000000000000000000001ac6"
+                   "cfb4900000000020000011f12487d2f9ab0118a53ebf8cf0264"
+                   "51bef2cf0e1529c0b8742056ca5c50ccedf231e88e681fbfcbd"
+                   "1d292ea0ad0ca2adbd722f2fcd42926f1d442ccd73da81542")
+        self.doit()
+
     def compareConstructedTX(self):
-        self.op = operations.Event_update_status(**{
-            "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "event_id": "1.18.12414",
-            "status": "settled",
-            "scores": ["0:0"],
-            "prefix": prefix,
+        self.op = operations.Game_move(**{
+            "fee": {
+                "amount": 0,
+                "asset_id": "1.3.0"
+            },
+            "game_id": "1.26.0",
+            "player_account_id": "1.2.0",
+            "move": [
+                1, {
+                    "nonce2": 1241214124,
+                    "gesture": "paper"
+                }
+            ],
+            "extensions": []
         })
 
         ops = [Operation(self.op)]
