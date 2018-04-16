@@ -11,7 +11,7 @@ class BlockchainInstance():
         elif "blockchain_instance" in kwargs and kwargs["blockchain_instance"]:
             self.blockchain = kwargs["blockchain_instance"]
         else:
-            self.blockchain = shared_peerplays_instance()
+            self.blockchain = shared_blockchain_instance()
 
     @property
     def peerplays(self):
@@ -33,7 +33,7 @@ class SharedInstance():
     config = {}
 
 
-def shared_peerplays_instance():
+def shared_blockchain_instance():
     """ This method will initialize ``SharedInstance.instance`` and return it.
         The purpose of this method is to have offer single default
         peerplays instance that can be reused by multiple classes.
@@ -44,7 +44,7 @@ def shared_peerplays_instance():
     return SharedInstance.instance
 
 
-def set_shared_peerplays_instance(peerplays_instance):
+def set_shared_blockchain_instance(peerplays_instance):
     """ This method allows us to override default peerplays instance for all
         users of ``SharedInstance.instance``.
 
@@ -69,3 +69,7 @@ def set_shared_config(config):
     """
     assert isinstance(config, dict)
     SharedInstance.config = config
+
+
+shared_peerplays_instance = shared_blockchain_instance
+set_shared_peerplays_instance = set_shared_blockchain_instance

@@ -9,7 +9,7 @@ class Asset(BlockchainObject):
 
         :param str Asset: Symbol name or object id of an asset
         :param bool lazy: Lazy loading
-        :param bool full: Also obtain bitasset-data and dynamic asset dat
+        :param bool full: Also obtain bitasset-data and dynamic asset data
         :param peerplays.peerplays.PeerPlays blockchain_instance: PeerPlays
             instance
         :returns: All data of an asset
@@ -30,8 +30,8 @@ class Asset(BlockchainObject):
         """
         asset = self.blockchain.rpc.get_asset(self.identifier)
         if not asset:
-            raise AssetDoesNotExistsException
-        super(Asset, self).__init__(asset)
+            raise AssetDoesNotExistsException(self.identifier)
+        super(Asset, self).__init__(asset, blockchain_instance=self.blockchain)
         if self.full:
             if "bitasset_data_id" in asset:
                 self["bitasset_data"] = self.blockchain.rpc.get_object(
@@ -47,6 +47,16 @@ class Asset(BlockchainObject):
             self["description"] = json.loads(asset["options"]["description"])
         except:
             self["description"] = asset["options"]["description"]
+
+    @property
+    def is_fully_loaded(self):
+        """ Is this instance fully loaded / e.g. all data available?
+        """
+        return (
+            self.full and
+            "bitasset_data_id" in self and
+            "bitasset_data" in self
+        )
 
     @property
     def symbol(self):
@@ -75,6 +85,6 @@ class Asset(BlockchainObject):
         return self["flags"]
 
     def ensure_full(self):
-        if not self.full:
+        if not self.is_fully_loaded:
             self.full = True
             self.refresh()

@@ -1,4 +1,4 @@
-from peerplays.instance import BlockchainInstance
+from .instance import BlockchainInstance
 from .asset import Asset
 
 
@@ -110,7 +110,7 @@ class Amount(dict):
 
         elif isinstance(amount, (int, float)) and asset and isinstance(asset, str):
             self["amount"] = amount
-            self["asset"] = Asset(asset)
+            self["asset"] = Asset(asset, blockchain_instance=self.blockchain)
             self["symbol"] = asset
 
         else:
@@ -146,6 +146,8 @@ class Amount(dict):
     def asset(self):
         """ Returns the asset as instance of :class:`peerplays.asset.Asset`
         """
+        if not self["asset"]:
+            self["asset"] = Asset(self["symbol"], blockchain_instance=self.blockchain)
         return self["asset"]
 
     def json(self):
@@ -196,26 +198,36 @@ class Amount(dict):
 
     def __floordiv__(self, other):
         a = self.copy()
-        assert isinstance(other, (int, float))
-        a["amount"] //= other
+        if isinstance(other, Amount):
+            from .price import Price
+            return Price(self, other)
+        else:
+            a["amount"] //= other
         return a
 
     def __div__(self, other):
         a = self.copy()
-        assert isinstance(other, (int, float))
-        a["amount"] /= other
+        if isinstance(other, Amount):
+            from .price import Price
+            return Price(self, other)
+        else:
+            a["amount"] /= other
         return a
 
     def __mod__(self, other):
         a = self.copy()
-        assert isinstance(other, (int, float))
-        a["amount"] %= other
+        if isinstance(other, Amount):
+            a["amount"] %= other["amount"]
+        else:
+            a["amount"] %= other
         return a
 
     def __pow__(self, other):
         a = self.copy()
-        assert isinstance(other, (int, float))
-        a["amount"] **= other
+        if isinstance(other, Amount):
+            a["amount"] **= other["amount"]
+        else:
+            a["amount"] **= other
         return a
 
     def __iadd__(self, other):
@@ -235,23 +247,33 @@ class Amount(dict):
         return self
 
     def __imul__(self, other):
-        assert isinstance(other, (int, float))
-        self["amount"] *= other
+        if isinstance(other, Amount):
+            assert other["asset"] == self["asset"]
+            self["amount"] *= other["amount"]
+        else:
+            self["amount"] *= other
         return self
 
     def __idiv__(self, other):
-        assert isinstance(other, (int, float))
-        self["amount"] /= other
-        return self
+        if isinstance(other, Amount):
+            assert other["asset"] == self["asset"]
+            return self["amount"] / other["amount"]
+        else:
+            self["amount"] /= other
+            return self
 
     def __ifloordiv__(self, other):
-        assert isinstance(other, (int, float))
-        self["amount"] //= other
+        if isinstance(other, Amount):
+            self["amount"] //= other["amount"]
+        else:
+            self["amount"] //= other
         return self
 
     def __imod__(self, other):
-        assert isinstance(other, (int, float))
-        self["amount"] %= other
+        if isinstance(other, Amount):
+            self["amount"] %= other["amount"]
+        else:
+            self["amount"] %= other
         return self
 
     def __ipow__(self, other):

@@ -1,4 +1,4 @@
-from peerplays.instance import BlockchainInstance
+from .instance import BlockchainInstance
 from datetime import datetime, timedelta
 
 

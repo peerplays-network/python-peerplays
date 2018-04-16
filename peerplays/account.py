@@ -1,6 +1,9 @@
-from peerplays.instance import BlockchainInstance
+from .instance import BlockchainInstance
 from .exceptions import AccountDoesNotExistsException
 from .blockchainobject import BlockchainObject
+import logging
+
+log = logging.getLogger()
 
 
 class Account(BlockchainObject):
@@ -8,7 +11,7 @@ class Account(BlockchainObject):
 
         :param str account_name: Name of the account
         :param peerplays.peerplays.PeerPlays blockchain_instance: PeerPlays
-        instance
+               instance
         :param bool full: Obtain all account data including orders, positions, etc.
         :param bool lazy: Use lazy loading
         :param bool full: Obtain all account data including orders, positions,
@@ -103,8 +106,8 @@ class Account(BlockchainObject):
         return Amount(0, symbol)
 
     def history(
-        self, first=None,
-        last=0, limit=100,
+        self, first=0,
+        last=0, limit=-1,
         only_ops=[], exclude_ops=[]
     ):
         """ Returns a generator for individual account transactions. The
@@ -112,6 +115,8 @@ class Account(BlockchainObject):
             ``for`` loop.
 
             :param int first: sequence number of the first
+                transaction to return (*optional*)
+            :param int last: sequence number of the last
                 transaction to return (*optional*)
             :param int limit: limit number of transactions to
                 return (*optional*)
@@ -124,19 +129,8 @@ class Account(BlockchainObject):
         _limit = 100
         cnt = 0
 
-        mostrecent = self.blockchain.rpc.get_account_history(
-            self["id"],
-            "1.11.{}".format(0),
-            1,
-            "1.11.{}".format(9999999999999),
-            api="history"
-        )
-        if not mostrecent:
-            return
-
-        if not first:
-            # first = int(mostrecent[0].get("id").split(".")[2]) + 1
-            first = 9999999999
+        if first < 0:
+            first = 0
 
         while True:
             # RPC call
@@ -161,8 +155,10 @@ class Account(BlockchainObject):
                         return
 
             if not txs:
+                log.info("No more history returned from API node")
                 break
             if len(txs) < _limit:
+                log.info("Less than {} have been returned.".format(_limit))
                 break
             first = int(txs[-1]["id"].split(".")[2])
 
@@ -212,7 +208,7 @@ class AccountUpdate(dict, BlockchainInstance):
             :class:`peerplays.account.Account` from this class, you can
             use the ``account`` attribute.
         """
-        account = Account(self["owner"])
+        account = Account(self["owner"], blockchain_instance=self.blockchain)
         account.refresh()
         return account
 

@@ -13,7 +13,7 @@ class Blockchain(object):
         :param str mode: (default) Irreversible block (``irreversible``) or
                  actual head block (``head``)
         :param int max_block_wait_repetition: (default) 3 maximum wait time for
-            next block is max_block_wait_repetition * block_interval
+            next block ismax_block_wait_repetition * block_interval
 
         This class let's you deal with blockchain related data and methods.
     """
