@@ -201,7 +201,7 @@ class Testcases(unittest.TestCase):
             "name": [["en", "Football"], ["de", "Fußball"]],
             "prefix": prefix,
         })
-        self.cm = ("f68585abf4dce7c80457012f000000000000000000020264650"
+        self.cm = ("f68585abf4dce7c804570134000000000000000000020264650"
                    "84675c39f62616c6c02656e08466f6f7462616c6c0000011f73"
                    "9bf27286518931950b40ee739e34972bda63a44e3a7901e6686"
                    "7b505f8122f2c9a47df242aad5e3630a5add2ea3aea8e62a92b"
@@ -215,7 +215,7 @@ class Testcases(unittest.TestCase):
             "sport_id": "1.0.1241",
             "prefix": prefix,
         })
-        self.cm = ("f68585abf4dce7c804570131000000000000000000020265"
+        self.cm = ("f68585abf4dce7c804570136000000000000000000020265"
                    "6e034e484c077a685f48616e7312e59c8be5aeb6e586b0e7"
                    "9083e881afe79b9fd9040000000000010000011f2e739264"
                    "8b843f756c8773a984cb2b218a39558cb7415bf7abc6168a"
@@ -232,7 +232,7 @@ class Testcases(unittest.TestCase):
             "event_group_id": "1.0.1241",
             "prefix": prefix,
         })
-        self.cm = ("f68585abf4dce7c8045701330000000000000000000102656"
+        self.cm = ("f68585abf4dce7c8045701380000000000000000000102656"
                    "e0d4d79204576656e74206e616d650102656e07323031362d"
                    "313701197bdb58d9040000000000010000011f22c306e6b51"
                    "0a66a1f1bf1acb537360a5d2d0f7b788f9da359b451ffc676"
@@ -247,7 +247,7 @@ class Testcases(unittest.TestCase):
             "description": [["en", "The winner will be the team with the most points at the end of the game.  The team with fewer points will not be the winner."]],
             "prefix": prefix,
         })
-        self.cm = ("f68585abf4dce7c8045701350000000000000000000102656"
+        self.cm = ("f68585abf4dce7c80457013a0000000000000000000102656"
                    "e0e4e484c2052756c65732076312e300102656e7c54686520"
                    "77696e6e65722077696c6c20626520746865207465616d207"
                    "769746820746865206d6f737420706f696e74732061742074"
@@ -270,7 +270,7 @@ class Testcases(unittest.TestCase):
             "delay_before_settling": 60,
             "prefix": prefix,
         })
-        self.cm = ("f68585abf4dce7c8045701370000000000000000000202646"
+        self.cm = ("f68585abf4dce7c80457013c0000000000000000000202646"
                    "5084675c39f62616c6c02656e08466f6f7462616c6cd90400"
                    "00000000010b000000000016017c003c000000000001204a5"
                    "182e5c97b042a61b743eae2f3dc91bfbd323b34043d6a0c5c"
@@ -286,7 +286,7 @@ class Testcases(unittest.TestCase):
             "payout_condition": [["en", "Foo == Bar"], ["zh_Hans", "Foo == Bar"]],
             "prefix": prefix,
         })
-        self.cm = ("f68585abf4dce7c804570138000000000000000000d904"
+        self.cm = ("f68585abf4dce7c80457013d000000000000000000d904"
                    "0000000000010102656e1a42657474696e67204d61726b"
                    "6574206465736372697074696f6e0202656e0a466f6f20"
                    "3d3d20426172077a685f48616e730a466f6f203d3d2042"
@@ -306,7 +306,7 @@ class Testcases(unittest.TestCase):
             ],
             "prefix": prefix,
         })
-        self.cm = ("f68585abf4dce7c80457013a00000000000000000080080"
+        self.cm = ("f68585abf4dce7c80457013f00000000000000000080080"
                    "2800204810204000001201f978ef488f7e2a23568c42943"
                    "84332575b602d727e64a467e4fa351b04348134300db2f9"
                    "59045b7b67f3822192279d9a6ef5a4a4a6203d644c668f7"
@@ -323,7 +323,7 @@ class Testcases(unittest.TestCase):
             "back_or_lay": "lay",
             "prefix": prefix,
         })
-        self.cm = ("f68585abf4dce7c804570139000000000000000000d909"
+        self.cm = ("f68585abf4dce7c80457013e000000000000000000d909"
                    "01e80300000000000001204e0000020000011f2255c9c3"
                    "47ca766db54cbbece1243f3b3f4958ae94fb215c8e504e"
                    "780329098d622782c809b28cb9094dfbd17d919a15c202"
@@ -337,7 +337,7 @@ class Testcases(unittest.TestCase):
             "bet_to_cancel": "1.22.1111",
             "prefix": prefix,
         })
-        self.cm = ("f68585abf4dce7c80457013f000000000000000000b32bd70800"
+        self.cm = ("f68585abf4dce7c804570144000000000000000000b32bd70800"
                    "0001201d84eb0e1b0e4490119bd1cc17f7ab0a648ac00c50a36e"
                    "f3b0d7e12012c8ed0f78c7acad5701d9a0df58e38e33d896bad5"
                    "fc68a0f59f2f9b591062a194049518")
@@ -350,7 +350,7 @@ class Testcases(unittest.TestCase):
             "new_name": [["en", "Football"], ["de", "Fußball"]],
             "prefix": prefix,
         })
-        self.cm = ("f68585abf4dce7c804570130000000000000000000d90901020"
+        self.cm = ("f68585abf4dce7c804570135000000000000000000d90901020"
                    "26465084675c39f62616c6c02656e08466f6f7462616c6c0000"
                    "012046e4c042915f933b7a3717806c92bcad8f6e08eff756685"
                    "1de6a209eacf4b6726fe1db5013ec0853acab6c96a572503dd7"
@@ -368,7 +368,7 @@ class Testcases(unittest.TestCase):
             "new_status": "settled",
             "prefix": prefix,
         })
-        self.cm = ("f68585abf4dce7c804570134000000000000000000fe6001d90"
+        self.cm = ("f68585abf4dce7c804570139000000000000000000fe6001d90"
                    "4000000000001010102656e0d4d79204576656e74206e616d65"
                    "010102656e07323031362d313701197bdb58010a00000120153"
                    "d94cdc2a2d88bd53e475d86525fd40d02143fd15b70a657d19b"
@@ -384,7 +384,7 @@ class Testcases(unittest.TestCase):
             "new_name": [["en", "NHL"], ["zh_Hans", "國家冰球聯盟"]],
             "prefix": prefix,
         })
-        self.cm = ("f68585abf4dce7c80457013200000000000000000001d904000"
+        self.cm = ("f68585abf4dce7c80457013700000000000000000001d904000"
                    "000001001010202656e034e484c077a685f48616e7312e59c8b"
                    "e5aeb6e586b0e79083e881afe79b9f0c000001201eea42229a7"
                    "15506ec419d41a459d546cad9247f7100d62015fdf187747e9b"
@@ -400,7 +400,7 @@ class Testcases(unittest.TestCase):
             "new_description": [["en", "The winner will be the team with the most points at the end of the game.  The team with fewer points will not be the winner."]],
             "prefix": prefix,
         })
-        self.cm = ("f68585abf4dce7c804570136000000000000000000010102656"
+        self.cm = ("f68585abf4dce7c80457013b000000000000000000010102656"
                    "e0e4e484c2052756c65732076312e30010102656e7c54686520"
                    "77696e6e65722077696c6c20626520746865207465616d20776"
                    "9746820746865206d6f737420706f696e747320617420746865"
@@ -651,7 +651,7 @@ class Testcases(unittest.TestCase):
             },
             "extensions": []
         })
-        self.cm = ("f68585abf4dce7c804570141000000000000000000000000000"
+        self.cm = ("f68585abf4dce7c80457012d000000000000000000000000000"
                    "008000000090000000000000000000000020000000400000000"
                    "00000500000003000000050000011f6d624fe31225a0af3b7d1"
                    "33852ebfe36906d3dbd8d72a8e1746ddd96ab0a56f745ac10a0"
@@ -674,7 +674,7 @@ class Testcases(unittest.TestCase):
             },
             "extensions": []
         })
-        self.cm = ("f68585abf4dce7c804570142000000000000000000000000000"
+        self.cm = ("f68585abf4dce7c80457012e000000000000000000000000000"
                    "0000000000000000000011f38faa1aa44f1af083ada58ed47a2"
                    "db97d5798d5ac49202d96cd49acf5d61754456c0f33d619da29"
                    "d662da14739f6829d7eddb8297cbb4ea96a24b1b96260c861")
@@ -691,7 +691,7 @@ class Testcases(unittest.TestCase):
             "tournament_id": "1.23.0",
             "extensions": []
         })
-        self.cm = ("f68585abf4dce7c804570145000000000000000000000000000"
+        self.cm = ("f68585abf4dce7c804570133000000000000000000000000000"
                    "0011f6bdc347553ddb982cc486b9554b833b76de62f5ace2391"
                    "043c71c8bc8ec525311ea4e79b8936bddd52e6989c205e199b0"
                    "e69829dedd4a96ef2d76b762f8ad796")
@@ -713,7 +713,7 @@ class Testcases(unittest.TestCase):
             ],
             "extensions": []
         })
-        self.cm = ("f68585abf4dce7c804570143000000000000000000000000000"
+        self.cm = ("f68585abf4dce7c80457012f000000000000000000000000000"
                    "00000000000000123456789abcdef0000000000000000000000"
                    "000000000000000000000000000000012043ff7a781a31805dd"
                    "33c1b60ecfc320b41d5c3d931e596c53a73faf546b21c737d31"
@@ -737,7 +737,7 @@ class Testcases(unittest.TestCase):
             ],
             "extensions": []
         })
-        self.cm = ("f68585abf4dce7c804570143000000000000000000000001ac6"
+        self.cm = ("f68585abf4dce7c80457012f000000000000000000000001ac6"
                    "cfb4900000000020000011f12487d2f9ab0118a53ebf8cf0264"
                    "51bef2cf0e1529c0b8742056ca5c50ccedf231e88e681fbfcbd"
                    "1d292ea0ad0ca2adbd722f2fcd42926f1d442ccd73da81542")
