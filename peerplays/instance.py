@@ -11,6 +11,7 @@ class BlockchainInstance():
         elif "blockchain_instance" in kwargs and kwargs["blockchain_instance"]:
             self.blockchain = kwargs["blockchain_instance"]
         else:
+            set_shared_config(kwargs)
             self.blockchain = shared_blockchain_instance()
 
     @property
