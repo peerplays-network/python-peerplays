@@ -41,6 +41,7 @@ class Proposals(list):
         :param peerplays blockchain_instance: PeerPlays() instance to use when accesing a RPC
     """
     cache = ObjectCache()
+
     def __init__(self, account, **kwargs):
         BlockchainInstance.__init__(self, **kwargs)
 
