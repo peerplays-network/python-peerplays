@@ -11,7 +11,8 @@ class BlockchainInstance():
         elif "blockchain_instance" in kwargs and kwargs["blockchain_instance"]:
             self.blockchain = kwargs["blockchain_instance"]
         else:
-            set_shared_config(kwargs)
+            if kwargs:
+                set_shared_config(kwargs)
             self.blockchain = shared_blockchain_instance()
 
     @property
@@ -69,7 +70,7 @@ def set_shared_config(config):
         without requiring to actually create an instance
     """
     assert isinstance(config, dict)
-    SharedInstance.config = config
+    SharedInstance.config.update(config)
 
 
 shared_peerplays_instance = shared_blockchain_instance
