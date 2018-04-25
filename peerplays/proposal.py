@@ -1,7 +1,7 @@
 from .instance import BlockchainInstance
 from .account import Account
 from .exceptions import ProposalDoesNotExistException
-from .blockchainobject import BlockchainObject
+from .blockchainobject import BlockchainObject, ObjectCache
 import logging
 log = logging.getLogger(__name__)
 
@@ -40,15 +40,20 @@ class Proposals(list):
         :param str account: Account name
         :param peerplays blockchain_instance: PeerPlays() instance to use when accesing a RPC
     """
+    cache = ObjectCache()
     def __init__(self, account, **kwargs):
         BlockchainInstance.__init__(self, **kwargs)
 
         account = Account(account)
-        proposals = self.blockchain.rpc.get_proposed_transactions(account["id"])
+        if account["id"] in Proposals.cache:
+            proposals = Proposals.cache[account["id"]]
+        else:
+            proposals = self.blockchain.rpc.get_proposed_transactions(account["id"])
+            Proposals.cache[account["id"]] = proposals
 
         super(Proposals, self).__init__(
             [
-                Proposal(x, blockchain_instance=self.blockchain)
+                Proposal(x, **kwargs, blockchain_instance=self.blockchain)
                 for x in proposals
             ]
         )
