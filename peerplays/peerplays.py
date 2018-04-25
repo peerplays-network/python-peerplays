@@ -1432,7 +1432,7 @@ class PeerPlays(object):
         event_id="0.0.0",
         rules_id="0.0.0",
         asset=None,
-        delay_before_settling=60 * 5,
+        delay_before_settling=0,
         never_in_play=False,
         account=None,
         **kwargs
@@ -1447,7 +1447,7 @@ class PeerPlays(object):
             :param peerplays.asset.Asset asset: Asset to be used for this
                 market
             :param int delay_before_settling: Delay in seconds before settling
-                (defaults to 5 minutes)
+                (defaults to 0 seconds - immediatelly)
             :param bool never_in_play: Set this market group as *never in play*
                 (defaults to *False*)
             :param str account: (optional) the account to allow access
