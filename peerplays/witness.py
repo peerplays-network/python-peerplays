@@ -49,7 +49,7 @@ class Witnesses(list):
             "2.12.0").get("current_shuffled_witnesses", [])
 
         witnesses = [
-            Witness(x, lazy=True, blockchain_instance=self.blockchain)
+            Witness(x, blockchain_instance=self.blockchain)
             for x in self.schedule
         ]
 
