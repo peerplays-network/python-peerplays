@@ -151,7 +151,7 @@ class PeerPlays(object):
         # txbuffers/propbuffer are initialized and cleared
         self.clear()
 
-        self.wallet = Wallet(peerplays_instance=self, **kwargs)
+        self.wallet = Wallet(blockchain_instance=self, **kwargs)
 
     # -------------------------------------------------------------------------
     # Basic Calls
@@ -286,7 +286,7 @@ class PeerPlays(object):
                 of the transactions.
         """
         if tx:
-            txbuffer = TransactionBuilder(tx, peerplays_instance=self)
+            txbuffer = TransactionBuilder(tx, blockchain_instance=self)
         else:
             txbuffer = self.txbuffer
         txbuffer.appendWif(wifs)
@@ -301,7 +301,8 @@ class PeerPlays(object):
         """
         if tx:
             # If tx is provided, we broadcast the tx
-            return TransactionBuilder(tx).broadcast()
+            return TransactionBuilder(
+                tx, blockchain_instance=self).broadcast()
         else:
             return self.txbuffer.broadcast()
 
@@ -379,7 +380,8 @@ class PeerPlays(object):
         parent=None,
         proposer=None,
         proposal_expiration=None,
-        proposal_review=None
+        proposal_review=None,
+        **kwargs
     ):
         if not parent:
             parent = self.tx()
@@ -398,8 +400,9 @@ class PeerPlays(object):
             proposer,
             proposal_expiration,
             proposal_review,
-            peerplays_instance=self,
-            parent=parent
+            blockchain_instance=self,
+            parent=parent,
+            **kwargs,
         )
         if parent:
             parent.appendOps(proposal)
@@ -413,7 +416,7 @@ class PeerPlays(object):
         """
         builder = TransactionBuilder(
             *args,
-            peerplays_instance=self,
+            blockchain_instance=self,
             **kwargs
         )
         self._txbuffers.append(builder)
@@ -447,14 +450,14 @@ class PeerPlays(object):
         if not account:
             raise ValueError("You need to provide an account")
 
-        account = Account(account, peerplays_instance=self)
-        amount = Amount(amount, asset, peerplays_instance=self)
-        to = Account(to, peerplays_instance=self)
+        account = Account(account, blockchain_instance=self)
+        amount = Amount(amount, asset, blockchain_instance=self)
+        to = Account(to, blockchain_instance=self)
 
         memoObj = Memo(
             from_account=account,
             to_account=to,
-            peerplays_instance=self
+            blockchain_instance=self
         )
 
         op = operations.Transfer(**{
@@ -547,13 +550,13 @@ class PeerPlays(object):
             )
 
         try:
-            Account(account_name, peerplays_instance=self)
+            Account(account_name, blockchain_instance=self)
             raise AccountExistsException
         except:
             pass
 
-        referrer = Account(referrer, peerplays_instance=self)
-        registrar = Account(registrar, peerplays_instance=self)
+        referrer = Account(referrer, blockchain_instance=self)
+        registrar = Account(registrar, blockchain_instance=self)
 
         " Generate new keys from password"
         from peerplaysbase.account import PasswordKey, PublicKey
@@ -599,15 +602,15 @@ class PeerPlays(object):
             active_key_authority.append([k, 1])
 
         for k in additional_owner_accounts:
-            addaccount = Account(k, peerplays_instance=self)
+            addaccount = Account(k, blockchain_instance=self)
             owner_accounts_authority.append([addaccount["id"], 1])
         for k in additional_active_accounts:
-            addaccount = Account(k, peerplays_instance=self)
+            addaccount = Account(k, blockchain_instance=self)
             active_accounts_authority.append([addaccount["id"], 1])
 
         # voting account
         voting_account = Account(
-            proxy_account or "proxy-to-self", peerplays_instance=self)
+            proxy_account or "proxy-to-self", blockchain_instance=self)
 
         op = {
             "fee": {"amount": 0, "asset_id": "1.3.0"},
@@ -647,7 +650,7 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account, peerplays_instance=self)
+        account = Account(account, blockchain_instance=self)
         op = operations.Account_upgrade(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "account_to_upgrade": account["id"],
@@ -703,7 +706,7 @@ class PeerPlays(object):
             raise ValueError(
                 "Permission needs to be either 'owner', or 'active"
             )
-        account = Account(account, peerplays_instance=self)
+        account = Account(account, blockchain_instance=self)
 
         if not weight:
             weight = account[permission]["weight_threshold"]
@@ -717,7 +720,7 @@ class PeerPlays(object):
             ])
         except:
             try:
-                foreign_account = Account(foreign, peerplays_instance=self)
+                foreign_account = Account(foreign, blockchain_instance=self)
                 authority["account_auths"].append([
                     foreign_account["id"],
                     weight
@@ -767,7 +770,7 @@ class PeerPlays(object):
             raise ValueError(
                 "Permission needs to be either 'owner', or 'active"
             )
-        account = Account(account, peerplays_instance=self)
+        account = Account(account, blockchain_instance=self)
         authority = account[permission]
 
         try:
@@ -781,7 +784,7 @@ class PeerPlays(object):
             ))
         except:
             try:
-                foreign_account = Account(foreign, peerplays_instance=self)
+                foreign_account = Account(foreign, blockchain_instance=self)
                 affected_items = list(
                     filter(lambda x: x[0] == foreign_account["id"],
                            authority["account_auths"]))
@@ -843,7 +846,7 @@ class PeerPlays(object):
 
         PublicKey(key, prefix=self.prefix)
 
-        account = Account(account, peerplays_instance=self)
+        account = Account(account, blockchain_instance=self)
         account["options"]["memo_key"] = key
         op = operations.Account_update(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
@@ -868,14 +871,14 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account, peerplays_instance=self)
+        account = Account(account, blockchain_instance=self)
         options = account["options"]
 
         if not isinstance(witnesses, (list, set, tuple)):
             witnesses = {witnesses}
 
         for witness in witnesses:
-            witness = Witness(witness, peerplays_instance=self)
+            witness = Witness(witness, blockchain_instance=self)
             options["votes"].append(witness["vote_id"])
 
         options["votes"] = list(set(options["votes"]))
@@ -905,14 +908,14 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account, peerplays_instance=self)
+        account = Account(account, blockchain_instance=self)
         options = account["options"]
 
         if not isinstance(witnesses, (list, set, tuple)):
             witnesses = {witnesses}
 
         for witness in witnesses:
-            witness = Witness(witness, peerplays_instance=self)
+            witness = Witness(witness, blockchain_instance=self)
             if witness["vote_id"] in options["votes"]:
                 options["votes"].remove(witness["vote_id"])
 
@@ -943,14 +946,14 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account, peerplays_instance=self)
+        account = Account(account, blockchain_instance=self)
         options = account["options"]
 
         if not isinstance(committees, (list, set, tuple)):
             committees = {committees}
 
         for committee in committees:
-            committee = Committee(committee, peerplays_instance=self)
+            committee = Committee(committee, blockchain_instance=self)
             options["votes"].append(committee["vote_id"])
 
         options["votes"] = list(set(options["votes"]))
@@ -980,14 +983,14 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account, peerplays_instance=self)
+        account = Account(account, blockchain_instance=self)
         options = account["options"]
 
         if not isinstance(committees, (list, set, tuple)):
             committees = {committees}
 
         for committee in committees:
-            committee = Committee(committee, peerplays_instance=self)
+            committee = Committee(committee, blockchain_instance=self)
             if committee["vote_id"] in options["votes"]:
                 options["votes"].remove(committee["vote_id"])
 
@@ -1026,7 +1029,7 @@ class PeerPlays(object):
         if not approver and not is_key:
             approver = account
         elif approver and not is_key:
-            approver = Account(approver, peerplays_instance=self)
+            approver = Account(approver, blockchain_instance=self)
         else:
             approver = PublicKey(approver)
 
@@ -1035,7 +1038,7 @@ class PeerPlays(object):
 
         op = []
         for proposal_id in proposal_ids:
-            proposal = Proposal(proposal_id, peerplays_instance=self)
+            proposal = Proposal(proposal_id, blockchain_instance=self)
             update_dict = {
                 "fee": {"amount": 0, "asset_id": "1.3.0"},
                 'fee_paying_account': account["id"],
@@ -1071,18 +1074,18 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account, peerplays_instance=self)
+        account = Account(account, blockchain_instance=self)
         if not approver:
             approver = account
         else:
-            approver = Account(approver, peerplays_instance=self)
+            approver = Account(approver, blockchain_instance=self)
 
         if not isinstance(proposal_ids, (list, set, tuple)):
             proposal_ids = {proposal_ids}
 
         op = []
         for proposal_id in proposal_ids:
-            proposal = Proposal(proposal_id, peerplays_instance=self)
+            proposal = Proposal(proposal_id, blockchain_instance=self)
             op.append(operations.Proposal_update(**{
                 "fee": {"amount": 0, "asset_id": "1.3.0"},
                 'fee_paying_account': account["id"],
@@ -1432,7 +1435,7 @@ class PeerPlays(object):
         event_id="0.0.0",
         rules_id="0.0.0",
         asset=None,
-        delay_before_settling=60 * 5,
+        delay_before_settling=0,
         never_in_play=False,
         account=None,
         **kwargs
@@ -1447,7 +1450,7 @@ class PeerPlays(object):
             :param peerplays.asset.Asset asset: Asset to be used for this
                 market
             :param int delay_before_settling: Delay in seconds before settling
-                (defaults to 5 minutes)
+                (defaults to 0 seconds - immediatelly)
             :param bool never_in_play: Set this market group as *never in play*
                 (defaults to *False*)
             :param str account: (optional) the account to allow access
@@ -1460,8 +1463,8 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account, peerplays_instance=self)
-        asset = Asset(asset, peerplays_instance=self)
+        account = Account(account, blockchain_instance=self)
+        asset = Asset(asset, blockchain_instance=self)
         if event_id[0] == "1":
             # Test if object exists
             Event(event_id)
@@ -1518,7 +1521,7 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account, peerplays_instance=self)
+        account = Account(account, blockchain_instance=self)
         bmg = BettingMarketGroup(betting_market_group_id)
 
         op_data = {

@@ -66,7 +66,7 @@ def pprintOperation(op):
     return json.dumps(op["op"][1], indent=4)
 
 
-def pretty_print(o, ctx):
+def pretty_print(o, *args, **kwargs):
     t = PrettyTable(
         o[0].keys(),
     )

@@ -1,6 +1,6 @@
 from peerplays.instance import BlockchainInstance
 from .exceptions import BettingMarketGroupDoesNotExistException
-from .blockchainobject import BlockchainObject
+from .blockchainobject import BlockchainObject, ObjectCache
 
 
 class BettingMarketGroup(BlockchainObject):
@@ -35,18 +35,26 @@ class BettingMarketGroup(BlockchainObject):
             self["id"], results, **kwargs
         )
 
+
 class BettingMarketGroups(list):
     """ List of all available BettingMarketGroups
 
         :param strevent_id: Event ID (``1.18.xxx``)
     """
+    cache = ObjectCache()
+
     def __init__(self, event_id, *args, **kwargs):
         BlockchainInstance.__init__(self, *args, **kwargs)
-        self.bettingmarketgroups = self.blockchain.rpc.list_betting_market_groups(
-            event_id)
+
+        if event_id in BettingMarketGroups.cache:
+            self.bettingmarketgroups = BettingMarketGroups.cache[event_id]
+        else:
+            self.bettingmarketgroups = self.blockchain.rpc.list_betting_market_groups(
+                event_id)
+            BettingMarketGroups.cache[event_id] = self.bettingmarketgroups
 
         super(BettingMarketGroups, self).__init__([
             BettingMarketGroup(
-                x, lazy=True, blockchain_instance=self.blockchain)
+                x, lazy=False, blockchain_instance=self.blockchain)
             for x in self.bettingmarketgroups
         ])

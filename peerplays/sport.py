@@ -1,6 +1,6 @@
 from .instance import BlockchainInstance
 from .exceptions import SportDoesNotExistException
-from .blockchainobject import BlockchainObject
+from .blockchainobject import BlockchainObject, ObjectCache
 
 
 class Sport(BlockchainObject):
@@ -28,11 +28,18 @@ class Sport(BlockchainObject):
 class Sports(list):
     """ List of all available sports
     """
+    cache = ObjectCache()
+
     def __init__(self, **kwargs):
         BlockchainInstance.__init__(self, **kwargs)
-        self.sports = self.blockchain.rpc.list_sports()
+
+        if "sports" in Sports.cache:
+            self.sports = Sports.cache["sports"]
+        else:
+            self.sports = self.blockchain.rpc.list_sports()
+            Sports.cache["sports"] = self.sports
 
         super(Sports, self).__init__([
-            Sport(x, lazy=True, blockchain_instance=self.blockchain)
+            Sport(x, lazy=False, blockchain_instance=self.blockchain)
             for x in self.sports
         ])

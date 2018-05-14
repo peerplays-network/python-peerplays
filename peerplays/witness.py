@@ -1,7 +1,7 @@
 from .instance import BlockchainInstance
 from .account import Account
 from .exceptions import WitnessDoesNotExistsException
-from .blockchainobject import BlockchainObject
+from .blockchainobject import BlockchainObject, ObjectCache
 
 
 class Witness(BlockchainObject):
@@ -43,13 +43,21 @@ class Witnesses(list):
         :param peerplays blockchain_instance: PeerPlays() instance to use when
             accesing a RPC
     """
+    cache = ObjectCache()
+
     def __init__(self, only_active=False, **kwargs):
+        _schedule_id = "2.12.0"
+
         BlockchainInstance.__init__(self, **kwargs)
-        self.schedule = self.blockchain.rpc.get_object(
-            "2.12.0").get("current_shuffled_witnesses", [])
+        if _schedule_id in Witnesses.cache:
+            self.schedule = Witnesses.cache[_schedule_id]
+        else:
+            self.schedule = self.blockchain.rpc.get_object(
+                _schedule_id).get("current_shuffled_witnesses", [])
+            Witnesses.cache[_schedule_id] = self.schedule
 
         witnesses = [
-            Witness(x, lazy=True, blockchain_instance=self.blockchain)
+            Witness(x, blockchain_instance=self.blockchain)
             for x in self.schedule
         ]
 
