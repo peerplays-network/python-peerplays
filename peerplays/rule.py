@@ -1,6 +1,6 @@
 from .instance import BlockchainInstance
 from .exceptions import RuleDoesNotExistException
-from .blockchainobject import BlockchainObject
+from .blockchainobject import BlockchainObject, ObjectCache
 
 
 class Rule(BlockchainObject):
@@ -36,13 +36,20 @@ class Rule(BlockchainObject):
 class Rules(list):
     """ List of all Rules
     """
+    cache = ObjectCache()
+
     def __init__(self, limit=1000, **kwargs):
         BlockchainInstance.__init__(self, **kwargs)
-        self.rules = self.blockchain.rpc.get_objects([
-            "1.19.{}".format(id) for id in range(0, limit)
-        ])
+
+        if "rules" in Rules.cache:
+            self.rules = Rules.cache["rules"]
+        else:
+            self.rules = self.blockchain.rpc.get_objects([
+                "1.19.{}".format(id) for id in range(0, limit)
+            ])
+            Rules.cache["rules"] = self.rules
 
         super(Rules, self).__init__([
-            Rule(x, blockchain_instance=self.blockchain)
+            Rule(x, lazy=False, blockchain_instance=self.blockchain)
             for x in self.rules if x
         ])
