@@ -34,6 +34,7 @@ class BettingMarkets(list, BlockchainInstance):
         :param str betting_market_group_id: Market Group ID (``1.20.xxx``)
     """
     cache = ObjectCache()
+
     def __init__(self, betting_market_group_id, *args, **kwargs):
         BlockchainInstance.__init__(self, *args, **kwargs)
 
@@ -45,6 +46,6 @@ class BettingMarkets(list, BlockchainInstance):
             BettingMarkets.cache[betting_market_group_id] = self.bettingmarkets
 
         super(BettingMarkets, self).__init__([
-            BettingMarket(x, lazy=True, blockchain_instance=self.blockchain)
+            BettingMarket(x, lazy=False, blockchain_instance=self.blockchain)
             for x in self.bettingmarkets
         ])

@@ -54,6 +54,6 @@ class Events(list):
             Events.cache[eventgroup_id] = self.events
 
         super(Events, self).__init__([
-            Event(x, blockchain_instance=self.blockchain)
+            Event(x, lazy=False, blockchain_instance=self.blockchain)
             for x in self.events
         ])

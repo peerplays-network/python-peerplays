@@ -1,6 +1,6 @@
 from peerplays.instance import BlockchainInstance
 from .exceptions import EventGroupDoesNotExistException
-from .blockchainobject import BlockchainObject
+from .blockchainobject import BlockchainObject, ObjectCache
 
 
 class EventGroup(BlockchainObject):
@@ -36,11 +36,17 @@ class EventGroups(list):
 
         :param str sport_id: Sport ID (``1.16.xxx``)
     """
+    cache = ObjectCache()
+
     def __init__(self, sport_id, *args, **kwargs):
         BlockchainInstance.__init__(self, *args, **kwargs)
-        self.eventgroups = self.blockchain.rpc.list_event_groups(sport_id)
+        if sport_id in EventGroups.cache:
+            self.eventgroups = EventGroups.cache[sport_id]
+        else:
+            self.eventgroups = self.blockchain.rpc.list_event_groups(sport_id)
+            EventGroups.cache[sport_id] = self.eventgroups
 
         super(EventGroups, self).__init__([
-            EventGroup(x, lazy=True, blockchain_instance=self.blockchain)
+            EventGroup(x, lazy=False, blockchain_instance=self.blockchain)
             for x in self.eventgroups
         ])

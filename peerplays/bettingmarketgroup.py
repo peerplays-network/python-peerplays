@@ -55,6 +55,6 @@ class BettingMarketGroups(list):
 
         super(BettingMarketGroups, self).__init__([
             BettingMarketGroup(
-                x, lazy=True, blockchain_instance=self.blockchain)
+                x, lazy=False, blockchain_instance=self.blockchain)
             for x in self.bettingmarketgroups
         ])
