@@ -131,7 +131,7 @@ class PeerPlays(object):
         self.unsigned = bool(kwargs.get("unsigned", False))
         self.expiration = int(kwargs.get("expiration", 30))
         self.bundle = bool(kwargs.get("bundle", False))
-        self.blocking = kwargs.get("blocking", False)
+        self.blocking = bool(kwargs.get("blocking", False))
 
         # Legacy Proposal attributes
         self.proposer = kwargs.get("proposer", None)
@@ -199,6 +199,12 @@ class PeerPlays(object):
         """
         Account(account)
         config["default_account"] = account
+
+    def set_blocking(self, block=True):
+        """ This sets a flag that forces the broadcast to block until the
+            transactions made it into a block
+        """
+        self.blocking = block
 
     def finalizeOp(self, ops, account, permission, **kwargs):
         """ This method obtains the required private keys if present in
