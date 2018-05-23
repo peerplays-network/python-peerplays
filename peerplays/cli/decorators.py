@@ -56,6 +56,7 @@ def offline(f):
     def new_func(ctx, *args, **kwargs):
         ctx.obj["offline"] = True
         ctx.peerplays = PeerPlays(**ctx.obj)
+        ctx.blockchain = ctx.peerplays
         set_shared_peerplays_instance(ctx.peerplays)
         return ctx.invoke(f, *args, **kwargs)
     return update_wrapper(new_func, f)
@@ -85,6 +86,7 @@ def customchain(**kwargsChain):
             newoptions = ctx.obj
             newoptions.update(kwargsChain)
             ctx.peerplays = PeerPlays(**newoptions)
+            ctx.blockchain = ctx.peerplays
             set_shared_peerplays_instance(ctx.peerplays)
             return ctx.invoke(f, *args, **kwargs)
         return update_wrapper(new_func, f)
@@ -99,6 +101,7 @@ def chain(f):
     @verbose
     def new_func(ctx, *args, **kwargs):
         ctx.peerplays = PeerPlays(**ctx.obj)
+        ctx.blockchain = ctx.peerplays
         set_shared_peerplays_instance(ctx.peerplays)
         return ctx.invoke(f, *args, **kwargs)
     return update_wrapper(new_func, f)
