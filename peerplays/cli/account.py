@@ -276,3 +276,26 @@ def newaccount(ctx, accountname, account, password):
 @unlockWallet
 def upgrade(ctx, account):
     pprint(ctx.peerplays.upgrade_account(account))
+
+
+@main.command()
+@click.pass_context
+@onlineChain
+@click.option(
+    "--key",
+    prompt="Memo Key",
+    type=str)
+@click.option(
+    "--account",
+    default=config["default_account"],
+    type=str,
+    help="Account to be modified"
+)
+@unlockWallet
+def changememokey(ctx, key, account):
+    """ Change the memo key of an account
+    """
+    pprint(ctx.blockchain.update_memo_key(
+        key,
+        account=account,
+    ))
