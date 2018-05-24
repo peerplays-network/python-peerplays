@@ -235,7 +235,7 @@ class Configuration(DataDir):
 
     #: Default configuration
     config_defaults = {
-        "node": "ws://ec2-35-183-21-190.ca-central-1.compute.amazonaws.com:8090",
+        "node": "wss://api1.peerplays.download",
         "rpcpassword": "",
         "rpcuser": "",
     }
