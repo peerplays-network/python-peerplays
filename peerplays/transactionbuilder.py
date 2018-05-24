@@ -23,10 +23,9 @@ class ProposalBuilder:
             supposed to expire
         :param int proposal_review: Number of seconds for review of the
             proposal
-        :param peerplays.transactionbuilder.TransactionBuilder: Specify
+        :param .transactionbuilder.TransactionBuilder: Specify
             your own instance of transaction builder (optional)
-        :param peerplays.peerplays.PeerPlays blockchain_instance: PeerPlays
-            instance
+        :param instance blockchain_instance: Blockchain instance
     """
     def __init__(
         self,
@@ -138,11 +137,18 @@ class TransactionBuilder(dict):
     ):
         BlockchainInstance.__init__(self, **kwargs)
         self.clear()
-        if not isinstance(tx, dict):
-            raise ValueError("Invalid TransactionBuilder Format")
-        super(TransactionBuilder, self).__init__(tx)
-        # Do we need to reconstruct the tx from self.ops?
-        self._require_reconstruction = True
+        if tx and isinstance(tx, dict):
+            super(TransactionBuilder, self).__init__(tx)
+            # Load operations
+            self.ops = tx["operations"]
+            self._require_reconstruction = False
+        else:
+            self._require_reconstruction = True
+        self.set_expiration(kwargs.get("expiration", 30))
+        self.set_fee_asset(kwargs.get("fee_asset", "1.3.0"))
+
+    def set_expiration(self, p):
+        self.expiration = p
 
     def is_empty(self):
         return not (len(self.ops) > 0)
@@ -266,6 +272,11 @@ class TransactionBuilder(dict):
             except:
                 raise InvalidWifError
 
+    def set_fee_asset(self, fee_asset):
+        """ Set asset to fee
+        """
+        self.fee_asset_id = fee_asset.identifier
+
     def constructTx(self):
         """ Construct the actual transaction and store it in the class's dict
             store
@@ -282,9 +293,12 @@ class TransactionBuilder(dict):
                 # otherwise, we simply wrap ops into Operations
                 ops.extend([Operation(op)])
 
-        # We no wrap everything into an actual transaction
-        ops = transactions.addRequiredFees(self.blockchain.rpc, ops)
-        expiration = transactions.formatTimeFromNow(self.blockchain.expiration)
+        # We now wrap everything into an actual transaction
+        ops = transactions.addRequiredFees(self.blockchain.rpc, ops,
+                                           asset_id=self.fee_asset_id)
+        expiration = transactions.formatTimeFromNow(
+            self.expiration or self.blockchain.expiration
+        )
         ref_block_num, ref_block_prefix = transactions.getBlockParams(
             self.blockchain.rpc)
         self.tx = Signed_Transaction(
@@ -293,11 +307,11 @@ class TransactionBuilder(dict):
             expiration=expiration,
             operations=ops
         )
-        super(TransactionBuilder, self).__init__(self.tx.json())
+        super(TransactionBuilder, self).update(self.tx.json())
         self._unset_require_reconstruction()
 
     def sign(self):
-        """ Sign a provided transaction witht he provided key(s)
+        """ Sign a provided transaction with the provided key(s)
 
             :param dict tx: The transaction to be signed and returned
             :param string wifs: One or many wif keys to use for signing
@@ -338,6 +352,7 @@ class TransactionBuilder(dict):
 
         signedtx.sign(self.wifs, chain=self.blockchain.rpc.chain_params)
         self["signatures"].extend(signedtx.json().get("signatures"))
+        return signedtx
 
     def verify_authority(self):
         """ Verify the authority of the signed transaction
@@ -349,7 +364,7 @@ class TransactionBuilder(dict):
             raise e
 
     def broadcast(self):
-        """ Broadcast a transaction to the PeerPlays network
+        """ Broadcast a transaction to the blockchain network
 
             :param tx tx: Signed transaction to broadcast
         """
@@ -378,8 +393,9 @@ class TransactionBuilder(dict):
                     ret, api="network_broadcast")
         except Exception as e:
             raise e
+        finally:
+            self.clear()
 
-        self.clear()
         return ret
 
     def clear(self):
