@@ -255,8 +255,7 @@ class TransactionBuilder(dict):
                 # If we couldn't find an active key, let's try overwrite it
                 # with an owner key
                 if not keys and permission != "owner":
-                    _keys = fetchkeys(account, "owner")
-                    keys.extend(_keys)
+                    keys.extend(fetchkeys(account, "owner"))
                 for x in keys:
                     self.wifs.add(x[0])
 
@@ -275,7 +274,8 @@ class TransactionBuilder(dict):
     def set_fee_asset(self, fee_asset):
         """ Set asset to fee
         """
-        self.fee_asset_id = fee_asset.identifier
+        # FIXME: this should ensure that fee_asset contains an id
+        self.fee_asset_id = fee_asset
 
     def constructTx(self):
         """ Construct the actual transaction and store it in the class's dict
