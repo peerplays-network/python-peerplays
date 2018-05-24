@@ -210,6 +210,7 @@ class TransactionBuilder(dict):
         if self.blockchain.wallet.locked():
             raise WalletLocked()
 
+        # Let's define a helper function for recursion
         def fetchkeys(account, perm, level=0):
             if level > 2:
                 return []
@@ -231,6 +232,7 @@ class TransactionBuilder(dict):
 
             return r
 
+        # Now let's actually deal with the accounts
         if account not in self.signing_accounts:
             # is the account an instance of public key?
             if isinstance(account, PublicKey):
@@ -239,12 +241,16 @@ class TransactionBuilder(dict):
                         str(account)
                     )
                 )
+            # ... or should we rather obtain the keys from an account name
             else:
                 account = Account(account, blockchain_instance=self.blockchain)
                 required_treshold = account[permission]["weight_threshold"]
                 keys = fetchkeys(account, permission)
-                if permission != "owner":
-                    keys.extend(fetchkeys(account, "owner"))
+                # If we couldn't find an active key, let's try overwrite it
+                # with an owner key
+                if not keys and permission != "owner":
+                    _keys = fetchkeys(account, "owner")
+                    keys.extend(_keys)
                 for x in keys:
                     self.wifs.add(x[0])
 
