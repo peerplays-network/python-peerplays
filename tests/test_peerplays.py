@@ -2,15 +2,63 @@ import mock
 import string
 import unittest
 import random
+
 from pprint import pprint
+
 from peerplays import PeerPlays
-from peerplaysbase.operationids import getOperationNameForId
 from peerplays.amount import Amount
-from peerplaysbase.account import PrivateKey
 from peerplays.instance import set_shared_peerplays_instance
+from peerplays.blockchainobject import BlockchainObject, ObjectCache
+
+from peerplaysbase.account import PrivateKey
+from peerplaysbase.operationids import getOperationNameForId
 
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
 core_unit = "PPY"
+
+account_id = '1.2.7'
+_objects = [{
+    'active': {'account_auths': [],
+               'address_auths': [],
+               'key_auths': [[str(PrivateKey(wif).pubkey),
+                              1]],
+               'weight_threshold': 1},
+    'active_special_authority': [0, {}],
+    'blacklisted_accounts': [],
+    'blacklisting_accounts': [],
+    'cashback_vb': '1.13.0',
+    'id': '1.2.7',
+    'lifetime_referrer': '1.2.7',
+    'lifetime_referrer_fee_percentage': 8000,
+    'membership_expiration_date': '1969-12-31T23:59:59',
+    'name': 'init0',
+    'network_fee_percentage': 2000,
+    'options': {'extensions': [],
+                'memo_key': str(PrivateKey(wif).pubkey),
+                'num_committee': 0,
+                'num_witness': 0,
+                'votes': [],
+                'voting_account': '1.2.5'},
+    'owner': {'account_auths': [],
+              'address_auths': [],
+              'key_auths': [[str(PrivateKey(wif).pubkey),
+                             1]],
+              'weight_threshold': 1},
+    'owner_special_authority': [0, {}],
+    'referrer': '1.2.7',
+    'referrer_rewards_percentage': 0,
+    'registrar': '1.2.7',
+    'statistics': '2.6.7',
+    'top_n_control_flags': 0,
+    'whitelisted_accounts': [],
+    'whitelisting_accounts': []
+}, {
+    'committee_member_account': '1.2.7',
+    'id': '1.5.0',
+    'total_votes': 0,
+    'url': '',
+    'vote_id': '0:11'}
+]
 
 
 class Testcases(unittest.TestCase):
@@ -20,12 +68,18 @@ class Testcases(unittest.TestCase):
 
         self.ppy = PeerPlays(
             nobroadcast=True,
-            wif=[wif]
+            wif={"active": wif}
         )
-        # from getpass import getpass
-        # self.ppy.wallet.unlock(getpass())
         set_shared_peerplays_instance(self.ppy)
         self.ppy.set_default_account("init0")
+        self.mock()
+
+    def mock(self):
+        # Inject test data into cache
+        _cache = ObjectCache(default_expiration=60 * 60 * 1, no_overwrite=True)
+        for i in _objects:
+            _cache[i["id"]] = i
+        BlockchainObject._cache = _cache
 
     def test_connect(self):
         self.ppy.connect()
@@ -208,7 +262,7 @@ class Testcases(unittest.TestCase):
 
     def test_approvewitness(self):
         ppy = self.ppy
-        tx = ppy.approvewitness("init0")
+        tx = ppy.approvewitness("1.6.1")
         self.assertEqual(
             getOperationNameForId(tx["operations"][0][0]),
             "account_update"
@@ -220,7 +274,7 @@ class Testcases(unittest.TestCase):
 
     def test_approvecommittee(self):
         ppy = self.ppy
-        tx = ppy.approvecommittee("init0")
+        tx = ppy.approvecommittee("1.5.0")
         self.assertEqual(
             getOperationNameForId(tx["operations"][0][0]),
             "account_update"
