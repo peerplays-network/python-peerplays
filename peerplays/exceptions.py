@@ -11,6 +11,12 @@ class WalletLocked(Exception):
     pass
 
 
+class RPCConnectionRequired(Exception):
+    """ An RPC connection is required
+    """
+    pass
+
+
 class AccountExistsException(Exception):
     """ The requested account already exists
     """
@@ -25,6 +31,12 @@ class AccountDoesNotExistsException(Exception):
 
 class AssetDoesNotExistsException(Exception):
     """ The asset does not exist
+    """
+    pass
+
+
+class InvalidAssetException(Exception):
+    """ An invalid asset has been provided
     """
     pass
 
@@ -133,7 +145,7 @@ class RuleDoesNotExistException(Exception):
 
 
 class ObjectNotInProposalBuffer(Exception):
-    """ Couldn't find object to relative 0.0.x
+    """ Object was not found in proposal
     """
     pass
 
@@ -164,5 +176,11 @@ class OfflineHasNoRPCException(Exception):
 
 class WrongMemoKey(Exception):
     """ The memo provided is not equal the one on the blockchain
+    """
+    pass
+
+
+class KeyNotFound(Exception):
+    """ Key not found
     """
     pass

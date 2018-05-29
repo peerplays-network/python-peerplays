@@ -24,28 +24,40 @@ class Memo(object):
 
         .. code-block:: python
 
-            from peerplays.memo import Memo
-            m = Memo("peerplayseu", "wallet.xeroc")
+            from bitshares.memo import Memo
+            m = Memo("bitshareseu", "wallet.xeroc")
+            m.bitshares.wallet.unlock("secret")
             enc = (m.encrypt("foobar"))
             print(enc)
-            >> {'nonce': '17329630356955254641',
-                'message': '8563e2bb2976e0217806d642901a2855'}
+            >> {'nonce': '17329630356955254641', 'message': '8563e2bb2976e0217806d642901a2855'}
             print(m.decrypt(enc))
             >> foobar
 
+        To decrypt a memo, simply use
+
+        .. code-block:: python
+
+            from bitshares.memo import Memo
+            m = Memo()
+            m.bitshares.wallet.unlock("secret")
+            print(memo.decrypt(op_data["memo"]))
+
+        if ``op_data`` being the payload of a transfer operation.
+
     """
-    def __init__(
-        self,
-        from_account,
-        to_account,
-        **kwargs
-    ):
+    def __init__(self, from_account=None, to_account=None, **kwargs):
         BlockchainInstance.__init__(self, **kwargs)
 
-        self.to_account = Account(
-            to_account, blockchain_instance=self.blockchain)
-        self.from_account = Account(
-            from_account, blockchain_instance=self.blockchain)
+        if to_account:
+            self.to_account = Account(to_account, blockchain_instance=self.blockchain)
+        if from_account:
+            self.from_account = Account(from_account, blockchain_instance=self.blockchain)
+
+    def unlock_wallet(self, *args, **kwargs):
+        """ Unlock the library internal wallet
+        """
+        self.blockchain.wallet.unlock(*args, **kwargs)
+        return self
 
     def encrypt(self, memo):
         """ Encrypt a memo
@@ -62,14 +74,16 @@ class Memo(object):
             self.from_account["options"]["memo_key"]
         )
         if not memo_wif:
-            raise MissingKeyError(
-                "Memo key for %s missing!" % self.from_account["name"])
+            raise MissingKeyError("Memo key for %s missing!" % self.from_account["name"])
+
+        if not hasattr(self, 'chain_prefix'):
+            self.chain_prefix = self.blockchain.prefix
 
         enc = PPYMemo.encode_memo(
             PrivateKey(memo_wif),
             PublicKey(
                 self.to_account["options"]["memo_key"],
-                prefix=self.blockchain.rpc.chain_params["prefix"]
+                prefix=self.chain_prefix
             ),
             nonce,
             memo
@@ -92,20 +106,32 @@ class Memo(object):
         if not memo:
             return None
 
-        memo_wif = self.blockchain.wallet.getPrivateKeyForPublicKey(
-            self.to_account["options"]["memo_key"]
-        )
-        if not memo_wif:
-            raise MissingKeyError(
-                "Memo key for %s missing!" % self.to_account["name"])
+        # We first try to decode assuming we received the memo
+        try:
+            memo_wif = self.blockchain.wallet.getPrivateKeyForPublicKey(
+                memo["to"]
+            )
+            pubkey = memo["from"]
+        except KeyNotFound:
+            try:
+                # if that failed, we assume that we have sent the memo
+                memo_wif = self.blockchain.wallet.getPrivateKeyForPublicKey(
+                    memo["from"]
+                )
+                pubkey = memo["to"]
+            except KeyNotFound:
+                # if all fails, raise exception
+                raise MissingKeyError(
+                    "Non of the required memo keys are installed!"
+                    "Need any of {}".format(
+                    [memo["to"], memo["from"]]))
 
-        # TODO: Use pubkeys of the message, not pubkeys of account!
+        if not hasattr(self, 'chain_prefix'):
+            self.chain_prefix = self.blockchain.prefix
+
         return PPYMemo.decode_memo(
             PrivateKey(memo_wif),
-            PublicKey(
-                self.from_account["options"]["memo_key"],
-                prefix=self.blockchain.rpc.chain_params["prefix"]
-            ),
+            PublicKey(pubkey, prefix=self.chain_prefix),
             memo.get("nonce"),
             memo.get("message")
         )

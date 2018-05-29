@@ -184,16 +184,6 @@ class PeerPlays(object):
     def prefix(self):
         return self.rpc.chain_params["prefix"]
 
-    def newWallet(self, pwd):
-        """ Create a new wallet. This method is basically only calls
-            :func:`peerplays.wallet.create`.
-
-            :param str pwd: Password to use for the new wallet
-            :raises peerplays.exceptions.WalletExists: if there is already a
-                wallet created
-        """
-        self.wallet.create(pwd)
-
     def set_default_account(self, account):
         """ Set the default account to be used
         """
@@ -408,7 +398,7 @@ class PeerPlays(object):
             proposal_review,
             blockchain_instance=self,
             parent=parent,
-            **kwargs,
+            **kwargs
         )
         if parent:
             parent.appendOps(proposal)
