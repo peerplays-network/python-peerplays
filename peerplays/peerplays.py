@@ -1317,6 +1317,10 @@ class PeerPlays(object):
             "prefix": self.prefix
         }
 
+        # Do not try to update status of it doesn't change it on the chain
+        if event["status"] == status:
+            status = None
+
         if event_group_id:
             if event_group_id[0] == "1":
                 # Test if object exists
@@ -1364,6 +1368,10 @@ class PeerPlays(object):
             raise ValueError("You need to provide an account")
         account = Account(account)
         event = Event(event_id)
+
+        # Do not try to update status of it doesn't change it on the chain
+        if event["status"] == status:
+            status = None
 
         op = operations.Event_update_status(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
@@ -1529,6 +1537,10 @@ class PeerPlays(object):
             raise ValueError("You need to provide an account")
         account = Account(account, blockchain_instance=self)
         bmg = BettingMarketGroup(betting_market_group_id)
+
+        # Do not try to update status of it doesn't change it on the chain
+        if bmg["status"] == status:
+            status = None
 
         op_data = {
             "fee": {"amount": 0, "asset_id": "1.3.0"},
