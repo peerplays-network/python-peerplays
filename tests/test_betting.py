@@ -239,7 +239,7 @@ class Testcases(unittest.TestCase):
 
     def test_event_status_update(self):
         def get_object(self, *args, **kwargs):
-            return {"id": "1.18.1234"}
+            return {"id": "1.18.1234", "status": "finished"}
 
         with mock.patch(
             "peerplaysapi.node.PeerPlaysNodeRPC.get_object",

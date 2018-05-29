@@ -95,7 +95,10 @@ class Notify(Events):
         """ This is used for processing of account Updates. It will
             return instances of :class:peerplays.account.AccountUpdate`
         """
-        self.on_account(AccountUpdate(message))
+        self.on_account(AccountUpdate(
+            message,
+            blockchain_instance=self.blockchain
+        ))
 
     def listen(self):
         """ This call initiates the listening/notification process. It

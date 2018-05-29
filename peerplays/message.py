@@ -3,9 +3,9 @@ import json
 import logging
 from binascii import hexlify, unhexlify
 from graphenebase.ecdsa import verify_message, sign_message
-from .instance import BlockchainInstance
 from peerplaysbase.account import PublicKey
-from peerplays.account import Account
+from .instance import BlockchainInstance
+from .account import Account
 from .exceptions import (
     InvalidMessageSignature,
     AccountDoesNotExistsException,

@@ -68,13 +68,13 @@ class Testcases(unittest.TestCase):
 
         self.ppy = PeerPlays(
             nobroadcast=True,
-            wif={"active": wif}
+            wif=[wif]
         )
         set_shared_peerplays_instance(self.ppy)
         self.ppy.set_default_account("init0")
-        self.mock()
+        self.mymock()
 
-    def mock(self):
+    def mymock(self):
         # Inject test data into cache
         _cache = ObjectCache(default_expiration=60 * 60 * 1, no_overwrite=True)
         for i in _objects:
