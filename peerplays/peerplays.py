@@ -257,6 +257,13 @@ class PeerPlays(object):
             # Append tot he default buffer
             self.txbuffer.appendOps(ops)
 
+        # The API that obtains the fee only allows to specify one particular
+        # fee asset for all operations in that transaction even though the
+        # blockchain itself could allow to pay multiple operations with
+        # different fee assets.
+        if "fee_asset" in kwargs and kwargs["fee_asset"]:
+            self.txbuffer.set_fee_asset(kwargs["fee_asset"])
+
         # Add signing information, signer, sign and optionally broadcast
         if self.unsigned:
             # In case we don't want to sign anything
