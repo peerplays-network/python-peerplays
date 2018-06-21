@@ -575,9 +575,9 @@ class PeerPlays(object):
             memo_privkey = memo_key.get_private_key()
             # store private keys
             if storekeys:
-                # self.wallet.addPrivateKey(owner_privkey)
-                self.wallet.addPrivateKey(active_privkey)
-                self.wallet.addPrivateKey(memo_privkey)
+                # self.wallet.addPrivateKey(str(owner_privkey))
+                self.wallet.addPrivateKey(str(active_privkey))
+                self.wallet.addPrivateKey(str(memo_privkey))
         elif (owner_key and active_key and memo_key):
             active_pubkey = PublicKey(
                 active_key, prefix=self.prefix)
@@ -1027,7 +1027,7 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account)
+        account = Account(account, blockchain_instance=self)
         is_key = approver and approver[:3] == self.prefix
         if not approver and not is_key:
             approver = account
