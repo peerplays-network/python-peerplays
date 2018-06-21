@@ -257,6 +257,14 @@ class PeerPlays(object):
             # Append tot he default buffer
             self.txbuffer.appendOps(ops)
 
+        # The API that obtains the fee only allows to specify one particular
+        # fee asset for all operations in that transaction even though the
+        # blockchain itself could allow to pay multiple operations with
+        # different fee assets.
+        if "fee_asset" in kwargs and kwargs["fee_asset"]:
+            fee_asset = Asset(kwargs["fee_asset"], blockchain_instance=self)
+            self.txbuffer.set_fee_asset(fee_asset)
+
         # Add signing information, signer, sign and optionally broadcast
         if self.unsigned:
             # In case we don't want to sign anything
@@ -568,9 +576,9 @@ class PeerPlays(object):
             memo_privkey = memo_key.get_private_key()
             # store private keys
             if storekeys:
-                # self.wallet.addPrivateKey(owner_privkey)
-                self.wallet.addPrivateKey(active_privkey)
-                self.wallet.addPrivateKey(memo_privkey)
+                # self.wallet.addPrivateKey(str(owner_privkey))
+                self.wallet.addPrivateKey(str(active_privkey))
+                self.wallet.addPrivateKey(str(memo_privkey))
         elif (owner_key and active_key and memo_key):
             active_pubkey = PublicKey(
                 active_key, prefix=self.prefix)
@@ -1020,7 +1028,7 @@ class PeerPlays(object):
                 account = config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
-        account = Account(account)
+        account = Account(account, blockchain_instance=self)
         is_key = approver and approver[:3] == self.prefix
         if not approver and not is_key:
             approver = account

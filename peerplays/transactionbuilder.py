@@ -144,8 +144,8 @@ class TransactionBuilder(dict):
             self._require_reconstruction = False
         else:
             self._require_reconstruction = True
+            self.set_fee_asset(kwargs.get("fee_asset", None))
         self.set_expiration(kwargs.get("expiration", 30))
-        self.set_fee_asset(kwargs.get("fee_asset", "1.3.0"))
 
     def set_expiration(self, p):
         self.expiration = p
@@ -274,8 +274,13 @@ class TransactionBuilder(dict):
     def set_fee_asset(self, fee_asset):
         """ Set asset to fee
         """
-        # FIXME: this should ensure that fee_asset contains an id
-        self.fee_asset_id = fee_asset
+        from .amount import Asset
+        if isinstance(fee_asset, Asset):
+            self.fee_asset_id = fee_asset["id"]
+        elif fee_asset:
+            self.fee_asset_id = fee_asset
+        else:
+            self.fee_asset_id = "1.3.0"
 
     def constructTx(self):
         """ Construct the actual transaction and store it in the class's dict
