@@ -25,3 +25,8 @@ class Testcases(unittest.TestCase):
         tx = self.ppy.transfer("init1", 1, "1.3.0", account="init0", fee_asset="1.3.1")
         op = tx["operations"][0][1]
         self.assertEqual(op["fee"]["asset_id"], "1.3.1")
+
+    def test_feeasset_on_transfer(self):
+        tx = self.ppy.transfer("init1", 1, "1.3.0", account="init0", fee_asset="BTF")
+        op = tx["operations"][0][1]
+        self.assertEqual(op["fee"]["asset_id"], "1.3.1")

@@ -262,7 +262,8 @@ class PeerPlays(object):
         # blockchain itself could allow to pay multiple operations with
         # different fee assets.
         if "fee_asset" in kwargs and kwargs["fee_asset"]:
-            self.txbuffer.set_fee_asset(kwargs["fee_asset"])
+            fee_asset = Asset(kwargs["fee_asset"], blockchain_instance=self)
+            self.txbuffer.set_fee_asset(fee_asset)
 
         # Add signing information, signer, sign and optionally broadcast
         if self.unsigned:

@@ -274,8 +274,8 @@ class TransactionBuilder(dict):
     def set_fee_asset(self, fee_asset):
         """ Set asset to fee
         """
-        from .amount import Amount
-        if isinstance(fee_asset, Amount):
+        from .amount import Asset
+        if isinstance(fee_asset, Asset):
             self.fee_asset_id = fee_asset["id"]
         elif fee_asset:
             self.fee_asset_id = fee_asset
