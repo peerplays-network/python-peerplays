@@ -18,6 +18,12 @@ class PeerPlaysNodeRPC(GrapheneWebsocketRPC, GrapheneHTTPRPC):
         self.rpc.__init__(self, urls, **kwargs)
         self.chain_params = self.get_network()
 
+    def register_apis(self):
+        self.login("", "", api_id=1)
+        self.api_id["database"] = self.database(api_id=1)
+        self.api_id["history"] = self.history(api_id=1)
+        self.api_id["network_broadcast"] = self.network_broadcast(api_id=1)
+
     @property
     def rpc(self):
         if isinstance(self._urls, (list, set)):
