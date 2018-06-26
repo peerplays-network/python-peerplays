@@ -620,7 +620,7 @@ class PeerPlays(object):
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "registrar": registrar["id"],
             "referrer": referrer["id"],
-            "referrer_percent": referrer_percent * 100,
+            "referrer_percent": int(referrer_percent * 100),
             "name": account_name,
             'owner': {'account_auths': owner_accounts_authority,
                       'key_auths': owner_key_authority,
