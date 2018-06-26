@@ -63,6 +63,10 @@ class Asset(BlockchainObject):
         return self["symbol"]
 
     @property
+    def id(self):
+        return self['id']
+
+    @property
     def precision(self):
         return self["precision"]
 
