@@ -235,7 +235,7 @@ class Configuration(DataDir):
 
     #: Default configuration
     config_defaults = {
-        "node": "wss://api1.peerplays.download",
+        "node": "wss://node.peerplays.download",
         "rpcpassword": "",
         "rpcuser": "",
     }
