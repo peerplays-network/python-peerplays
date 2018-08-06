@@ -180,7 +180,7 @@ class WrongMemoKey(Exception):
     pass
 
 
-class KeyNotFound(Exception):
-    """ Key not found
+class GenesisBalanceDoesNotExistsException(Exception):
+    """ The provided genesis balance id does not exist
     """
     pass
