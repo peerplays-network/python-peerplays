@@ -743,21 +743,41 @@ class Testcases(unittest.TestCase):
                    "1d292ea0ad0ca2adbd722f2fcd42926f1d442ccd73da81542")
         self.doit()
 
-    def compareConstructedTX(self):
-        self.op = operations.Game_move(**{
+    def test_claim_balance(self):
+        self.op = operations.Balance_claim(**{
             "fee": {
                 "amount": 0,
                 "asset_id": "1.3.0"
             },
-            "game_id": "1.26.0",
-            "player_account_id": "1.2.0",
-            "move": [
-                1, {
-                    "nonce2": 1241214124,
-                    "gesture": "paper"
-                }
-            ],
-            "extensions": []
+            "deposit_to_account": "1.2.0",
+            "balance_to_claim": "1.15.0",
+            "balance_owner_key": "PPY1111111111111111111111111111111114T1Anm",
+            "total_claimed": {
+                "amount": 0,
+                "asset_id": "1.3.0"
+            }
+        })
+        self.cm = ("f68585abf4dce7c804570125000000000000000000000000000"
+                   "000000000000000000000000000000000000000000000000000"
+                   "000000000000000000000000000000012074ae5e434d206b7f6"
+                   "5018fc8044e6886c7e2cffd9bbbc2af4ee291f554e1fdb46984"
+                   "af5f3ab3c850190acb5d6beeab8d153b7ac225bd55128bfbda1"
+                   "84a732d3c")
+        self.doit()
+
+    def compareConstructedTX(self):
+        self.op = operations.Balance_claim(**{
+            "fee": {
+                "amount": 0,
+                "asset_id": "1.3.0"
+            },
+            "deposit_to_account": "1.2.0",
+            "balance_to_claim": "1.15.0",
+            "balance_owner_key": "PPY1111111111111111111111111111111114T1Anm",
+            "total_claimed": {
+                "amount": 0,
+                "asset_id": "1.3.0"
+            }
         })
 
         ops = [Operation(self.op)]

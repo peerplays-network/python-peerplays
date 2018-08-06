@@ -889,3 +889,19 @@ class Game_move(GrapheneObject):
                 ('move', GameSpecificMoves(kwargs["move"])),
                 ('extensions', Set([])),
             ]))
+
+
+class Balance_claim(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('deposit_to_account', ObjectId(kwargs["deposit_to_account"], "account")),
+                ('balance_to_claim', ObjectId(kwargs["balance_to_claim"], "balance")),
+                ('balance_owner_key', PublicKey(kwargs["balance_owner_key"])),
+                ('total_claimed', Asset(kwargs["total_claimed"])),
+            ]))
