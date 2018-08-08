@@ -15,6 +15,10 @@ known_chains = {
         "chain_id": "789de55e9d6472a04c51df9a0bbdf3ada5e3c84fbd00b7c758108b337ab18dde",
         "core_symbol": "PPY",
         "prefix": "PPY"},
+    "CHARLIE2": {
+        "chain_id": "365662270b29bb805ed28c669b10d2cf44ba32727cd4228e15ffe51f1919ffe6",
+        "core_symbol": "PPY",
+        "prefix": "PPY"},
     "ELIZABETH": {
         "chain_id": "95e08774554ed5139854d0aa930b3952192b0fb795445113a23bdead730749cd",
         "core_symbol": "PPY",
