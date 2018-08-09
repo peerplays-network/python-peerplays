@@ -33,7 +33,8 @@ from . import (
     committee,
     bookie,
     message,
-    rpc
+    rpc,
+    asset
 )
 
 log = logging.getLogger(__name__)

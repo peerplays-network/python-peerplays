@@ -43,6 +43,7 @@ class Asset(BlockchainObject):
         self["permissions"] = todict(asset["options"].get(
             "issuer_permissions"))
         self["flags"] = todict(asset["options"].get("flags"))
+        self["max_supply"] = asset["options"].get("max_supply")
         try:
             self["description"] = json.loads(asset["options"]["description"])
         except:
@@ -59,16 +60,28 @@ class Asset(BlockchainObject):
         )
 
     @property
-    def symbol(self):
-        return self["symbol"]
-
-    @property
     def id(self):
         return self['id']
 
     @property
+    def symbol(self):
+        return self["symbol"]
+
+    @property
+    def description(self):
+        return self["description"]
+
+    @property
     def precision(self):
         return self["precision"]
+
+    @property
+    def max_supply(self):
+        from .amount import Amount
+        return Amount({
+            "amount": self["max_supply"],
+            "asset_id": self["id"]
+        })
 
     @property
     def is_bitasset(self):
