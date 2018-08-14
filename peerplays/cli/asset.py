@@ -2,11 +2,7 @@ from .decorators import (
     onlineChain,
 )
 
-try:
-    import click
-except ImportError:
-    print("Please install python-click")
-    sys.exit(1)
+import click
 
 from peerplays.asset import Asset
 from peerplays.exceptions import AssetDoesNotExistsException
@@ -41,4 +37,4 @@ def assets(ctx):
             description = "--"
         assetTable.add_row([assets[i].id, assets[i].symbol, assets[i].precision, description, assets[i].max_supply["amount"]])
 
-    print (assetTable)
+    click.echo(assetTable)
