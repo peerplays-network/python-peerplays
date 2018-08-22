@@ -34,3 +34,10 @@ class UnhandledRPCError(RPCError):
 
 class NumRetriesReached(Exception):
     pass
+
+
+class OperationInProposalExistsException(Exception):
+    """ An operation in a proposal was already seen by the API node and will
+        not be accepted for rebroadcast
+    """
+    pass

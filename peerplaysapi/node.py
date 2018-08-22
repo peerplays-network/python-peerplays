@@ -11,6 +11,8 @@ class Api(Original_Api):
             raise exceptions.MissingRequiredActiveAuthority
         elif re.match("^no method with name.*", msg):
             raise exceptions.NoMethodWithName(msg)
+        elif msg == "Proposed operation is already pending for approval.":
+            raise exceptions.OperationInProposalExistsException(msg)
         elif msg:
             raise exceptions.UnhandledRPCError(msg)
         else:
