@@ -17,9 +17,11 @@ from .rule import Rule
 from .bettingmarketgroup import BettingMarketGroup
 from .bettingmarket import BettingMarket
 from .bet import Bet
+from .genesisbalance import GenesisBalance
 
 from .exceptions import (
     AccountExistsException,
+    MissingKeyError
 )
 from .wallet import Wallet
 from .transactionbuilder import TransactionBuilder, ProposalBuilder
