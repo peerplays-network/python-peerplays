@@ -34,7 +34,8 @@ from . import (
     bookie,
     message,
     rpc,
-    asset
+    asset,
+    bos
 )
 
 log = logging.getLogger(__name__)
