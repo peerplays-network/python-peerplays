@@ -46,7 +46,7 @@ setup(
         ],
     },
     install_requires=[
-        "graphenelib==0.6.6",
+        "graphenelib<1.0.0",
         "appdirs",
         "prettytable",
         "events==0.3",
