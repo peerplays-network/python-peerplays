@@ -12,15 +12,11 @@ known_chains = {
         "core_symbol": "PPYTEST",
         "prefix": "PPYTEST"},
     "CHARLIE": {
-        "chain_id": "789de55e9d6472a04c51df9a0bbdf3ada5e3c84fbd00b7c758108b337ab18dde",
-        "core_symbol": "PPY",
-        "prefix": "PPY"},
-    "CHARLIE2": {
-        "chain_id": "365662270b29bb805ed28c669b10d2cf44ba32727cd4228e15ffe51f1919ffe6",
+        "chain_id": "ff13188de4d86b9d53d1cd4452b56d672562c4ceae3f7b59847e982220fe260f",
         "core_symbol": "PPY",
         "prefix": "PPY"},
     "ELIZABETH": {
-        "chain_id": "95e08774554ed5139854d0aa930b3952192b0fb795445113a23bdead730749cd",
+        "chain_id": "bfd04981389d7ac80f9e9739a183808ff9d99c948f65510a0c08b4979e3538ae",
         "core_symbol": "PPY",
         "prefix": "PPY"}
 }
