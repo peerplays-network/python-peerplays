@@ -13,10 +13,10 @@ known_chains = {
         "prefix": "PPYTEST"},
     "CHARLIE": {
         "chain_id": "ff13188de4d86b9d53d1cd4452b56d672562c4ceae3f7b59847e982220fe260f",
-        "core_symbol": "PPY",
-        "prefix": "PPY"},
+        "core_symbol": "TEST",
+        "prefix": "TEST"},
     "ELIZABETH": {
         "chain_id": "bfd04981389d7ac80f9e9739a183808ff9d99c948f65510a0c08b4979e3538ae",
-        "core_symbol": "PPY",
-        "prefix": "PPY"}
+        "core_symbol": "TEST",
+        "prefix": "TEST"}
 }
