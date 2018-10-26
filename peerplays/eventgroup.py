@@ -11,7 +11,7 @@ class EventGroup(BlockchainObject):
             accesing a RPC
 
     """
-    type_id = 17
+    type_id = 21
 
     def refresh(self):
         data = self.blockchain.rpc.get_object(self.identifier)

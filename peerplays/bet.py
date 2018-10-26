@@ -9,7 +9,7 @@ class Bet(BlockchainObject):
         :param peerplays blockchain_instance: PeerPlays() instance to use when accesing a RPC
 
     """
-    type_id = 22
+    type_id = 26
 
     def refresh(self):
         data = self.blockchain.rpc.get_object(self.identifier)

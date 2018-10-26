@@ -11,7 +11,7 @@ class Event(BlockchainObject):
             accesing a RPC
 
     """
-    type_id = 18
+    type_id = 22
 
     def refresh(self):
         data = self.blockchain.rpc.get_object(self.identifier)

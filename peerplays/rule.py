@@ -12,7 +12,7 @@ class Rule(BlockchainObject):
 
     """
 
-    type_id = 19
+    type_id = 23
 
     def refresh(self):
         rule = self.blockchain.rpc.get_object(self.identifier)

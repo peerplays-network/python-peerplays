@@ -11,7 +11,7 @@ class BettingMarket(BlockchainObject):
             accesing a RPC
 
     """
-    type_id = 21
+    type_id = 25
 
     def refresh(self):
         assert self.identifier[:5] == "1.21.",\
