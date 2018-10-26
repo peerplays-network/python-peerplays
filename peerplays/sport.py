@@ -11,7 +11,7 @@ class Sport(BlockchainObject):
             accesing a RPC
 
     """
-    type_id = 16
+    type_id = 20
 
     def refresh(self):
         data = self.blockchain.rpc.get_object(self.identifier)

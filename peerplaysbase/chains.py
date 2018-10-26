@@ -7,12 +7,20 @@ known_chains = {
         "chain_id": "80df3c34bff8469bdaf47e55a2fb6fb6f1eb4a49d6375aaa5689d3ca9e51bff5",
         "core_symbol": "PPY",
         "prefix": "PPY"},
+    "BEATRICE": {
+        "chain_id": "b3f7fe1e5ad0d2deca40a626a4404524f78e65c3a48137551c33ea4e7c365672",
+        "core_symbol": "TEST",
+        "prefix": "TEST"},
     "BAXTER": {
         "chain_id": "be6b79295e728406cbb7494bcb626e62ad278fa4018699cf8f75739f4c1a81fd",
         "core_symbol": "PPYTEST",
         "prefix": "PPYTEST"},
     "CHARLIE": {
         "chain_id": "56ac9f92ef2413363c26fdd3cbb0e09bbc59acb04cfc59f4cf6ef41960dcba4b",
+        "core_symbol": "TEST",
+        "prefix": "TEST"},
+    "DICK": {
+        "chain_id": "4b1f5041bd11377cca5e3d440be543f55d8e242cdac4cc915fb93e7537f91bd6",
         "core_symbol": "TEST",
         "prefix": "TEST"},
     "ELIZABETH": {
