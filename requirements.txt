@@ -1,0 +1,13 @@
+graphenelib<1.0.0
+appdirs
+prettytable
+events==0.3
+scrypt
+pyyaml
+
+# for AES, installed through graphenelib already
+pycryptodome
+
+# for the CLI tool
+click
+treelib
