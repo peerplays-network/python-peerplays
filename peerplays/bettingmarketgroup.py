@@ -39,7 +39,7 @@ class BettingMarketGroup(BlockchainObject):
 class BettingMarketGroups(list):
     """ List of all available BettingMarketGroups
 
-        :param strevent_id: Event ID (``1.18.xxx``)
+        :param strevent_id: Event ID (``1.22.xxx``)
     """
     cache = ObjectCache()
 

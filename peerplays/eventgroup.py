@@ -34,7 +34,7 @@ class EventGroup(BlockchainObject):
 class EventGroups(list):
     """ List of all available EventGroups
 
-        :param str sport_id: Sport ID (``1.16.xxx``)
+        :param str sport_id: Sport ID (``1.21.xxx``)
     """
     cache = ObjectCache()
 

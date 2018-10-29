@@ -45,7 +45,7 @@ class Rules(list):
             self.rules = Rules.cache["rules"]
         else:
             self.rules = self.blockchain.rpc.get_objects([
-                "1.19.{}".format(id) for id in range(0, limit)
+                "1.23.{}".format(id) for id in range(0, limit)
             ])
             Rules.cache["rules"] = self.rules
 

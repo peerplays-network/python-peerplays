@@ -14,8 +14,8 @@ class BettingMarket(BlockchainObject):
     type_id = 25
 
     def refresh(self):
-        assert self.identifier[:5] == "1.21.",\
-            "Identifier needs to be of form '1.21.xx'"
+        assert self.identifier[:5] == "1.25.",\
+            "Identifier needs to be of form '1.25.xx'"
         data = self.blockchain.rpc.get_object(self.identifier)
         if not data:
             raise BettingMarketDoesNotExistException(self.identifier)
@@ -31,7 +31,7 @@ class BettingMarket(BlockchainObject):
 class BettingMarkets(list, BlockchainInstance):
     """ List of all available BettingMarkets
 
-        :param str betting_market_group_id: Market Group ID (``1.20.xxx``)
+        :param str betting_market_group_id: Market Group ID (``1.24.xxx``)
     """
     cache = ObjectCache()
 
