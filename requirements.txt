@@ -1,7 +1,7 @@
-graphenelib<1.0.0
+graphenelib
 appdirs
 prettytable
-events==0.3
+events
 scrypt
 pyyaml
 
