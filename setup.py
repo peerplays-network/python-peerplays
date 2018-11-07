@@ -11,7 +11,7 @@ except LookupError:
     ascii = codecs.lookup('ascii')
     codecs.register(lambda name, enc=ascii: {True: enc}.get(name == 'mbcs'))
 
-VERSION = '0.1.37'
+VERSION = '0.1.38'
 
 setup(
     name='peerplays',
@@ -45,17 +45,7 @@ setup(
             'peerplays = peerplays.cli.cli:main',
         ],
     },
-    install_requires=[
-        "graphenelib<1.0.0",
-        "appdirs",
-        "prettytable",
-        "events==0.3",
-        "scrypt",
-        "pycryptodome",  # for AES, installed through graphenelib already
-        # for the CLI tool
-        "click",
-        "treelib",
-    ],
+    install_requires=open("requirements.txt").readlines(),
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     include_package_data=True,

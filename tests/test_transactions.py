@@ -299,10 +299,10 @@ class Testcases(unittest.TestCase):
     def test_betting_market_group_resolve(self):
         self.op = operations.Betting_market_group_resolve(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "betting_market_group_id": "1.20.1024",
+            "betting_market_group_id": "1.24.1024",
             "resolutions": [
-                ["1.21.257", "cancel"],
-                ["1.21.256", "cancel"],
+                ["1.25.257", "cancel"],
+                ["1.25.256", "cancel"],
             ],
             "prefix": prefix,
         })
@@ -317,7 +317,7 @@ class Testcases(unittest.TestCase):
         self.op = operations.Bet_place(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "bettor_id": "1.2.1241",
-            "betting_market_id": "1.21.1",
+            "betting_market_id": "1.25.1",
             "amount_to_bet": {"amount": 1000, "asset_id": "1.3.1"},
             "backer_multiplier": 2 * GRAPHENE_BETTING_ODDS_PRECISION,
             "back_or_lay": "lay",
@@ -334,7 +334,7 @@ class Testcases(unittest.TestCase):
         self.op = operations.Bet_cancel(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "bettor_id": "1.2.5555",
-            "bet_to_cancel": "1.22.1111",
+            "bet_to_cancel": "1.26.1111",
             "prefix": prefix,
         })
         self.cm = ("f68585abf4dce7c804570144000000000000000000b32bd70800"
@@ -346,7 +346,7 @@ class Testcases(unittest.TestCase):
     def test_sport_update(self):
         self.op = operations.Sport_update(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "sport_id": "1.16.1241",
+            "sport_id": "1.20.1241",
             "new_name": [["en", "Football"], ["de", "Fußball"]],
             "prefix": prefix,
         })
@@ -360,7 +360,7 @@ class Testcases(unittest.TestCase):
     def test_event_update(self):
         self.op = operations.Event_update(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "event_id": "1.18.12414",
+            "event_id": "1.22.12414",
             "new_event_group_id": "1.0.1241",
             "new_name": [["en", "My Event name"]],
             "new_season": [["en", "2016-17"]],
@@ -379,13 +379,13 @@ class Testcases(unittest.TestCase):
     def test_event_group_update(self):
         self.op = operations.Event_group_update(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "event_group_id": "1.17.12",
-            "new_sport_id": "1.16.1241",
+            "event_group_id": "1.21.12",
+            "new_sport_id": "1.20.1241",
             "new_name": [["en", "NHL"], ["zh_Hans", "國家冰球聯盟"]],
             "prefix": prefix,
         })
         self.cm = ("f68585abf4dce7c80457013700000000000000000001d904000"
-                   "000001001010202656e034e484c077a685f48616e7312e59c8b"
+                   "000001401010202656e034e484c077a685f48616e7312e59c8b"
                    "e5aeb6e586b0e79083e881afe79b9f0c000001201eea42229a7"
                    "15506ec419d41a459d546cad9247f7100d62015fdf187747e9b"
                    "78378b538cbde9902afb6b9ac95736999927146759174b60fbe"
@@ -395,7 +395,7 @@ class Testcases(unittest.TestCase):
     def test_betting_market_rules_update(self):
         self.op = operations.Betting_market_rules_update(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "betting_market_rules_id": "1.19.2324",
+            "betting_market_rules_id": "1.23.2324",
             "new_name": [["en", "NHL Rules v1.0"]],
             "new_description": [["en", "The winner will be the team with the most points at the end of the game.  The team with fewer points will not be the winner."]],
             "prefix": prefix,
@@ -415,7 +415,7 @@ class Testcases(unittest.TestCase):
     def test_betting_market_group_update(self):
         self.op = operations.Betting_market_group_update(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "betting_market_group_id": "1.20.24124",
+            "betting_market_group_id": "1.24.24124",
             "new_description": [["en", "Football"], ["de", "Fußball"]],
             "new_event_id": "1.0.1241",
             "new_rules_id": "1.22.11",
@@ -433,7 +433,7 @@ class Testcases(unittest.TestCase):
     def test_betting_market_update(self):
         self.op = operations.Betting_market_update(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "betting_market_id": "1.21.124",
+            "betting_market_id": "1.25.124",
             "new_group_id": "1.0.1241",
             "new_description": [["en", "Betting market description"]],
             "new_payout_condition": [["en", "Foo == Bar"], ["zh_Hans", "Foo == Bar"]],
@@ -611,7 +611,7 @@ class Testcases(unittest.TestCase):
     def test_event_status_update(self):
         self.op = operations.Event_update_status(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "event_id": "1.18.12414",
+            "event_id": "1.22.12414",
             "status": "settled",
             "scores": ["0:0"],
             "prefix": prefix,
@@ -667,7 +667,7 @@ class Testcases(unittest.TestCase):
             },
             "payer_account_id": "1.2.0",
             "player_account_id": "1.2.0",
-            "tournament_id": "1.23.0",
+            "tournament_id": "1.16.0",
             "buy_in": {
                 "amount": 0,
                 "asset_id": "1.3.0"
@@ -688,7 +688,7 @@ class Testcases(unittest.TestCase):
             },
             "canceling_account_id": "1.2.0",
             "player_account_id": "1.2.0",
-            "tournament_id": "1.23.0",
+            "tournament_id": "1.16.0",
             "extensions": []
         })
         self.cm = ("f68585abf4dce7c804570133000000000000000000000000000"
@@ -703,7 +703,7 @@ class Testcases(unittest.TestCase):
                 "amount": 0,
                 "asset_id": "1.3.0"
             },
-            "game_id": "1.26.0",
+            "game_id": "1.19.0",
             "player_account_id": "1.2.0",
             "move": [
                 0, {
@@ -727,7 +727,7 @@ class Testcases(unittest.TestCase):
                 "amount": 0,
                 "asset_id": "1.3.0"
             },
-            "game_id": "1.26.0",
+            "game_id": "1.19.0",
             "player_account_id": "1.2.0",
             "move": [
                 1, {

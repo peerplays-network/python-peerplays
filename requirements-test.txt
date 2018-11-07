@@ -1,8 +1,6 @@
-graphenelib>=0.5.0
-pycrypto==2.6.1
-scrypt==0.7.1
+# Faster unittests
 secp256k1
-pyyaml
+
 pytest
 coverage
 mock
