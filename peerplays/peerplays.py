@@ -1451,6 +1451,7 @@ class PeerPlays(object):
         asset=None,
         delay_before_settling=0,
         never_in_play=False,
+        resolution_constraint="exactly_one_winner",
         account=None,
         **kwargs
     ):
@@ -1505,6 +1506,7 @@ class PeerPlays(object):
             "asset_id": asset["id"],
             "never_in_play": bool(never_in_play),
             "delay_before_settling": int(delay_before_settling),
+            "resolution_constraint": resolution_constraint,
             "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)

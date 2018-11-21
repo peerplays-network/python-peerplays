@@ -407,3 +407,10 @@ class TournamentOptions(GrapheneObject):
                 ('meta', Optional(None)),
                 ('game_options', GameSpecificOptions(kwargs["game_options"])),
             ]))
+
+
+class ResolutionConstraint(Enum):
+    options = [
+        "exactly_one_winner",
+        "at_most_one_winner"
+    ]

@@ -25,7 +25,8 @@ from .objects import (
     BettingMarketStatus,
     BettingMarketGroupStatus,
     TournamentOptions,
-    GameSpecificMoves
+    GameSpecificMoves,
+    ResolutionConstraint
 )
 default_prefix = "PPY"
 
@@ -643,6 +644,7 @@ class Betting_market_group_create(GrapheneObject):
                 ('asset_id', ObjectId(kwargs["asset_id"], "asset")),
                 ('never_in_play', Bool(kwargs["never_in_play"])),
                 ('delay_before_settling', Uint32(kwargs["delay_before_settling"])),
+                ('resolution_constraint', ResolutionConstraint(kwargs["resolution_constraint"])),
                 ('extensions', Set([])),
             ]))
 
