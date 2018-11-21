@@ -47,9 +47,13 @@ timestamp={meta[timestamp]}
 
 class Message():
 
-    def __init__(self, message, **kwargs):
-        BlockchainInstance.__init__(self, **kwargs)
-        self.message = message
+    def __init__(self, message, *args, **kwargs):
+        BlockchainInstance.__init__(self, *args, **kwargs)
+        self.message = message.replace("\r\n", "\n")
+        self.signed_by_account = None
+        self.signed_by_name = None
+        self.meta = None
+        self.plain_message = None
 
     def sign(self, account=None, **kwargs):
         """ Sign a message with an account's memo key
@@ -91,6 +95,11 @@ class Message():
             enc_message,
             wif
         )).decode("ascii")
+
+        self.signed_by_account = account
+        self.signed_by_name = account["name"]
+        self.meta = meta
+        self.plain_message = message
 
         return SIGNED_MESSAGE_ENCAPSULATED.format(
             MESSAGE_SPLIT=MESSAGE_SPLIT,
@@ -153,7 +162,7 @@ class Message():
         # Test if memo key is the same as on the blockchain
         if not account["options"]["memo_key"] == memo_key:
             raise WrongMemoKey(
-                "Memo Key of account {} on the Blockchain".format(
+                "Memo Key of account {} on the Blockchain ".format(
                     account["name"]) +
                 "differs from memo key in the message: {} != {}".format(
                     account["options"]["memo_key"], memo_key
@@ -167,8 +176,13 @@ class Message():
         pubkey = verify_message(enc_message, unhexlify(signature))
 
         # Verify pubky
-        pk = PublicKey(hexlify(pubkey).decode("ascii"))
+        pk = PublicKey(hexlify(pubkey).decode("ascii"), prefix=self.blockchain.prefix)
         if format(pk, self.blockchain.prefix) != memo_key:
-            raise InvalidMessageSignature
+            raise InvalidMessageSignature("The signature doesn't match the memo key")
+
+        self.signed_by_account = account
+        self.signed_by_name = account["name"]
+        self.meta = meta
+        self.plain_message = message
 
         return True

@@ -5,37 +5,23 @@ from peerplays import PeerPlays
 from peerplays.utils import parse_time
 from peerplaysbase.operationids import getOperationNameForId
 from peerplays.instance import set_shared_peerplays_instance
+from .fixtures import fixture_data, peerplays
 
-wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
-
+peerplays.bundle = True
 
 class Testcases(unittest.TestCase):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.ppy = PeerPlays(
-            nobroadcast=True,
-            # this account creates the proposal
-            # proposer="init2",
-            # Proposal needs to be approve within 1 hour
-            # proposal_expiration=60 * 60 * 24 * 14,
-            # We want to bundle many operations into a single transaction
-            bundle=True,
-            # Overwrite wallet to use this list of wifs only
-            wif=[wif]
-        )
-        set_shared_peerplays_instance(self.ppy)
-        self.ppy.set_default_account("init0")
+    def setUp(self):
+        fixture_data()
 
     def test_sport_create(self):
         sport = [
             ["de", "Fussball"],
             ["en", "Soccer"],
         ]
-        proposal = self.ppy.proposal()
-        self.ppy.sport_create(sport, append_to=proposal)
-        tx = self.ppy.tx()
+        proposal = peerplays.proposal()
+        peerplays.sport_create(sport, append_to=proposal)
+        tx = peerplays.tx()
         ops = tx["operations"]
         prop = ops[0][1]
         self.assertEqual(len(ops), 1)
@@ -58,10 +44,10 @@ class Testcases(unittest.TestCase):
             ["de", "Fussball"],
             ["en", "Soccer"],
         ]
-        proposal = self.ppy.proposal()
-        self.ppy.sport_create(sport, append_to=proposal)
-        self.ppy.sport_create(sport, append_to=proposal)
-        tx = self.ppy.tx()
+        proposal = peerplays.proposal()
+        peerplays.sport_create(sport, append_to=proposal)
+        peerplays.sport_create(sport, append_to=proposal)
+        tx = peerplays.tx()
         ops = tx["operations"]
         prop = ops[0][1]
         self.assertEqual(len(ops), 1)
@@ -88,10 +74,10 @@ class Testcases(unittest.TestCase):
             ["de", "1. Bundesliga"],
             ["en", "First Country League"],
         ]
-        proposal = self.ppy.proposal()
-        self.ppy.sport_create(["en", "testsport"], append_to=proposal)
-        self.ppy.event_group_create(ev, sport_id="0.0.0", append_to=proposal)
-        tx = self.ppy.tx()
+        proposal = peerplays.proposal()
+        peerplays.sport_create(["en", "testsport"], append_to=proposal)
+        peerplays.event_group_create(ev, sport_id="0.0.0", append_to=proposal)
+        tx = peerplays.tx()
         ops = tx["operations"]
         prop = ops[0][1]
         self.assertEqual(len(ops), 1)
@@ -118,15 +104,15 @@ class Testcases(unittest.TestCase):
         desc = [["de", "Bundesliga"], ["en", "Germany Scoccer Championship"]]
         season = [["de", "Januar 2016"], ["en", "January 2016"]]
         start = datetime.datetime(2016, 1, 1, 0, 0, 0)
-        proposal = self.ppy.proposal()
-        self.ppy.sport_create(["en", "testsport"], append_to=proposal)
-        self.ppy.event_group_create(ev, sport_id="0.0.0", append_to=proposal)
-        self.ppy.event_create(
+        proposal = peerplays.proposal()
+        peerplays.sport_create(["en", "testsport"], append_to=proposal)
+        peerplays.event_group_create(ev, sport_id="0.0.0", append_to=proposal)
+        peerplays.event_create(
             desc, season, start,
             event_group_id="0.0.1",
             append_to=proposal
         )
-        tx = self.ppy.tx()
+        tx = peerplays.tx()
         ops = tx["operations"]
         prop = ops[0][1]
         self.assertEqual(len(ops), 1)
@@ -159,10 +145,10 @@ class Testcases(unittest.TestCase):
     def test_betting_market_rules_create(self):
         name = [["en", "NHL Rules v1.0"]]
         rule = [["en", "The winner will be the team with the most points at the end of the game.  The team with fewer points will not be the winner."]]
-        self.ppy.betting_market_rules_create(
-            name, rule, append_to=self.ppy.proposal()
+        peerplays.betting_market_rules_create(
+            name, rule, append_to=peerplays.proposal()
         )
-        tx = self.ppy.tx()
+        tx = peerplays.tx()
         ops = tx["operations"]
         prop = ops[0][1]
         self.assertEqual(len(ops), 1)
@@ -195,18 +181,18 @@ class Testcases(unittest.TestCase):
         season = [["de", "Januar 2016"], ["en", "January 2016"]]
         start = datetime.datetime(2016, 1, 1, 0, 0, 0)
 
-        proposal = self.ppy.proposal()
-        self.ppy.sport_create(["en", "testsport"], append_to=proposal)
-        self.ppy.event_group_create(ev, sport_id="0.0.0", append_to=proposal)
-        self.ppy.event_create(desc, season, start, event_group_id="0.0.1", append_to=proposal)
-        self.ppy.betting_market_rules_create(rule_name, rule, append_to=proposal)
-        self.ppy.betting_market_group_create(
+        proposal = peerplays.proposal()
+        peerplays.sport_create(["en", "testsport"], append_to=proposal)
+        peerplays.event_group_create(ev, sport_id="0.0.0", append_to=proposal)
+        peerplays.event_create(desc, season, start, event_group_id="0.0.1", append_to=proposal)
+        peerplays.betting_market_rules_create(rule_name, rule, append_to=proposal)
+        peerplays.betting_market_group_create(
             name,
             event_id="0.0.2",
             rules_id="0.0.3",
             append_to=proposal
         )
-        tx = self.ppy.tx()
+        tx = peerplays.tx()
         ops = tx["operations"]
         prop = ops[0][1]
         self.assertEqual(len(ops), 1)
@@ -246,20 +232,20 @@ class Testcases(unittest.TestCase):
         season = [["de", "Januar 2016"], ["en", "January 2016"]]
         start = datetime.datetime(2016, 1, 1, 0, 0, 0)
 
-        proposal = self.ppy.proposal()
-        self.ppy.sport_create(["en", "testsport"], append_to=proposal)
-        self.ppy.event_group_create(ev, sport_id="0.0.0", append_to=proposal)
-        self.ppy.event_create(desc, season, start, event_group_id="0.0.1", append_to=proposal)
-        self.ppy.betting_market_rules_create(rule_name, rule, append_to=proposal)
-        self.ppy.betting_market_group_create(bmg_name, event_id="0.0.2", rules_id="0.0.3", append_to=proposal)
+        proposal = peerplays.proposal()
+        peerplays.sport_create(["en", "testsport"], append_to=proposal)
+        peerplays.event_group_create(ev, sport_id="0.0.0", append_to=proposal)
+        peerplays.event_create(desc, season, start, event_group_id="0.0.1", append_to=proposal)
+        peerplays.betting_market_rules_create(rule_name, rule, append_to=proposal)
+        peerplays.betting_market_group_create(bmg_name, event_id="0.0.2", rules_id="0.0.3", append_to=proposal)
 
-        self.ppy.betting_market_create(
+        peerplays.betting_market_create(
             cond,
             name,
             group_id="0.0.4",
             append_to=proposal
         )
-        tx = self.ppy.tx()
+        tx = peerplays.tx()
         ops = tx["operations"]
         prop = ops[0][1]
         self.assertEqual(len(ops), 1)
@@ -286,43 +272,31 @@ class Testcases(unittest.TestCase):
         )
 
     def test_betting_market_resolve(self):
-        def new_refresh(self):
-            dict.__init__(
-                self,
-                {"id": "1.20.0"}
-            )
-
-        result = [["1.21.257", "win"],
-                  ["1.21.258", "not_win"],
-                  ["1.21.259", "cancel"]]
-
-        with mock.patch(
-            "peerplays.bettingmarketgroup.BettingMarketGroup.refresh",
-            new=new_refresh
-        ):
-            self.ppy.betting_market_resolve(
-                "1.20.0",
-                result,
-                append_to=self.ppy.proposal()
-            )
-            tx = self.ppy.tx()
-            ops = tx["operations"]
-            prop = ops[0][1]
-            self.assertEqual(len(ops), 1)
-            self.assertEqual(
-                getOperationNameForId(ops[0][0]),
-                "proposal_create"
-            )
-            self.assertEqual(len(prop["proposed_ops"]), 1)
-            self.assertEqual(
-                getOperationNameForId(prop["proposed_ops"][0]["op"][0]),
-                "betting_market_group_resolve"
-            )
-            self.assertEqual(
-                "1.20.0",
-                prop["proposed_ops"][0]["op"][1]["betting_market_group_id"]
-            )
-            self.assertEqual(
-                result,
-                prop["proposed_ops"][0]["op"][1]["resolutions"]
-            )
+        result = [['1.25.2950', "win"],
+                  ['1.25.2951', "not_win"]]
+        peerplays.betting_market_resolve(
+            "1.24.212",
+            result,
+            append_to=peerplays.proposal()
+        )
+        tx = peerplays.tx()
+        ops = tx["operations"]
+        prop = ops[0][1]
+        self.assertEqual(len(ops), 1)
+        self.assertEqual(
+            getOperationNameForId(ops[0][0]),
+            "proposal_create"
+        )
+        self.assertEqual(len(prop["proposed_ops"]), 1)
+        self.assertEqual(
+            getOperationNameForId(prop["proposed_ops"][0]["op"][0]),
+            "betting_market_group_resolve"
+        )
+        self.assertEqual(
+            "1.24.212",
+            prop["proposed_ops"][0]["op"][1]["betting_market_group_id"]
+        )
+        self.assertEqual(
+            result,
+            prop["proposed_ops"][0]["op"][1]["resolutions"]
+        )

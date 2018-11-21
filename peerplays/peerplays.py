@@ -858,7 +858,8 @@ class PeerPlays(object):
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "account": account["id"],
             "new_options": account["options"],
-            "extensions": {}
+            "extensions": {},
+            "prefix": self.prefix,
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 

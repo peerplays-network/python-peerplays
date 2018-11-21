@@ -7,24 +7,13 @@ from peerplays.amount import Amount
 from peerplays.asset import Asset
 from peerplays.instance import set_shared_peerplays_instance
 from peerplaysbase.operationids import getOperationNameForId
-
-wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
+from .fixtures import fixture_data, peerplays
 
 
 class Testcases(unittest.TestCase):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.ppy = PeerPlays(
-            nobroadcast=True,
-            # We want to bundle many operations into a single transaction
-            bundle=True,
-            # Overwrite wallet to use this list of wifs only
-            wif=[wif]
-        )
-        self.ppy.set_default_account("init0")
-        set_shared_peerplays_instance(self.ppy)
+    def setUp(self):
+        fixture_data()
 
     def test_account(self):
         Account("witness-account")
@@ -52,7 +41,7 @@ class Testcases(unittest.TestCase):
         self.assertIsInstance(Account(account), Account)
 
     def test_account_upgrade(self):
-        account = Account("witness-account")
+        account = Account("init0")
         tx = account.upgrade()
         ops = tx["operations"]
         op = ops[0][1]
@@ -66,5 +55,5 @@ class Testcases(unittest.TestCase):
         )
         self.assertEqual(
             op["account_to_upgrade"],
-            "1.2.1",
+            account["id"],
         )

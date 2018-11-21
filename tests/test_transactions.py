@@ -268,14 +268,15 @@ class Testcases(unittest.TestCase):
             "asset_id": "1.3.124",
             "never_in_play": False,
             "delay_before_settling": 60,
+            "resolution_constraint": "exactly_one_winner",
             "prefix": prefix,
         })
         self.cm = ("f68585abf4dce7c80457013c0000000000000000000202646"
                    "5084675c39f62616c6c02656e08466f6f7462616c6cd90400"
-                   "00000000010b000000000016017c003c000000000001204a5"
-                   "182e5c97b042a61b743eae2f3dc91bfbd323b34043d6a0c5c"
-                   "fc06fffbb7837648447501de8cdd214eb1e55eabd394cb4af"
-                   "152c9846f1819ec0b483fa2d275")
+                   "00000000010b000000000016017c003c00000000000001207"
+                   "44ff472b07d8bf57af73a302a8af7e4bc0e93d18838a666c7"
+                   "a6301a9f06f4602ac455f6527e8ed66241add8334fd6d20be"
+                   "af2a2a9aa3baba2e4d02b4f427b49")
         self.doit()
 
     def test_betting_market_create(self):
