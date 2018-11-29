@@ -11,10 +11,6 @@ known_chains = {
         "chain_id": "b3f7fe1e5ad0d2deca40a626a4404524f78e65c3a48137551c33ea4e7c365672",
         "core_symbol": "TEST",
         "prefix": "TEST"},
-    "BAXTER": {
-        "chain_id": "be6b79295e728406cbb7494bcb626e62ad278fa4018699cf8f75739f4c1a81fd",
-        "core_symbol": "PPYTEST",
-        "prefix": "PPYTEST"},
     "CHARLIE": {
         "chain_id": "56ac9f92ef2413363c26fdd3cbb0e09bbc59acb04cfc59f4cf6ef41960dcba4b",
         "core_symbol": "TEST",
