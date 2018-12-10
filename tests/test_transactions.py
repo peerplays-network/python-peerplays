@@ -1,17 +1,16 @@
+import unittest
+from binascii import hexlify
+from pprint import pprint
+
 from peerplaysbase import (
-    transactions,
     memo,
     account,
     operations,
     objects
 )
+from peerplaysbase.account import PrivateKey
 from peerplaysbase.objects import Operation
 from peerplaysbase.signedtransactions import Signed_Transaction
-from peerplaysbase.account import PrivateKey
-import random
-import unittest
-from pprint import pprint
-from binascii import hexlify
 
 TEST_AGAINST_CLI_WALLET = False
 
@@ -357,6 +356,18 @@ class Testcases(unittest.TestCase):
                    "b0a899d144d1ece18021a52b2c5ff3")
         self.doit()
 
+    def test_sport_delete(self):
+        self.op = operations.Sport_delete(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "sport_id": "1.20.1241",
+            "prefix": prefix,
+        })
+        self.cm = ("f68585abf4dce7c804570149000000000000000000d90900000"
+                   "1206beb69280d58f5e32b5bf107810b840801edb83a6e463dfc"
+                   "924e925a3f9643ba2c3ce2ae880c8e3bf93511857d9f4425afc"
+                   "1ff97a5d73475af0670345d634b0f")
+        self.doit()
+
     def test_event_update(self):
         self.op = operations.Event_update(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},
@@ -390,6 +401,18 @@ class Testcases(unittest.TestCase):
                    "15506ec419d41a459d546cad9247f7100d62015fdf187747e9b"
                    "78378b538cbde9902afb6b9ac95736999927146759174b60fbe"
                    "3d477e007611080")
+        self.doit()
+
+    def test_event_group_delete(self):
+        self.op = operations.Event_group_delete(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "event_group_id": "1.21.12",
+            "prefix": prefix,
+        })
+        self.cm = ("f68585abf4dce7c80457014a0000000000000000000c0000012"
+                   "067d41a8225327b453d8558248161603bd5c19f1eb8987871b8"
+                   "fe4c961b57d89b3a1f04f8e80cee973462b2ea513eda834fead"
+                   "d4fcd95b923f934239c934dbfa2")
         self.doit()
 
     def test_betting_market_rules_update(self):
