@@ -357,6 +357,18 @@ class Testcases(unittest.TestCase):
                    "b0a899d144d1ece18021a52b2c5ff3")
         self.doit()
 
+    def test_sport_delete(self):
+        self.op = operations.Sport_delete(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "sport_id": "1.20.1241",
+            "prefix": prefix,
+        })
+        self.cm = ("f68585abf4dce7c804570149000000000000000000d90900000"
+                   "1206beb69280d58f5e32b5bf107810b840801edb83a6e463dfc"
+                   "924e925a3f9643ba2c3ce2ae880c8e3bf93511857d9f4425afc"
+                   "1ff97a5d73475af0670345d634b0f")
+        self.doit()
+
     def test_event_update(self):
         self.op = operations.Event_update(**{
             "fee": {"amount": 0, "asset_id": "1.3.0"},

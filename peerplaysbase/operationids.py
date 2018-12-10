@@ -72,6 +72,10 @@ ops = [
     "betting_market_group_update",
     "betting_market_update",
     "event_update_status",
+    "sport_delete",
+    "event_group_delete",
+    "affiliate_payout",
+    "affiliate_referral_payout",
 ]
 operations = {o: ops.index(o) for o in ops}
 
