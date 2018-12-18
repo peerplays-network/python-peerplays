@@ -1,5 +1,4 @@
 from .peerplays import PeerPlays
-from graphenebase import base58
 
 __all__ = [
     "account",
@@ -28,8 +27,5 @@ __all__ = [
     "notify",
     "message",
 ]
-base58.known_prefixes.append("PPY")
-base58.known_prefixes.append("PPY1")
-base58.known_prefixes.append("PPYTEST")
 
 GRAPHENE_BETTING_ODDS_PRECISION = 10000

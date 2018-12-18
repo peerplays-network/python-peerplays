@@ -4,17 +4,13 @@ from peerplays import PeerPlays
 from peerplays.amount import Amount
 from peerplays.asset import Asset
 from peerplays.instance import set_shared_peerplays_instance
+from .fixtures import fixture_data, peerplays
 
 
 class Testcases(unittest.TestCase):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.ppy = PeerPlays(
-            nobroadcast=True,
-        )
-        set_shared_peerplays_instance(self.ppy)
+    def setUp(self):
+        fixture_data()
         self.asset = Asset("1.3.0")
         self.symbol = self.asset["symbol"]
         self.precision = self.asset["precision"]

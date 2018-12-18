@@ -6,8 +6,10 @@ from graphenebase.account import (
     BrainKey as GPHBrainKey,
     Address as GPHAddress,
     PublicKey as GPHPublicKey,
-    PrivateKey as GPHPrivateKey
+    PrivateKey as GPHPrivateKey,
 )
+
+default_prefix = "PPY"
 
 
 class PasswordKey(GPHPasswordKey):
@@ -17,19 +19,7 @@ class PasswordKey(GPHPasswordKey):
         passphrase only.
     """
 
-    def __init__(self, *args, **kwargs):
-        super(PasswordKey, self).__init__(*args, **kwargs)
-
-    def get_private(self):
-        """ Derive private key from the brain key and the current sequence
-            number
-        """
-        if sys.version > '3':
-            a = bytes(self.password + self.account + self.role, 'utf8')
-        else:
-            a = bytes(self.password + self.account + self.role).encode('utf8')
-        s = hashlib.sha256(a).digest()
-        return PrivateKey(hexlify(s).decode('ascii'))
+    prefix = default_prefix
 
 
 class BrainKey(GPHBrainKey):
@@ -51,8 +41,7 @@ class BrainKey(GPHBrainKey):
         regenerated given the brain key.
     """
 
-    def __init__(self, *args, **kwargs):
-        super(BrainKey, self).__init__(*args, **kwargs)
+    prefix = default_prefix
 
 
 class Address(GPHAddress):
@@ -69,10 +58,8 @@ class Address(GPHAddress):
            Address("PPYFN9r6VYzBK8EKtMewfNbfiGCr56pHDBFi")
 
     """
-    def __init__(self, *args, **kwargs):
-        if "prefix" not in kwargs:
-            kwargs["prefix"] = "PPY"  # make prefix PPY
-        super(Address, self).__init__(*args, **kwargs)
+
+    prefix = default_prefix
 
 
 class PublicKey(GPHPublicKey):
@@ -92,10 +79,8 @@ class PublicKey(GPHPublicKey):
                       PublicKey("xxxxx").unCompressed()
 
     """
-    def __init__(self, *args, **kwargs):
-        if "prefix" not in kwargs:
-            kwargs["prefix"] = "PPY"  # make prefix PPY
-        super(PublicKey, self).__init__(*args, **kwargs)
+
+    prefix = default_prefix
 
 
 class PrivateKey(GPHPrivateKey):
@@ -121,7 +106,5 @@ class PrivateKey(GPHPrivateKey):
             Instance of ``Address`` using uncompressed key.
 
     """
-    def __init__(self, *args, **kwargs):
-        if "prefix" not in kwargs:
-            kwargs["prefix"] = "PPY"  # make prefix PPY
-        super(PrivateKey, self).__init__(*args, **kwargs)
+
+    prefix = default_prefix

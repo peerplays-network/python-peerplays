@@ -1,23 +1,18 @@
 import click
-from peerplays.storage import configStorage as config
 from peerplays.account import Account
 from prettytable import PrettyTable
-from .decorators import (
-    onlineChain,
-    offlineChain,
-    unlockWallet
-)
+from .decorators import onlineChain, offlineChain, unlockWallet
 from .main import main
 
 
 @main.command()
 @click.pass_context
 @click.option(
-    '--password',
+    "--password",
     prompt="Wallet Passphrase",
     hide_input=True,
     confirmation_prompt=True,
-    help="New Wallet Passphrase"
+    help="New Wallet Passphrase",
 )
 @offlineChain
 def createwallet(ctx, password):
@@ -30,11 +25,11 @@ def createwallet(ctx, password):
 @click.pass_context
 @offlineChain
 @click.option(
-    '--new-password',
+    "--new-password",
     prompt="New Wallet Passphrase",
     hide_input=True,
     confirmation_prompt=True,
-    help="New Wallet Passphrase"
+    help="New Wallet Passphrase",
 )
 @unlockWallet
 def changewalletpassphrase(ctx, new_password):
@@ -46,10 +41,7 @@ def changewalletpassphrase(ctx, new_password):
 @main.command()
 @click.pass_context
 @onlineChain
-@click.argument(
-    "key",
-    nargs=-1
-)
+@click.argument("key", nargs=-1)
 @unlockWallet
 def addkey(ctx, key):
     """ Add a private key to the wallet
@@ -60,7 +52,7 @@ def addkey(ctx, key):
                 "Private Key (wif) [Enter to quit]",
                 hide_input=True,
                 show_default=False,
-                default="exit"
+                default="exit",
             )
             if not key or key == "exit":
                 break
@@ -87,16 +79,13 @@ def addkey(ctx, key):
             click.echo("You can change these settings with:")
             click.echo("    uptick set default_account <account>")
             click.echo("=" * 30)
-            config["default_account"] = account["name"]
+            ctx.blockchain.config["default_account"] = account["name"]
 
 
 @main.command()
 @click.pass_context
 @offlineChain
-@click.argument(
-    "pubkeys",
-    nargs=-1
-)
+@click.argument("pubkeys", nargs=-1)
 def delkey(ctx, pubkeys):
     """ Delete a private key from the wallet
     """
@@ -114,10 +103,7 @@ def delkey(ctx, pubkeys):
 @main.command()
 @click.pass_context
 @offlineChain
-@click.argument(
-    "pubkey",
-    nargs=1
-)
+@click.argument("pubkey", nargs=1)
 @unlockWallet
 def getkey(ctx, pubkey):
     """ Obtain private key in WIF format
@@ -147,25 +133,18 @@ def listaccounts(ctx):
     t = PrettyTable(["Name", "Type", "Available Key"])
     t.align = "l"
     for account in ctx.peerplays.wallet.getAccounts():
-        t.add_row([
-            account["name"] or "n/a",
-            account["type"] or "n/a",
-            account["pubkey"]
-        ])
+        t.add_row(
+            [account["name"] or "n/a", account["type"] or "n/a", account["pubkey"]]
+        )
     click.echo(t)
 
 
 @main.command()
 @click.pass_context
 @onlineChain
-@click.argument(
-    "account",
-    nargs=1,
-)
+@click.argument("account", nargs=1)
 @click.option(
-    "--role",
-    type=click.Choice(["owner", "active", "memo"]),
-    default="active"
+    "--role", type=click.Choice(["owner", "active", "memo"]), default="active"
 )
 @unlockWallet
 def importaccount(ctx, account, role):
@@ -173,16 +152,15 @@ def importaccount(ctx, account, role):
     """
     from peerplaysbase.account import PasswordKey
 
-    password = click.prompt(
-        "Account Passphrase",
-        hide_input=True,
-    )
+    password = click.prompt("Account Passphrase", hide_input=True)
     account = Account(account, peerplays_instance=ctx.peerplays)
     imported = False
 
     if role == "owner":
         owner_key = PasswordKey(account["name"], password, role="owner")
-        owner_pubkey = format(owner_key.get_public_key(), ctx.peerplays.rpc.chain_params["prefix"])
+        owner_pubkey = format(
+            owner_key.get_public_key(), ctx.peerplays.rpc.chain_params["prefix"]
+        )
         if owner_pubkey in [x[0] for x in account["owner"]["key_auths"]]:
             click.echo("Importing owner key!")
             owner_privkey = owner_key.get_private_key()
@@ -191,7 +169,9 @@ def importaccount(ctx, account, role):
 
     if role == "active":
         active_key = PasswordKey(account["name"], password, role="active")
-        active_pubkey = format(active_key.get_public_key(), ctx.peerplays.rpc.chain_params["prefix"])
+        active_pubkey = format(
+            active_key.get_public_key(), ctx.peerplays.rpc.chain_params["prefix"]
+        )
         if active_pubkey in [x[0] for x in account["active"]["key_auths"]]:
             click.echo("Importing active key!")
             active_privkey = active_key.get_private_key()
@@ -200,7 +180,9 @@ def importaccount(ctx, account, role):
 
     if role == "memo":
         memo_key = PasswordKey(account["name"], password, role=role)
-        memo_pubkey = format(memo_key.get_public_key(), ctx.peerplays.rpc.chain_params["prefix"])
+        memo_pubkey = format(
+            memo_key.get_public_key(), ctx.peerplays.rpc.chain_params["prefix"]
+        )
         if memo_pubkey == account["memo_key"]:
             click.echo("Importing memo key!")
             memo_privkey = memo_key.get_private_key()
@@ -214,7 +196,7 @@ def importaccount(ctx, account, role):
 @main.command()
 @click.pass_context
 @click.option(
-    '--ignore-warning/--no-ignore-warning',
+    "--ignore-warning/--no-ignore-warning",
     prompt="Are you sure you want to wipe your wallet? This action is irreversible!",
 )
 @offlineChain

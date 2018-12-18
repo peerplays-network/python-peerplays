@@ -11,6 +11,7 @@ class BettingMarketGroup(BlockchainObject):
             accesing a RPC
 
     """
+
     type_id = 24
 
     def refresh(self):
@@ -23,24 +24,25 @@ class BettingMarketGroup(BlockchainObject):
     @property
     def event(self):
         from .event import Event
+
         return Event(self["event_id"])
 
     @property
     def bettingmarkets(self):
         from .bettingmarket import BettingMarkets
+
         return BettingMarkets(self["id"])
 
     def resolve(self, results, **kwargs):
-        return self.blockchain.betting_market_resolve(
-            self["id"], results, **kwargs
-        )
+        return self.blockchain.betting_market_resolve(self["id"], results, **kwargs)
 
 
-class BettingMarketGroups(list):
+class BettingMarketGroups(list, BlockchainInstance):
     """ List of all available BettingMarketGroups
 
         :param strevent_id: Event ID (``1.22.xxx``)
     """
+
     cache = ObjectCache()
 
     def __init__(self, event_id, *args, **kwargs):
@@ -50,11 +52,13 @@ class BettingMarketGroups(list):
             self.bettingmarketgroups = BettingMarketGroups.cache[event_id]
         else:
             self.bettingmarketgroups = self.blockchain.rpc.list_betting_market_groups(
-                event_id)
+                event_id
+            )
             BettingMarketGroups.cache[event_id] = self.bettingmarketgroups
 
-        super(BettingMarketGroups, self).__init__([
-            BettingMarketGroup(
-                x, lazy=False, blockchain_instance=self.blockchain)
-            for x in self.bettingmarketgroups
-        ])
+        super(BettingMarketGroups, self).__init__(
+            [
+                BettingMarketGroup(x, lazy=False, blockchain_instance=self.blockchain)
+                for x in self.bettingmarketgroups
+            ]
+        )

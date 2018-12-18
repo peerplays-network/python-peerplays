@@ -3,17 +3,13 @@ from peerplays import PeerPlays, exceptions
 from peerplays.instance import set_shared_peerplays_instance
 from peerplays.account import Account
 from peerplays.committee import Committee
+from .fixtures import fixture_data, peerplays
 
 
 class Testcases(unittest.TestCase):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.ppy = PeerPlays(
-            nobroadcast=True,
-        )
-        set_shared_peerplays_instance(self.ppy)
+    def setUp(self):
+        fixture_data()
 
     def test_Committee(self):
         with self.assertRaises(
@@ -21,11 +17,11 @@ class Testcases(unittest.TestCase):
         ):
             Committee("FOObarNonExisting")
 
-        c = Committee("init0")
-        self.assertEqual(c["id"], "1.5.0")
+        c = Committee("init2")
+        self.assertEqual(c["id"], "1.5.2")
         self.assertIsInstance(c.account, Account)
 
         with self.assertRaises(
             exceptions.CommitteeMemberDoesNotExistsException
         ):
-            Committee("nathan")
+            Committee("faucet")

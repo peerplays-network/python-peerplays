@@ -3,17 +3,13 @@ from peerplays import PeerPlays
 from peerplays.asset import Asset
 from peerplays.instance import set_shared_peerplays_instance
 from peerplays.exceptions import AssetDoesNotExistsException
+from .fixtures import fixture_data, peerplays
 
 
 class Testcases(unittest.TestCase):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.ppy = PeerPlays(
-            nobroadcast=True,
-        )
-        set_shared_peerplays_instance(self.ppy)
+    def setUp(self):
+        fixture_data()
 
     def test_assert(self):
         with self.assertRaises(AssetDoesNotExistsException):
