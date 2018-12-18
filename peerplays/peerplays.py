@@ -28,6 +28,7 @@ from .utils import formatTime, test_proposal_in_buffer
 
 log = logging.getLogger(__name__)
 
+
 class PeerPlays(AbstractGrapheneChain):
     """ Connect to the PeerPlays network.
 
@@ -861,17 +862,16 @@ class PeerPlays(AbstractGrapheneChain):
 
         account = Account(account)
         sport = Sport(sport_id)
-        op = operations.Sport_delete(**{
-            "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "sport_id": sport["id"],
-            "prefix": self.prefix
-        })
+        op = operations.Sport_delete(
+            **{
+                "fee": {"amount": 0, "asset_id": "1.3.0"},
+                "sport_id": sport["id"],
+                "prefix": self.prefix,
+            }
+        )
 
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def event_group_create(
-        self, names, sport_id="0.0.0", account=None, **kwargs
-    ):
     def event_group_create(self, names, sport_id="0.0.0", account=None, **kwargs):
         """ Create an event group. This needs to be **proposed**.
 
@@ -961,11 +961,13 @@ class PeerPlays(AbstractGrapheneChain):
         account = Account(account)
         eventgroup = EventGroup(event_group_id)
 
-        op = operations.Event_group_delete(**{
-            "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "event_group_id": eventgroup["id"],
-            "prefix": self.prefix
-        })
+        op = operations.Event_group_delete(
+            **{
+                "fee": {"amount": 0, "asset_id": "1.3.0"},
+                "event_group_id": eventgroup["id"],
+                "prefix": self.prefix,
+            }
+        )
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
     def event_create(
