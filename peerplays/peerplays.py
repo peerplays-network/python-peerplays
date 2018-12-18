@@ -29,7 +29,6 @@ from .utils import formatTime, test_proposal_in_buffer
 
 log = logging.getLogger(__name__)
 
-
 class PeerPlays(object):
     """ Connect to the PeerPlays network.
 
@@ -203,7 +202,7 @@ class PeerPlays(object):
             the wallet, finalizes the transaction, signs it and
             broadacasts it
 
-            :param operation ops: The operation (or list of operaions) to
+            :param operation ops: The operation (or list of operations) to
                 broadcast
             :param operation account: The account that authorizes the
                 operation
@@ -1151,6 +1150,31 @@ class PeerPlays(object):
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
+    def sport_delete(self, sport_id="0.0.0", account=None, **kwargs):
+
+        """ Remove a sport. This needs to be **proposed**.
+
+            :param str sport_id: Sport ID to identify the Sport to be deleted
+
+            :param str account: (optional) Account used to verify the operation
+        """
+
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+            if not account:
+                raise ValueError("You need to provide an account")
+
+        account = Account(account)
+        sport = Sport(sport_id)
+        op = operations.Sport_delete(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "sport_id": sport["id"],
+            "prefix": self.prefix
+        })
+
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
+
     def event_group_create(
         self, names, sport_id="0.0.0", account=None, **kwargs
     ):
@@ -1223,6 +1247,27 @@ class PeerPlays(object):
             "event_group_id": event_group["id"],
             "new_name": names,
             "new_sport_id": sport_id,
+            "prefix": self.prefix
+        })
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
+
+    def eventgroup_delete(self, event_group_id="0.0.0", account=None, **kwargs):
+        """ Delete an eventgroup. This needs to be **propose**.
+
+            :param str event_group_id: ID of the event group to be deleted
+
+            :param str account: (optional) Account used to verify the operation"""
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an Account")
+        account = Account(account)
+        eventgroup = EventGroup(event_group_id)
+
+        op = operations.Event_group_delete(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "event_group_id": eventgroup["id"],
             "prefix": self.prefix
         })
         return self.finalizeOp(op, account["name"], "active", **kwargs)
