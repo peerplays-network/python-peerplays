@@ -1,6 +1,10 @@
-# Faster unittests
-secp256k1
-
+# Unit testing
 pytest
+pytest-mock
 coverage
 mock
+
+# Code style
+# black
+isort
+pre-commit
