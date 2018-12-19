@@ -459,11 +459,33 @@ class Sport_delete(GrapheneObject):
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
-            super().__init__(OrderedDict([
-                ('fee', Asset(kwargs["fee"])),
-                ('sport_id', ObjectId(kwargs["sport_id"], "sport")),
-                ('extensions', Set([])),
-            ]))
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("sport_id", ObjectId(kwargs["sport_id"], "sport")),
+                        ("extensions", Set([])),
+                    ]
+                )
+            )
+
+
+class Sport_delete(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("sport_id", ObjectId(kwargs["sport_id"], "sport")),
+                        ("extensions", Set([])),
+                    ]
+                )
+            )
 
 
 class Event_group_delete(GrapheneObject):
@@ -473,12 +495,18 @@ class Event_group_delete(GrapheneObject):
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
-            super().__init__(OrderedDict([
-                ('fee', Asset(kwargs['fee'])),
-                ('event_group_id', ObjectId(kwargs["event_group_id"], "event_group")),
-                ('extensions', Set([])),
-            ]))
-
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        (
+                            "event_group_id",
+                            ObjectId(kwargs["event_group_id"], "event_group"),
+                        ),
+                        ("extensions", Set([])),
+                    ]
+                )
+            )
 
 
 class Event_group_create(GrapheneObject):
