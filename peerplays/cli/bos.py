@@ -13,7 +13,6 @@ from peerplays.event import Event, Events
 from peerplays.bettingmarketgroup import BettingMarketGroup, BettingMarketGroups
 from peerplays.rule import Rule, Rules
 from peerplays.proposal import Proposals
-from peerplays.storage import configStorage as config
 
 
 @main.group()
@@ -25,18 +24,13 @@ def bos():
 
 @bos.command()
 @click.pass_context
-@click.argument(
-    "eventids",
-    nargs=-1)
+@click.argument("eventids", nargs=-1)
 @customchain(bundle=True)
 @unlockWallet
 def cancel_event(ctx, eventids):
     for eventid in eventids:
         Event(eventid)
-        ctx.blockchain.event_update_status(
-            eventid,
-            "canceled",
-        )
+        ctx.blockchain.event_update_status(eventid, "canceled")
     click.echo(ctx.broadcast())
 
 
@@ -48,7 +42,4 @@ def cancel_event(ctx, eventids):
 def approve_all(ctx, account):
     proposals = Proposals(account)
     proposal_ids = {x["id"] for x in proposals}
-    click.echo(ctx.peerplays.approveproposal(
-        proposal_ids,
-        account=account
-    ))
+    click.echo(ctx.peerplays.approveproposal(proposal_ids, account=account))

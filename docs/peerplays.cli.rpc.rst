@@ -5,3 +5,4 @@ peerplays\.cli\.rpc module
     :members:
     :undoc-members:
     :show-inheritance:
+    :inherited-members:

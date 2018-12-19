@@ -1,7 +1,7 @@
-peerplays\.blockchain module
+peerplays\.cli\.asset module
 ============================
 
-.. automodule:: peerplays.blockchain
+.. automodule:: peerplays.cli.asset
     :members:
     :undoc-members:
     :show-inheritance:

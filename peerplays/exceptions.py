@@ -1,186 +1,137 @@
-class WalletExists(Exception):
-    """ A wallet has already been created and requires a password to be
-        unlocked by means of :func:`peerplays.wallet.unlock`.
-    """
-    pass
-
-
-class WalletLocked(Exception):
-    """ Wallet is locked
-    """
-    pass
+# -*- coding: utf-8 -*-
+from graphenestorage.exceptions import WrongMasterPasswordException
+from graphenecommon.exceptions import (
+    AccountDoesNotExistsException,
+    AssetDoesNotExistsException,
+    BlockDoesNotExistsException,
+    CommitteeMemberDoesNotExistsException,
+    InvalidAssetException,
+    InvalidMemoKeyException,
+    InvalidMessageSignature,
+    InvalidWifError,
+    KeyAlreadyInStoreException,
+    KeyNotFound,
+    MissingKeyError,
+    NoWalletException,
+    OfflineHasNoRPCException,
+    ProposalDoesNotExistException,
+    VestingBalanceDoesNotExistsException,
+    WalletExists,
+    WalletLocked,
+    WitnessDoesNotExistsException,
+    WorkerDoesNotExistsException,
+    WrongMemoKey,
+    GenesisBalanceDoesNotExistsException,
+)
 
 
 class RPCConnectionRequired(Exception):
     """ An RPC connection is required
     """
+
     pass
 
 
 class AccountExistsException(Exception):
     """ The requested account already exists
     """
-    pass
 
-
-class AccountDoesNotExistsException(Exception):
-    """ The account does not exist
-    """
-    pass
-
-
-class AssetDoesNotExistsException(Exception):
-    """ The asset does not exist
-    """
-    pass
-
-
-class InvalidAssetException(Exception):
-    """ An invalid asset has been provided
-    """
-    pass
-
-
-class InsufficientAuthorityError(Exception):
-    """ The transaction requires signature of a higher authority
-    """
-    pass
-
-
-class MissingKeyError(Exception):
-    """ A required key couldn't be found in the wallet
-    """
-    pass
-
-
-class InvalidWifError(Exception):
-    """ The provided private Key has an invalid format
-    """
-    pass
-
-
-class ProposalDoesNotExistException(Exception):
-    """ The proposal does not exist
-    """
-    pass
-
-
-class BlockDoesNotExistsException(Exception):
-    """ The block does not exist
-    """
-    pass
-
-
-class NoWalletException(Exception):
-    """ No Wallet could be found, please use :func:`peerplays.wallet.create` to
-        create a new wallet
-    """
-    pass
-
-
-class WitnessDoesNotExistsException(Exception):
-    """ The witness does not exist
-    """
-    pass
-
-
-class WrongMasterPasswordException(Exception):
-    """ The password provided could not properly unlock the wallet
-    """
-    pass
-
-
-class CommitteeMemberDoesNotExistsException(Exception):
-    """ Committee Member does not exist
-    """
-    pass
-
-
-class VestingBalanceDoesNotExistsException(Exception):
-    """ Vesting Balance does not exist
-    """
-    pass
-
-
-class BetDoesNotExistException(Exception):
-    """ This bet does not exist
-    """
-    pass
-
-
-class BettingMarketDoesNotExistException(Exception):
-    """ Betting market does not exist
-    """
-    pass
-
-
-class BettingMarketGroupDoesNotExistException(Exception):
-    """ Betting Market Group does not exist
-    """
-    pass
-
-
-class EventDoesNotExistException(Exception):
-    """ This event does not exist
-    """
-    pass
-
-
-class EventGroupDoesNotExistException(Exception):
-    """ This event group does not exist
-    """
-    pass
-
-
-class SportDoesNotExistException(Exception):
-    """ Sport does not exist
-    """
-    pass
-
-
-class RuleDoesNotExistException(Exception):
-    """ Rule does not exist
-    """
     pass
 
 
 class ObjectNotInProposalBuffer(Exception):
     """ Object was not found in proposal
     """
+
     pass
 
 
-class InvalidMessageSignature(Exception):
-    """ The message signature does not fit the message
+class RPCConnectionRequired(Exception):
+    """ An RPC connection is required
     """
+
     pass
 
 
-class KeyNotFound(Exception):
-    """ Key not found
+class AccountExistsException(Exception):
+    """ The requested account already exists
     """
+
     pass
 
 
-class InvalidMemoKeyException(Exception):
-    """ Memo key in message is invalid
+class InsufficientAuthorityError(Exception):
+    """ The transaction requires signature of a higher authority
     """
+
     pass
 
 
-class OfflineHasNoRPCException(Exception):
-    """ When in offline mode, we don't have RPC
+class WrongMasterPasswordException(Exception):
+    """ The password provided could not properly unlock the wallet
     """
+
     pass
 
 
-class WrongMemoKey(Exception):
-    """ The memo provided is not equal the one on the blockchain
+class BetDoesNotExistException(Exception):
+    """ This bet does not exist
     """
+
+    pass
+
+
+class BettingMarketDoesNotExistException(Exception):
+    """ Betting market does not exist
+    """
+
+    pass
+
+
+class BettingMarketGroupDoesNotExistException(Exception):
+    """ Betting Market Group does not exist
+    """
+
+    pass
+
+
+class EventDoesNotExistException(Exception):
+    """ This event does not exist
+    """
+
+    pass
+
+
+class EventGroupDoesNotExistException(Exception):
+    """ This event group does not exist
+    """
+
+    pass
+
+
+class SportDoesNotExistException(Exception):
+    """ Sport does not exist
+    """
+
+    pass
+
+
+class RuleDoesNotExistException(Exception):
+    """ Rule does not exist
+    """
+
+    pass
+
+
+class ObjectNotInProposalBuffer(Exception):
+    """ Object was not found in proposal
+    """
+
     pass
 
 
 class GenesisBalanceDoesNotExistsException(Exception):
     """ The provided genesis balance id does not exist
     """
+
     pass

@@ -11,6 +11,7 @@ class EventGroup(BlockchainObject):
             accesing a RPC
 
     """
+
     type_id = 21
 
     def refresh(self):
@@ -23,19 +24,22 @@ class EventGroup(BlockchainObject):
     @property
     def sport(self):
         from .sport import Sport
+
         return Sport(self["sport_id"])
 
     @property
     def events(self):
         from .event import Events
+
         return Events(self["id"])
 
 
-class EventGroups(list):
+class EventGroups(list, BlockchainInstance):
     """ List of all available EventGroups
 
         :param str sport_id: Sport ID (``1.21.xxx``)
     """
+
     cache = ObjectCache()
 
     def __init__(self, sport_id, *args, **kwargs):
@@ -46,7 +50,9 @@ class EventGroups(list):
             self.eventgroups = self.blockchain.rpc.list_event_groups(sport_id)
             EventGroups.cache[sport_id] = self.eventgroups
 
-        super(EventGroups, self).__init__([
-            EventGroup(x, lazy=False, blockchain_instance=self.blockchain)
-            for x in self.eventgroups
-        ])
+        super(EventGroups, self).__init__(
+            [
+                EventGroup(x, lazy=False, blockchain_instance=self.blockchain)
+                for x in self.eventgroups
+            ]
+        )

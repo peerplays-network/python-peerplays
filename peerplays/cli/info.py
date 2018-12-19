@@ -8,22 +8,14 @@ from peerplays.amount import Amount
 from peerplays.blockchain import Blockchain
 from peerplays.account import Account
 from peerplays.asset import Asset
-from peerplays.storage import configStorage as config
-from .decorators import (
-    onlineChain,
-    unlockWallet
-)
+from .decorators import onlineChain, unlockWallet
 from .main import main
 
 
 @main.command()
 @click.pass_context
 @onlineChain
-@click.argument(
-    'objects',
-    type=str,
-    nargs=-1
-)
+@click.argument("objects", type=str, nargs=-1)
 def info(ctx, objects):
     """ Obtain all kinds of information
     """
@@ -124,12 +116,11 @@ def fees(ctx):
 
     for fee in fees:
         for f in fee[1]:
-            t.add_row([
-                getOperationNameForId(fee[0]),
-                f,
-                str(Amount({
-                    "amount": fee[1].get(f, 0),
-                    "asset_id": "1.3.0"
-                }))
-            ])
+            t.add_row(
+                [
+                    getOperationNameForId(fee[0]),
+                    f,
+                    str(Amount({"amount": fee[1].get(f, 0), "asset_id": "1.3.0"})),
+                ]
+            )
     click.echo(t)

@@ -14,7 +14,6 @@ Submodules
 .. toctree::
 
    peerplays.account
-   peerplays.aes
    peerplays.amount
    peerplays.asset
    peerplays.bet
@@ -27,6 +26,7 @@ Submodules
    peerplays.event
    peerplays.eventgroup
    peerplays.exceptions
+   peerplays.genesisbalance
    peerplays.instance
    peerplays.memo
    peerplays.message
@@ -48,3 +48,4 @@ Module contents
     :members:
     :undoc-members:
     :show-inheritance:
+    :inherited-members:

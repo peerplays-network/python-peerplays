@@ -11,18 +11,10 @@ except ImportError:
 
 from pprint import pprint
 from peerplaysbase.account import PrivateKey
-from peerplays.storage import configStorage as config
 from peerplays.transactionbuilder import TransactionBuilder
 from prettytable import PrettyTable
-from .ui import (
-    print_permissions,
-    print_version,
-)
-from .decorators import (
-    onlineChain,
-    offlineChain,
-    unlockWallet
-)
+from .ui import print_permissions, print_version
+from .decorators import onlineChain, offlineChain, unlockWallet
 from .main import main
 from . import (
     account,
@@ -35,57 +27,39 @@ from . import (
     message,
     rpc,
     asset,
-    bos
+    bos,
 )
 
 log = logging.getLogger(__name__)
 
 
-@main.command(
-    help="Set configuration key/value pair"
-)
+@main.command(help="Set configuration key/value pair")
 @click.pass_context
 @offlineChain
-@click.argument(
-    'key',
-    type=str
-)
-@click.argument(
-    'value',
-    type=str
-)
+@click.argument("key", type=str)
+@click.argument("value", type=str)
 def set(ctx, key, value):
     """ Set configuration parameters
     """
-    if (key == "default_account" and
-            value[0] == "@"):
+    if key == "default_account" and value[0] == "@":
         value = value[1:]
-    config[key] = value
+    ctx.blockchain.config[key] = value
 
 
-@main.command(
-    help="Show configuration variables"
-)
+@main.command(help="Show configuration variables")
 def configuration():
     t = PrettyTable(["Key", "Value"])
     t.align = "l"
-    for key in config:
-        if key not in [
-            "encrypted_master_password"
-        ]:
-            t.add_row([key, config[key]])
+    for key in ctx.blockchain.config:
+        if key not in ["encrypted_master_password"]:
+            t.add_row([key, ctx.blockchain.config[key]])
     click.echo(t)
 
 
-@main.command(
-    help="Sign a json-formatted transaction"
-)
+@main.command(help="Sign a json-formatted transaction")
 @click.pass_context
 @offlineChain
-@click.argument(
-    'filename',
-    required=False,
-    type=click.File('r'))
+@click.argument("filename", required=False, type=click.File("r"))
 @unlockWallet
 def sign(ctx, filename):
     if filename:
@@ -98,15 +72,10 @@ def sign(ctx, filename):
     pprint(tx.json())
 
 
-@main.command(
-    help="Broadcast a json-formatted transaction"
-)
+@main.command(help="Broadcast a json-formatted transaction")
 @click.pass_context
 @onlineChain
-@click.argument(
-    'filename',
-    required=False,
-    type=click.File('r'))
+@click.argument("filename", required=False, type=click.File("r"))
 def broadcast(ctx, filename):
     if filename:
         tx = filename.read()
@@ -117,27 +86,12 @@ def broadcast(ctx, filename):
     pprint(tx.json())
 
 
-@main.command(
-    help="Obtain a random private/public key pair"
-)
-@click.option(
-    '--prefix',
-    type=str,
-    default="PPY",
-    help="The refix to use"
-)
-@click.option(
-    '--num',
-    type=int,
-    default=1,
-    help="The number of keys to derive"
-)
+@main.command(help="Obtain a random private/public key pair")
+@click.option("--prefix", type=str, default="PPY", help="The refix to use")
+@click.option("--num", type=int, default=1, help="The number of keys to derive")
 def randomwif(prefix, num):
     t = PrettyTable(["wif", "pubkey"])
     for n in range(0, num):
         wif = PrivateKey()
-        t.add_row([
-            str(wif),
-            format(wif.pubkey, prefix)
-        ])
+        t.add_row([str(wif), format(wif.pubkey, prefix)])
     click.echo(str(t))

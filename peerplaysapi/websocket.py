@@ -89,13 +89,8 @@ class PeerPlaysWebsocket(Events):
                 ['1.7.68612']
 
     """
-    __events__ = [
-        'on_tx',
-        'on_object',
-        'on_block',
-        'on_account',
-        'on_market',
-    ]
+
+    __events__ = ["on_tx", "on_object", "on_block", "on_account", "on_market"]
 
     def __init__(
         self,
@@ -169,17 +164,13 @@ class PeerPlaysWebsocket(Events):
         # Subscribe to events on the Backend and give them a
         # callback number that allows us to identify the event
         if len(self.on_object):
-            self.set_subscribe_callback(
-                self.__events__.index('on_object'),
-                False)
+            self.set_subscribe_callback(self.__events__.index("on_object"), False)
 
         if len(self.on_tx):
-            self.set_pending_transaction_callback(
-                self.__events__.index('on_tx'))
+            self.set_pending_transaction_callback(self.__events__.index("on_tx"))
 
         if len(self.on_block):
-            self.set_block_applied_callback(
-                self.__events__.index('on_block'))
+            self.set_block_applied_callback(self.__events__.index("on_block"))
 
         if self.subscription_accounts and self.on_account:
             # Unfortunately, account subscriptions don't have their own
@@ -191,20 +182,17 @@ class PeerPlaysWebsocket(Events):
                 # Technially, every market could have it's own
                 # callback number
                 self.subscribe_to_market(
-                    self.__events__.index('on_market'),
-                    market[0], market[1])
+                    self.__events__.index("on_market"), market[0], market[1]
+                )
 
         # We keep the connetion alive by requesting a short object
         def ping(self):
             while 1:
-                log.debug('Sending ping')
+                log.debug("Sending ping")
                 self.get_objects(["2.8.0"])
                 time.sleep(self.keep_alive)
 
-        self.keepalive = threading.Thread(
-            target=ping,
-            args=(self,)
-        )
+        self.keepalive = threading.Thread(target=ping, args=(self,))
         self.keepalive.start()
 
     def process_notice(self, notice):
@@ -242,14 +230,11 @@ class PeerPlaysWebsocket(Events):
             id = data["params"][0]
 
             if id >= len(self.__events__):
-                log.critical(
-                    "Received an id that is out of range\n\n" +
-                    str(data)
-                )
+                log.critical("Received an id that is out of range\n\n" + str(data))
                 return
 
             # This is a "general" object change notification
-            if id == self.__events__.index('on_object'):
+            if id == self.__events__.index("on_object"):
                 # Let's see if a specific object has changed
                 for notice in data["params"][1]:
                     try:
@@ -260,15 +245,22 @@ class PeerPlaysWebsocket(Events):
                                 if "id" in obj:
                                     self.process_notice(obj)
                     except Exception as e:
-                        log.critical("Error in process_notice: {}\n\n{}".format(str(e), traceback.format_exc))
+                        log.critical(
+                            "Error in process_notice: {}\n\n{}".format(
+                                str(e), traceback.format_exc
+                            )
+                        )
             else:
                 try:
                     callbackname = self.__events__[id]
                     log.info("Patching through to call %s" % callbackname)
                     [getattr(self.events, callbackname)(x) for x in data["params"][1]]
                 except Exception as e:
-                    log.critical("Error in {}: {}\n\n{}".format(
-                        callbackname, str(e), traceback.format_exc()))
+                    log.critical(
+                        "Error in {}: {}\n\n{}".format(
+                            callbackname, str(e), traceback.format_exc()
+                        )
+                    )
 
     def on_error(self, ws, error):
         """ Called on websocket errors
@@ -278,7 +270,7 @@ class PeerPlaysWebsocket(Events):
     def on_close(self, ws):
         """ Called when websocket connection is closed
         """
-        log.debug('Closing WebSocket connection with {}'.format(self.url))
+        log.debug("Closing WebSocket connection with {}".format(self.url))
         if self.keepalive and self.keepalive.is_alive():
             self.keepalive.do_run = False
             self.keepalive.join()
@@ -301,19 +293,19 @@ class PeerPlaysWebsocket(Events):
                     # on_data=self.on_message,
                     on_error=self.on_error,
                     on_close=self.on_close,
-                    on_open=self.on_open
+                    on_open=self.on_open,
                 )
                 self.ws.run_forever()
             except websocket.WebSocketException as exc:
-                if (self.num_retries >= 0 and cnt > self.num_retries):
+                if self.num_retries >= 0 and cnt > self.num_retries:
                     raise NumRetriesReached()
 
                 sleeptime = (cnt - 1) * 2 if cnt < 10 else 10
                 if sleeptime:
                     log.warning(
                         "Lost connection to node during wsconnect(): %s (%d/%d) "
-                        % (self.url, cnt, self.num_retries) +
-                        "Retrying in %d seconds" % sleeptime
+                        % (self.url, cnt, self.num_retries)
+                        + "Retrying in %d seconds" % sleeptime
                     )
                     time.sleep(sleeptime)
 
@@ -330,15 +322,16 @@ class PeerPlaysWebsocket(Events):
 
     """ RPC Calls
     """
+
     def rpcexec(self, payload):
         """ Execute a call by sending the payload
 
-            :param json payload: Payload data
+            :param dict payload: Payload data
             :raises ValueError: if the server does not respond in proper JSON format
             :raises RPCError: if the server returns an error
         """
         log.debug(json.dumps(payload))
-        self.ws.send(json.dumps(payload, ensure_ascii=False).encode('utf8'))
+        self.ws.send(json.dumps(payload, ensure_ascii=False).encode("utf8"))
 
     def __getattr__(self, name):
         """ Map all methods to RPC calls and pass through the arguments
@@ -350,15 +343,13 @@ class PeerPlaysWebsocket(Events):
 
             # Sepcify the api to talk to
             if "api_id" not in kwargs:
-                if ("api" in kwargs):
-                    if (kwargs["api"] in self.api_id and
-                            self.api_id[kwargs["api"]]):
+                if "api" in kwargs:
+                    if kwargs["api"] in self.api_id and self.api_id[kwargs["api"]]:
                         api_id = self.api_id[kwargs["api"]]
                     else:
                         raise ValueError(
                             "Unknown API! "
-                            "Verify that you have registered to %s"
-                            % kwargs["api"]
+                            "Verify that you have registered to %s" % kwargs["api"]
                         )
                 else:
                     api_id = 0
@@ -368,10 +359,13 @@ class PeerPlaysWebsocket(Events):
             # let's be able to define the num_retries per query
             self.num_retries = kwargs.get("num_retries", self.num_retries)
 
-            query = {"method": "call",
-                     "params": [api_id, name, list(args)],
-                     "jsonrpc": "2.0",
-                     "id": self.get_request_id()}
+            query = {
+                "method": "call",
+                "params": [api_id, name, list(args)],
+                "jsonrpc": "2.0",
+                "id": self.get_request_id(),
+            }
             r = self.rpcexec(query)
             return r
+
         return method

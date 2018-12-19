@@ -24,18 +24,19 @@ class Rule(BlockchainObject):
     def grading(self):
         import json
         from .utils import map2dict
+
         desc = map2dict(self["description"])
-        assert "grading" in desc, "Rule {} has no grading!".format(
-            self["id"])
+        assert "grading" in desc, "Rule {} has no grading!".format(self["id"])
         grading = json.loads(desc.get("grading", {}))
         assert "metric" in grading
         assert "resolutions" in grading
         return grading
 
 
-class Rules(list):
+class Rules(list, BlockchainInstance):
     """ List of all Rules
     """
+
     cache = ObjectCache()
 
     def __init__(self, limit=1000, **kwargs):
@@ -44,12 +45,15 @@ class Rules(list):
         if "rules" in Rules.cache:
             self.rules = Rules.cache["rules"]
         else:
-            self.rules = self.blockchain.rpc.get_objects([
-                "1.23.{}".format(id) for id in range(0, limit)
-            ])
+            self.rules = self.blockchain.rpc.get_objects(
+                ["1.23.{}".format(id) for id in range(0, limit)]
+            )
             Rules.cache["rules"] = self.rules
 
-        super(Rules, self).__init__([
-            Rule(x, lazy=False, blockchain_instance=self.blockchain)
-            for x in self.rules if x
-        ])
+        super(Rules, self).__init__(
+            [
+                Rule(x, lazy=False, blockchain_instance=self.blockchain)
+                for x in self.rules
+                if x
+            ]
+        )

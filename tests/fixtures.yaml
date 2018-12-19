@@ -1,0 +1,507 @@
+accounts:
+
+ - name: init0
+   id: '1.2.100'
+   owner:
+     address_auths: []
+     key_auths:
+     - - TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+       - 1
+     account_auths: []
+     weight_threshold: 1
+   active:
+     address_auths: []
+     key_auths:
+     - - TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+       - 1
+     account_auths: []
+     weight_threshold: 1
+   options:
+     memo_key: TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+
+ - name: init1
+   id: '1.2.101'
+   owner:
+     address_auths: []
+     key_auths:
+     - - TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+       - 1
+     account_auths: []
+     weight_threshold: 1
+   active:
+     address_auths: []
+     key_auths:
+     - - TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+       - 1
+     account_auths: []
+     weight_threshold: 1
+   options:
+     memo_key: TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+
+ - name: from
+   id: '1.2.7'
+   owner:
+     address_auths: []
+     key_auths:
+     - - TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+       - 1
+     account_auths: []
+     weight_threshold: 1
+   active:
+     address_auths: []
+     key_auths:
+     - - TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+       - 1
+     account_auths: []
+     weight_threshold: 1
+   options:
+     memo_key: TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+
+ - name: to
+   id: '1.2.8'
+   owner:
+     address_auths: []
+     key_auths:
+     - - TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+       - 1
+     account_auths: []
+     weight_threshold: 1
+   active:
+     address_auths: []
+     key_auths:
+     - - TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+       - 1
+     account_auths: []
+     weight_threshold: 1
+   options:
+     memo_key: TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+
+assets:
+ - precision: 4
+   symbol: PPY
+   id: '1.3.1'
+   issuer: '1.2.0'
+   options:
+    blacklist_authorities: []
+    blacklist_markets: []
+    core_exchange_rate:
+      base: {amount: 0, asset_id: 1.3.0}
+      quote: {amount: 0, asset_id: 1.3.0}
+    description: Fun token. Supposed to be worthless!
+    extensions: []
+    flags: 128
+    issuer_permissions: 79
+    market_fee_percent: 0
+    max_market_fee: 1000000000000000
+    max_supply: 2100000000000000
+    whitelist_authorities: []
+    whitelist_markets: []
+
+sports:
+ - id: '1.24.0'
+   name:
+    - ["de", "Amerikanisches Football - Error"]  # The error will be fixed in unit test test_pendingproposals.py
+    - ["identifier", "AmericanFootball"]
+    - ["en", "American Football"]
+
+ - id: '1.24.1'
+   name:
+    - ["en", "Basketball"]
+    - ["identifier", "Basketball"]
+    - ["sen", "Basketball"]
+
+eventgroups:
+ - id: '1.25.12'
+   name:
+     - ['en', 'NBA Regular Season']
+     - ['identifier', "NBA Regular Season"]
+     - ['sen', 'NBA']
+   sport_id: '1.24.1'
+
+events:
+ - id: "1.22.2241"
+   status: "upcoming"
+   name: [["en", "Demo : Foobar"], ['en_us', 'Foobar @ Demo']]
+   season: [["en", "2017"]]
+   start_time: "2022-10-16T00:00:00"
+   event_group_id: "1.25.12"
+
+ - id: "1.22.2242"
+   status: "upcoming"
+   name: [['en', 'Boston Celtics @ Atlanta Hawks']]
+   # Home: Atlanta
+   # Away: Boston
+   season: [["en", "2017"]]
+   start_time: "2022-10-16T00:00:00"
+   event_group_id: "1.25.12"
+
+bettingmarketgroups:
+ - id: "1.24.211"
+   asset_id: '1.3.0'
+   delay_before_settling: 0
+   description: [['en', 'MSeaward BMG1']]
+   status: 'upcoming'
+   rules_id: '1.23.10'
+   event_id: '1.22.2241'
+
+ - id: "1.24.212"
+   asset_id: '1.3.0'
+   delay_before_settling: 0
+   description: [["sen", "Moneyline"],
+                 ["en", "Moneyline"],
+                 ["display_name", "Moneyline"]]
+   status: 'upcoming'
+   rules_id: '1.23.11'
+   event_id: '1.22.2242'
+
+ - id: "1.24.213"
+   asset_id: '1.3.0'
+   delay_before_settling: 0
+   description:
+   - [display_name, 'HC (0:1)']
+   - [en, 'Handicap (0:1)']
+   - [sen, 'Handicap (0:1)']
+   - ["_dynamic", "hc"]
+   - ["_hch", "1"]
+   - ["_hca", "-1"]
+   status: 'upcoming'
+   rules_id: '1.23.10'
+   event_id: '1.22.2242'
+
+ - id: "1.24.214"
+   asset_id: '1.3.0'
+   delay_before_settling: 0
+   description:
+   - [display_name, 'HC (0:2)']
+   - [en, 'Handicap (0:2)']
+   - [sen, 'Handicap (0:2)']
+   - ["_hch", "2"]
+   - ["_hca", "-2"]
+   status: 'upcoming'
+   rules_id: '1.23.10'
+   event_id: '1.22.2242'
+
+ - id: "1.24.215"
+   asset_id: '1.3.0'
+   delay_before_settling: 0
+   description:
+   - [display_name, 'HC (2:0)']
+   - [en, 'Handicap (2:0)']
+   - [sen, 'Handicap (2:0)']
+   - ["_dynamic", "hc"]
+   - ["_hch", "-2"]
+   - ["_hca", "2"]
+   status: 'upcoming'
+   rules_id: '1.23.10'
+   event_id: '1.22.2242'
+
+ - id: "1.24.216"
+   asset_id: '1.3.0'
+   delay_before_settling: 0
+   description:
+   - [display_name, 'HC (0:3)']
+   - [en, 'Handicap (0:3)']
+   - [sen, 'Handicap (0:3)']
+   - ["_dynamic", "hc"]
+   - ["_hch", "3"]
+   - ["_hca", "-3"]
+   status: 'upcoming'
+   rules_id: '1.23.10'
+   event_id: '1.22.2242'
+
+ - id: "1.24.217"
+   asset_id: '1.3.0'
+   delay_before_settling: 0
+   description:
+   - [display_name, 'HC (0:2)']
+   - [en, 'Handicap (0:2)']
+   - [sen, 'Handicap (0:2)']
+   - ["_dynamic", "hc"]
+   - ["_hch", "2"]
+   - ["_hca", "-2"]
+   status: 'upcoming'
+   rules_id: '1.23.10'
+   event_id: '1.22.2242'
+
+ - id: "1.24.218"
+   asset_id: '1.3.0'
+   delay_before_settling: 0
+   description:
+   - ["display_name", "Over/Under 3.5 pts"]
+   - ["en", "Over/Under 3.5 pts"]
+   - ["sen", "Total Points"]
+   - ["_dynamic", "ou"]
+   - ["_ou", "3.5"]
+   status: 'upcoming'
+   rules_id: '1.23.10'
+   event_id: '1.22.2242'
+
+ - id: "1.24.219"
+   asset_id: '1.3.0'
+   delay_before_settling: 0
+   description:
+   - [display_name, 'HC (3:0)']
+   - [en, 'Handicap (3:0)']
+   - [sen, 'Handicap (3:0)']
+   status: 'upcoming'
+   rules_id: '1.23.10'
+   event_id: '1.22.2242'
+
+# For fuzzy search
+ - id: "1.24.220"
+   asset_id: '1.3.0'
+   delay_before_settling: 0
+   description:
+   - [display_name, 'HC (0:5)']
+   - [en, 'Handicap (0:5)']
+   - [sen, 'Handicap (0:5)']
+   - ["_dynamic", "hc"]
+   - ["_hch", "5"]
+   - ["_hca", "-5"]
+   status: 'upcoming'
+   rules_id: '1.23.10'
+   event_id: '1.22.2242'
+
+ - id: "1.24.221"
+   asset_id: '1.3.0'
+   delay_before_settling: 0
+   description:
+   - ["display_name", "Over/Under 5.5 pts"]
+   - ["en", "Over/Under 5.5 pts"]
+   - ["sen", "Total Points"]
+   - ["_dynamic", "ou"]
+   - ["_ou", "5.5"]
+   status: 'upcoming'
+   rules_id: '1.23.10'
+   event_id: '1.22.2242'
+
+ - id: "1.24.222"
+   asset_id: '1.3.0'
+   delay_before_settling: 0
+   description:
+   - ["display_name", "Over/Under 1.5 pts"]
+   - ["en", "Over/Under 1.5 pts"]
+   - ["sen", "Total Points"]
+   - ["_dynamic", "ou"]
+   - ["_ou", "3.5"]
+   status: 'upcoming'
+   rules_id: '1.23.10'
+   event_id: '1.22.2242'
+
+ # Floating handicaps
+ - id: "1.24.300"
+   asset_id: '1.3.0'
+   delay_before_settling: 0
+   description:
+   - [display_name, 'HC (0:1.5)']
+   - [en, 'Handicap (0:1.5)']
+   - [sen, 'Handicap (0:1.5)']
+   - ["_dynamic", "hc"]
+   - ["_hch", "1.5"]
+   - ["_hca", "-1.5"]
+   status: 'upcoming'
+   rules_id: '1.23.10'
+   event_id: '1.22.2242'
+
+ - id: "1.24.301"
+   asset_id: '1.3.0'
+   delay_before_settling: 0
+   description:
+   - [display_name, 'HC (0:5.5)']
+   - [en, 'Handicap (0:5.5)']
+   - [sen, 'Handicap (0:5.5)']
+   - ["_dynamic", "hc"]
+   - ["_hch", "5.5"]
+   - ["_hca", "-5.5"]
+   status: 'upcoming'
+   rules_id: '1.23.10'
+   event_id: '1.22.2242'
+
+ - id: "1.24.302"
+   asset_id: '1.3.0'
+   delay_before_settling: 0
+   description:
+   - [display_name, 'HC (0:2.5)']
+   - [en, 'Handicap (0:2.5)']
+   - [sen, 'Handicap (0:2.5)']
+   - ["_dynamic", "hc"]
+   - ["_hch", "2.5"]
+   - ["_hca", "-2.5"]
+   status: 'upcoming'
+   rules_id: '1.23.10'
+   event_id: '1.22.2242'
+
+bettingmarkets:
+ - id: '1.25.2950'
+   description: [['en', 'Boston Celtics']]
+   group_id: '1.24.212'
+   status: 'unresolved'
+
+ - id: '1.25.2951'
+   description: [['en', 'Atlanta Hawks']]
+   group_id: '1.24.212'
+   status: 'unresolved'
+
+ ###################
+ - id: '1.25.2952'
+   description:
+    - ['en', 'Atlanta Hawks (1)']
+   group_id: '1.24.213'
+   status: 'unresolved'
+
+ - id: '1.25.2953'
+   description:
+    - ['en', 'Boston Celtics (-1)']
+   group_id: '1.24.213'
+   status: 'unresolved'
+ ###################
+
+ - id: '1.25.2954'
+   description:
+    - ['en', 'Atlanta Hawks (2)']
+   group_id: '1.24.214'
+   status: 'unresolved'
+
+ - id: '1.25.2955'
+   description:
+    - ['en', 'Boston Celtics (-2)']
+   group_id: '1.24.214'
+   status: 'unresolved'
+ ###################
+
+ - id: '1.25.2956'
+   description:
+    - ['en', 'Atlanta Hawks (-2)']
+   group_id: '1.24.215'
+   status: 'unresolved'
+
+ - id: '1.25.2957'
+   description:
+    - ['en', 'Boston Celtics (2)']
+   group_id: '1.24.215'
+   status: 'unresolved'
+ ###################
+
+ - id: '1.25.2958'
+   description:
+    - ['en', 'Atlanta Hawks (3)']
+   group_id: '1.24.216'
+   status: 'unresolved'
+
+ - id: '1.25.2959'
+   description:
+    - ['en', 'Boston Celtics (-3)']
+   group_id: '1.24.216'
+   status: 'unresolved'
+ ###################
+
+ - id: '1.25.2960'
+   description:
+    - ['en', 'Atlanta Hawks (-2)']
+   group_id: '1.24.217'
+   status: 'unresolved'
+
+ - id: '1.25.2961'
+   description:
+    - ['en', 'Boston Celtics (2)']
+   group_id: '1.24.217'
+   status: 'unresolved'
+ ###################
+
+ - id: '1.25.2962'
+   description:
+    - ['en', 'Over 3.5']
+   group_id: '1.24.218'
+   status: 'unresolved'
+
+ - id: '1.25.2963'
+   description:
+    - ['en', 'Under 3.5']
+   group_id: '1.24.218'
+   status: 'unresolved'
+
+ - id: '1.25.2962'
+   description:
+    - ['en', 'Over 1.5']
+   group_id: '1.24.218'
+   status: 'unresolved'
+
+ - id: '1.25.2963'
+   description:
+    - ['en', 'Under 1.5']
+   group_id: '1.24.218'
+   status: 'unresolved'
+
+ # Floats
+ ###################
+ - id: '1.25.3000'
+   description:
+    - ['en', 'Atlanta Hawks (1.5)']
+   group_id: '1.24.300'
+   status: 'unresolved'
+
+ - id: '1.25.3001'
+   description:
+    - ['en', 'Boston Celtics (-1.5)']
+   group_id: '1.24.300'
+   status: 'unresolved'
+
+ - id: '1.25.3002'
+   description:
+    - ['en', 'Atlanta Hawks (2.5)']
+   group_id: '1.24.302'
+   status: 'unresolved'
+
+ - id: '1.25.3003'
+   description:
+    - ['en', 'Boston Celtics (-2.5)']
+   group_id: '1.24.302'
+   status: 'unresolved'
+
+bets:
+ - id: 1.26.13
+ - id: 1.26.14
+
+rules:
+ - id: "1.23.10"
+   name:
+    - ["en", "R_NBA_HCP_1"]
+    - ["identifier", "R_NBA_HCP_1"]
+   description:
+    - ["en", "Foobar"]
+    - ["grading", '{"resolutions":[{"void":"False","not_win":"{metric} <= 0","win":"{metric} > 0"},{"void":"False","not_win":"{metric} >= 0","win":"{metric} < 0"}],"metric":"({result.home} + {handicaps.home_score}) - ({result.away} + {handicaps.away_score})"}']
+
+ - id: "1.23.11"
+   name:
+    - ["en", "R_NBA_ML_1"]
+    - ["identifier", "R_NBA_ML_1"]
+   description:
+    - ['en', 'MARKET INFORMATION Who will win this match? This market INCLUDES overtime. At the start of play any unmatched bets will be automatically cancelled and the market will turn in-play. Please note that this market will not be actively managed therefore it is the responsibility of all users to manage their in-play positions. Please also be aware that transmissions described as "live" may actually involve a certain time delay which can vary from case to case. Commission and Transaction Fees apply to all bets placed in this market. For further information please see Bookie Rules.']
+    - ['grading', '{"metric": "{result.awayteam} - {result.hometeam}", "resolutions": [{"not_win": "{metric} <= 0", "void": "False", "win": "{metric} > 0"}, {"not_win": "{metric} >= 0", "void": "False", "win": "{metric} < 0"}]}']
+
+ - id: "1.23.12"
+   name:
+    - ["en", "R_NBA_OU_1"]
+    - ["identifier", "R_NBA_OU_1"]
+   description:
+    - ["en", "Foobar"]
+    - ["grading", '{"metric": "{result.total}", "resolutions": [{"not_win": "{metric} > {overunder.value}", "void": "False", "win": "{metric} <= {overunder.value}"}, {"not_win": "{metric} <= {overunder.value}", "void": "False", "win": "{metric} > {overunder.value}"}]}']
+
+committees:
+ - id: 1.5.0
+   committee_member_account: 1.2.7
+   total_votes: 0
+   url: ""
+   vote_id: 0:11
+
+proposals:
+ - proposal_id: 1.10.1
+   operations:
+    - sport_update:
+        extensions: []
+        fee: {amount: 0, asset_id: 1.3.0}
+        new_name:
+        - [de, Amerikanisches Football]
+        - [en, American Football]
+        - [identifier, AmericanFootball]
+        sport_id: 1.24.0

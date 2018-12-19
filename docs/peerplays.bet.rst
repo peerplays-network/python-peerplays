@@ -5,3 +5,4 @@ peerplays\.bet module
     :members:
     :undoc-members:
     :show-inheritance:
+    :inherited-members:

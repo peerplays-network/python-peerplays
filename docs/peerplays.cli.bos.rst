@@ -1,7 +1,8 @@
-peerplaysbase\.memo module
+peerplays\.cli\.bos module
 ==========================
 
-.. automodule:: peerplaysbase.memo
+.. automodule:: peerplays.cli.bos
     :members:
     :undoc-members:
     :show-inheritance:
+    :inherited-members:
