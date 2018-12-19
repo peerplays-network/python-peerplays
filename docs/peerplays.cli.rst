@@ -7,7 +7,9 @@ Submodules
 .. toctree::
 
    peerplays.cli.account
+   peerplays.cli.asset
    peerplays.cli.bookie
+   peerplays.cli.bos
    peerplays.cli.cli
    peerplays.cli.committee
    peerplays.cli.decorators
@@ -27,3 +29,4 @@ Module contents
     :members:
     :undoc-members:
     :show-inheritance:
+    :inherited-members:

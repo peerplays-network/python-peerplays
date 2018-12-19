@@ -5,3 +5,4 @@ peerplays\.cli\.decorators module
     :members:
     :undoc-members:
     :show-inheritance:
+    :inherited-members:

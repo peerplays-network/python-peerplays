@@ -1,7 +1,7 @@
-peerplays\.cli\.rpc module
+peerplays\.cli\.bos module
 ==========================
 
-.. automodule:: peerplays.cli.rpc
+.. automodule:: peerplays.cli.bos
     :members:
     :undoc-members:
     :show-inheritance:

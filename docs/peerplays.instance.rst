@@ -5,3 +5,4 @@ peerplays\.instance module
     :members:
     :undoc-members:
     :show-inheritance:
+    :inherited-members:

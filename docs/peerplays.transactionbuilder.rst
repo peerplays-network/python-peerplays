@@ -5,3 +5,4 @@ peerplays\.transactionbuilder module
     :members:
     :undoc-members:
     :show-inheritance:
+    :inherited-members:

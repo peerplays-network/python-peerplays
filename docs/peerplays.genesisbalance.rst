@@ -1,7 +1,7 @@
-peerplays\.cli\.committee module
+peerplays\.genesisbalance module
 ================================
 
-.. automodule:: peerplays.cli.committee
+.. automodule:: peerplays.genesisbalance
     :members:
     :undoc-members:
     :show-inheritance:
