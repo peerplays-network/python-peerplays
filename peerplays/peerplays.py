@@ -1038,7 +1038,7 @@ class PeerPlays(AbstractGrapheneChain):
             :param str event_group_id: Event group ID to create the event for
                 (defaults to *relative* id ``0.0.0``)
             :param datetime start_time: Time of the start of the event
-            :param str status: Event status (:doc:`event_status`)
+            :param str status: Event status
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
@@ -1091,7 +1091,7 @@ class PeerPlays(AbstractGrapheneChain):
         """ Update the status of an event. This needs to be **proposed**.
 
             :param str event_id: Id of the event to update
-            :param str status: Event status (:doc:`event_status`)
+            :param str status: Event status
             :param list scores: List of strings that represent the scores of a
                 match (defaults to [])
             :param str account: (optional) the account to allow access

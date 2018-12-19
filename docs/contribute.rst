@@ -8,7 +8,7 @@ Repository
 
 The *main* repository of python-peerplays is currently located at:
 
-    https://github.com/xeroc/python-peerplays
+    https://github.com/pbsa/python-peerplays
 
 Flow
 ----

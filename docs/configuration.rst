@@ -20,15 +20,3 @@ You can access those variables like a regular dictionary by using
     print(peerplays.config.items())
 
 Keys can be added and changed like they are for regular dictionaries.
-
-If you don't want to load the :class:`peerplays.PeerPlays` class, you
-can load the configuration directly by using:
-
-.. code-block:: python
-
-    from peerplays.storage import configStorage as config
-
-API
----
-.. autoclass:: peerplays.storage.Configuration
-   :members:

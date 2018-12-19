@@ -4,7 +4,7 @@ Stati
 
 List of statis and types used within PeerPlays:
 
-... code-block:: python
+.. code-block:: python
 
     class BetType(Enum):
         options = [
