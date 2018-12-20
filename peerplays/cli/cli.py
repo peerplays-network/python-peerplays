@@ -47,7 +47,9 @@ def set(ctx, key, value):
 
 
 @main.command(help="Show configuration variables")
-def configuration():
+@click.pass_context
+@offlineChain
+def configuration(ctx):
     t = PrettyTable(["Key", "Value"])
     t.align = "l"
     for key in ctx.blockchain.config:
