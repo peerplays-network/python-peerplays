@@ -11,8 +11,7 @@ class Block(GrapheneBlock):
     """ Read a single block from the chain
 
         :param int block: block number
-        :param bitshares.bitshares.BitShares blockchain_instance: BitShares
-            instance
+        :param instance blockchain_instance: blockchain instance
         :param bool lazy: Use lazy loading
 
         Instances of this class are dictionaries that come with additional
@@ -21,7 +20,7 @@ class Block(GrapheneBlock):
 
         .. code-block:: python
 
-            from bitshares.block import Block
+            from .block import Block
             block = Block(1)
             print(block)
 

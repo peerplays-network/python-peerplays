@@ -39,7 +39,8 @@ class BettingMarkets(BlockchainObjects, BlockchainInstance):
 
     def __init__(self, betting_market_group_id, *args, **kwargs):
         self.betting_market_group_id = betting_market_group_id
-        BlockchainObjects.__init__(self, *args, **kwargs)
+        BlockchainInstance.__init__(self, *args, **kwargs)
+        BlockchainObjects.__init__(self, betting_market_group_id, *args, **kwargs)
 
     def refresh(self, *args, **kwargs):
 

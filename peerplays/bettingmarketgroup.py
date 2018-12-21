@@ -45,7 +45,8 @@ class BettingMarketGroups(BlockchainObjects, BlockchainInstance):
 
     def __init__(self, event_id, *args, **kwargs):
         self.event_id = event_id
-        super().__init__(self, *args, **kwargs)
+        BlockchainInstance.__init__(self, *args, **kwargs)
+        BlockchainObjects.__init__(self, event_id, *args, **kwargs)
 
     def refresh(self, *args, **kwargs):
         self.bettingmarketgroups = self.blockchain.rpc.list_betting_market_groups(

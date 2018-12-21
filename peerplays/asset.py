@@ -14,8 +14,7 @@ class Asset(GrapheneAsset):
         :param str Asset: Symbol name or object id of an asset
         :param bool lazy: Lazy loading
         :param bool full: Also obtain bitasset-data and dynamic asset data
-        :param bitshares.bitshares.BitShares blockchain_instance: BitShares
-            instance
+        :param instance blockchain_instance: Instance of blockchain
         :returns: All data of an asset
         :rtype: dict
 
