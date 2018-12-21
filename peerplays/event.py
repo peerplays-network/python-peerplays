@@ -45,7 +45,8 @@ class Events(BlockchainObjects, BlockchainInstance):
 
     def __init__(self, eventgroup_id, *args, **kwargs):
         self.eventgroup_id = eventgroup_id
-        super().__init__(self, *args, **kwargs)
+        BlockchainInstance.__init__(self, *args, **kwargs)
+        BlockchainObjects.__init__(self, eventgroup_id, *args, **kwargs)
 
     def refresh(self, *args, **kwargs):
         self.events = self.blockchain.rpc.list_events_in_group(self.eventgroup_id)

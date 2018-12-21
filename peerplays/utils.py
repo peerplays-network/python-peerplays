@@ -2,7 +2,7 @@
 from .exceptions import ObjectNotInProposalBuffer
 from .instance import BlockchainInstance
 
-# Load methods from graphene and provide them to bitshares
+# Load methods from graphene and provide them here
 from graphenecommon.utils import (
     formatTime,
     timeFormat,
