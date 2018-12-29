@@ -16,7 +16,7 @@ PeerPlays is a **blockchain-based autonomous company** (i.e. a DAC) that
 offers gaming and tournaments on a blockchain.
 
 It is based on *Graphene* (tm), a blockchain technology stack (i.e.
-software) that allows for fast transactions and ascalable blockchain
+software) that allows for fast transactions and a scalable blockchain
 solution. In case of PeerPlays, it comes with decentralized gaming
 engine and allows setting up and running tournaments of any kind.
 
