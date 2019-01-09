@@ -275,7 +275,24 @@ class Proposal_update(GrapheneObject):
                 ('extensions', Set([])),
             ]))
 
+            
+class Proposal_delete(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
 
+            super().__init__(OrderedDict([
+                ('fee', Asset(kwargs["fee"])),
+                ('fee_paying_account', ObjectId(kwargs["fee_paying_account"], "account")),
+                ('using_owner_authority', Bool(kwargs["using_owner_authority"])),
+                ('proposal', ObjectId(kwargs["proposal"], "proposal")),
+                ('extenstions', Set([])),
+            ]))
+
+                        
 class Sport_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
