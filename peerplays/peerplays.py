@@ -1100,6 +1100,32 @@ class PeerPlays(object):
             }))
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
+    
+    def deleteproposal(
+        self, proposal_id, account=None, **kwargs
+    ):
+
+        from .proposal import Proposal
+        if not account:
+            if "default_account" in config:
+                account = config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account, blockchain_instance=self)
+
+        proposal = Proposal(proposal_id, blockchain_instance=self)
+        using_owner_authority = False
+
+        op = operations.Proposal_delete(**{
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "fee_paying_account": account["id"],
+            "using_owner_authority": using_owner_authority,
+            "proposal": proposal_id,
+            "prefix": self.prefix
+        })
+
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
+   
     # -------------------------------------------------------------------------
     # Bookie related calls
     # -------------------------------------------------------------------------
