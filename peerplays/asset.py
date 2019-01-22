@@ -1,6 +1,5 @@
 import json
 from peerplaysbase.asset_permissions import todict
-from .blockchainobject import BlockchainObject
 from .exceptions import AssetDoesNotExistsException
 from .instance import BlockchainInstance
 
