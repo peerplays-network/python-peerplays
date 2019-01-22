@@ -35,10 +35,16 @@ class Sports(BlockchainObjects, BlockchainInstance):
         super().__init__(self, *args, **kwargs)
 
     def refresh(self, *args, **kargs):
-        self.sports = self.blockchain.rpc.list_sports()
+        self._sports = self.blockchain.rpc.list_sports()
         self.store(
             [
                 Sport(x, lazy=False, blockchain_instance=self.blockchain)
-                for x in self.sports
+                for x in self._sports
             ]
         )
+
+    @property
+    def sports(self):
+        """ DEPRECATED
+        """
+        return list(self)
