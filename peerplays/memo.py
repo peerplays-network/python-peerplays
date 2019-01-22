@@ -46,13 +46,6 @@ class Memo(GrapheneMemo):
 
     """
 
-    MESSAGE_SPLIT = (
-        "-----BEGIN PEERPLAYS SIGNED MESSAGE-----",
-        "-----BEGIN META-----",
-        "-----BEGIN SIGNATURE-----",
-        "-----END PEERPLAYS SIGNED MESSAGE-----",
-    )
-
     def define_classes(self):
         self.account_class = Account
         self.privatekey_class = PrivateKey

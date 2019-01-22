@@ -52,15 +52,17 @@ def fixture_data():
 
     [Account(x) for x in data.get("accounts", [])]
     [Account(x).store(x, "name") for x in data.get("accounts", [])]
-    Witnesses._import([Witness(x) for x in data.get("witnesses", [])])
-    Sports._import([Sport(x) for x in data.get("sports", [])])
-    EventGroups._import([EventGroup(x) for x in data.get("eventgroups", [])])
-    Events._import([Event(x) for x in data.get("events", [])])
-    BettingMarketGroups._import(
+    Witnesses.cache_objects([Witness(x) for x in data.get("witnesses", [])])
+    Sports.cache_objects([Sport(x) for x in data.get("sports", [])])
+    EventGroups.cache_objects([EventGroup(x) for x in data.get("eventgroups", [])])
+    Events.cache_objects([Event(x) for x in data.get("events", [])])
+    BettingMarketGroups.cache_objects(
         [BettingMarketGroup(x) for x in data.get("bettingmarketgroups", [])]
     )
-    BettingMarkets._import([BettingMarket(x) for x in data.get("bettingmarkets", [])])
-    Rules._import([Rule(x) for x in data.get("rules", [])])
+    BettingMarkets.cache_objects(
+        [BettingMarket(x) for x in data.get("bettingmarkets", [])]
+    )
+    Rules.cache_objects([Rule(x) for x in data.get("rules", [])])
     [Bet(x) for x in data.get("bets", [])]
 
     proposals = []
@@ -90,5 +92,5 @@ def fixture_data():
         }
         proposals.append(Proposal(proposal_data))
 
-    Proposals._import(proposals, "1.2.1")
-    Proposals._import(proposals, "witness-account")
+    Proposals.cache_objects(proposals, "1.2.1")
+    Proposals.cache_objects(proposals, "witness-account")
