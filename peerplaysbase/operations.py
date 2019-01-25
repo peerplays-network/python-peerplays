@@ -842,10 +842,14 @@ class Betting_market_group_create(GrapheneObject):
                             "delay_before_settling",
                             Uint32(kwargs["delay_before_settling"]),
                         ),
-                        (
-                            "resolution_constraint",
-                            ResolutionConstraint(kwargs["resolution_constraint"]),
-                        ),
+                        ########################
+                        # Multi Market Exposure
+                        # Not available on beatrice or alice-hardfork
+                        ########################
+                        # (
+                        #    "resolution_constraint",
+                        #    ResolutionConstraint(kwargs["resolution_constraint"]),
+                        # ),
                         ("extensions", Set([])),
                     ]
                 )
@@ -1198,6 +1202,7 @@ class Balance_claim(GrapheneObject):
         else:
             if len(args) == 1 and len(kwargs) == 0:
                 kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
             super().__init__(
                 OrderedDict(
                     [
@@ -1210,7 +1215,10 @@ class Balance_claim(GrapheneObject):
                             "balance_to_claim",
                             ObjectId(kwargs["balance_to_claim"], "balance"),
                         ),
-                        ("balance_owner_key", PublicKey(kwargs["balance_owner_key"])),
+                        (
+                            "balance_owner_key",
+                            PublicKey(kwargs["balance_owner_key"], prefix=prefix),
+                        ),
                         ("total_claimed", Asset(kwargs["total_claimed"])),
                     ]
                 )

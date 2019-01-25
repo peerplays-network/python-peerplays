@@ -3,13 +3,14 @@ from binascii import hexlify
 from pprint import pprint
 
 from peerplaysbase import memo, account, operations, objects
-from peerplaysbase.account import PrivateKey
+from peerplaysbase.account import PrivateKey, PublicKey
 from peerplaysbase.objects import Operation
 from peerplaysbase.signedtransactions import Signed_Transaction
+from .fixtures import peerplays
 
 TEST_AGAINST_CLI_WALLET = False
 
-prefix = "PPY"
+prefix = "TEST"
 wif = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
 ref_block_num = 34294
 ref_block_prefix = 3707022213
@@ -44,6 +45,15 @@ class Testcases(unittest.TestCase):
             # print("ist:  %s" % txWire[:-130])
             # print(txWire[:-130] == self.cm[:-130])
             self.assertEqual(self.cm[:-130], txWire[:-130])
+
+        # Test against Bitshares backened
+        live = peerplays.rpc.get_transaction_hex(tx.json())
+
+        # Compare expected result with online result
+        self.assertEqual(live[:-130], txWire[:-130])
+
+        # Compare expected result with online backend
+        self.assertEqual(live[:-130], self.cm[:-130])
 
     def test_Transfer(self):
         pub = format(account.PrivateKey(wif).pubkey, prefix)
@@ -313,12 +323,12 @@ class Testcases(unittest.TestCase):
         self.cm = (
             "f68585abf4dce7c80457013c0000000000000000000202646"
             "5084675c39f62616c6c02656e08466f6f7462616c6cd90400"
-            "00000000010b000000000016017c003c000000000000011f3"
-            "2f18702b5c395f8d86caac95e5d8896e2e246711a3d2e49e5"
-            "db8e8e482d4d84666b947e532b356f23fe776724f5841acb3"
-            "3c8894e3c087994e0b6f3c80551cd"
+            "00000000010b000000000016017c003c00000000000120125"
+            "d5aeb51a33e6e62a5383f7cf38e6761ee42abfebbfe6c34e1"
+            "059bce54e3da2e9af8ae51662f2281435ae7be8880c88b0c2"
+            "94eae0e840c39ab6de29435ef02"
         )
-        self.doit()
+        self.doit(0)
 
     def test_betting_market_create(self):
         self.op = operations.Betting_market_create(
@@ -433,15 +443,19 @@ class Testcases(unittest.TestCase):
         self.doit()
 
     def test_sport_delete(self):
-        self.op = operations.Sport_delete(**{
-            "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "sport_id": "1.20.1241",
-            "prefix": prefix,
-        })
-        self.cm = ("f68585abf4dce7c804570149000000000000000000d90900000"
-                   "1206beb69280d58f5e32b5bf107810b840801edb83a6e463dfc"
-                   "924e925a3f9643ba2c3ce2ae880c8e3bf93511857d9f4425afc"
-                   "1ff97a5d73475af0670345d634b0f")
+        self.op = operations.Sport_delete(
+            **{
+                "fee": {"amount": 0, "asset_id": "1.3.0"},
+                "sport_id": "1.20.1241",
+                "prefix": prefix,
+            }
+        )
+        self.cm = (
+            "f68585abf4dce7c804570149000000000000000000d90900000"
+            "1206beb69280d58f5e32b5bf107810b840801edb83a6e463dfc"
+            "924e925a3f9643ba2c3ce2ae880c8e3bf93511857d9f4425afc"
+            "1ff97a5d73475af0670345d634b0f"
+        )
         self.doit()
 
     def test_event_update(self):
@@ -713,6 +727,7 @@ class Testcases(unittest.TestCase):
                 },
                 "issue_to_account": "1.2.0",
                 "extensions": [],
+                "prefix": prefix,
             }
         )
         self.cm = (
@@ -869,8 +884,11 @@ class Testcases(unittest.TestCase):
                 "fee": {"amount": 0, "asset_id": "1.3.0"},
                 "deposit_to_account": "1.2.0",
                 "balance_to_claim": "1.15.0",
-                "balance_owner_key": "PPY1111111111111111111111111111111114T1Anm",
+                "balance_owner_key": format(
+                    prefix + "1111111111111111111111111111111114T1Anm"
+                ),
                 "total_claimed": {"amount": 0, "asset_id": "1.3.0"},
+                "prefix": prefix,
             }
         )
         self.cm = (
@@ -889,8 +907,9 @@ class Testcases(unittest.TestCase):
                 "fee": {"amount": 0, "asset_id": "1.3.0"},
                 "deposit_to_account": "1.2.0",
                 "balance_to_claim": "1.15.0",
-                "balance_owner_key": "PPY1111111111111111111111111111111114T1Anm",
+                "balance_owner_key": prefix + "1111111111111111111111111111111114T1Anm",
                 "total_claimed": {"amount": 0, "asset_id": "1.3.0"},
+                "prefix": prefix,
             }
         )
 
