@@ -1,6 +1,10 @@
 from peerplays.instance import BlockchainInstance
 from .exceptions import BettingMarketGroupDoesNotExistException
 from .blockchainobject import BlockchainObject, BlockchainObjects
+from .utils import map2dict
+
+HANDICAP_MARKET_LABELS = ["hc", "1x2_hc"]
+OVERUNDER_MARKET_LABELS = ["ou"]
 
 
 class BettingMarketGroup(BlockchainObject):
@@ -35,6 +39,22 @@ class BettingMarketGroup(BlockchainObject):
 
     def resolve(self, results, **kwargs):
         return self.blockchain.betting_market_resolve(self["id"], results, **kwargs)
+
+    def get_dynamic_type(self):
+        assert self.is_dynamic()
+        description = map2dict(self["description"])
+        return description.get("_dynamic")
+
+    def is_dynamic(self):
+        description = map2dict(self["description"])
+        return bool(description.get("_dynamic", False))
+
+    def is_dynamic_type(self, other_type):
+        our_type = self.get_dynamic_type()
+        if our_type in HANDICAP_MARKET_LABELS:
+            return other_type in HANDICAP_MARKET_LABELS
+        else:
+            return other_type in OVERUNDER_MARKET_LABELS
 
 
 class BettingMarketGroups(BlockchainObjects, BlockchainInstance):

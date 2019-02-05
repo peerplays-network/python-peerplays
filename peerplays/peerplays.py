@@ -412,11 +412,11 @@ class PeerPlays(AbstractGrapheneChain):
         try:
             pubkey = PublicKey(foreign, prefix=self.prefix)
             authority["key_auths"].append([str(pubkey), weight])
-        except:
+        except Exception:
             try:
                 foreign_account = Account(foreign, blockchain_instance=self)
                 authority["account_auths"].append([foreign_account["id"], weight])
-            except:
+            except Exception:
                 raise ValueError("Unknown foreign account or invalid public key")
         if threshold:
             authority["weight_threshold"] = threshold

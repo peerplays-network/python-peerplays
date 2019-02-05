@@ -38,3 +38,11 @@ def map2dict(darray):
     """ Reformat a list of maps to a dictionary
     """
     return {v[0]: v[1] for v in darray}
+
+
+def dList2Dict(l):
+    return map2dict(l)
+
+
+def dict2dList(l):
+    return [[k, v] for k, v in l.items()]
