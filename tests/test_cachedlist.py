@@ -2,10 +2,32 @@ import time
 import unittest
 from mock import MagicMock
 from peerplays import PeerPlays
+from peerplays.sport import Sports
+from peerplays.eventgroup import EventGroups
+from peerplays.event import Events
+from peerplays.bettingmarketgroup import BettingMarketGroups
+from peerplays.bettingmarket import BettingMarkets
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 class Testcases(unittest.TestCase):
-    pass
+    def test_evg(self):
+        EventGroups("1.20.0")
+        EventGroups("1.20.0")
+
+        Sports()
+        Sports()
+
+        Events("1.21.12")
+        Events("1.21.12")
+
+        BettingMarketGroups("1.22.12")
+        BettingMarketGroups("1.22.12")
+
+        BettingMarkets("1.24.241")
+        BettingMarkets("1.24.241")
 
     """
     def test_proposals(self):

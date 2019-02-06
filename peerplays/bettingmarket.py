@@ -51,5 +51,6 @@ class BettingMarkets(BlockchainObjects, BlockchainInstance):
             [
                 BettingMarket(x, lazy=False, blockchain_instance=self.blockchain)
                 for x in self.bettingmarkets
-            ]
+            ],
+            self.betting_market_group_id,
         )
