@@ -54,5 +54,6 @@ class Events(BlockchainObjects, BlockchainInstance):
             [
                 Event(x, lazy=False, blockchain_instance=self.blockchain)
                 for x in self.events
-            ]
+            ],
+            self.eventgroup_id,
         )

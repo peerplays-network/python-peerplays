@@ -37,7 +37,7 @@ class EventGroup(BlockchainObject):
 class EventGroups(BlockchainObjects, BlockchainInstance):
     """ List of all available EventGroups
 
-        :param str sport_id: Sport ID (``1.21.xxx``)
+        :param str sport_id: Sport ID (``1.20.xxx``)
     """
 
     def __init__(self, sport_id, *args, **kwargs):
@@ -51,5 +51,6 @@ class EventGroups(BlockchainObjects, BlockchainInstance):
             [
                 EventGroup(x, lazy=False, blockchain_instance=self.blockchain)
                 for x in self.eventgroups
-            ]
+            ],
+            self.sport_id,
         )
