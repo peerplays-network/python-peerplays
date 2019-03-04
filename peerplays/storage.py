@@ -9,9 +9,9 @@ from graphenestorage import (
 )
 
 
-# url = "wss://"
-# InRamConfigurationStore.setdefault("node", url)
-# SqliteConfigurationStore.setdefault("node", url)
+url = "wss://node.peerplays.download"
+InRamConfigurationStore.setdefault("node", url)
+SqliteConfigurationStore.setdefault("node", url)
 
 
 def get_default_config_store(*args, **kwargs):
