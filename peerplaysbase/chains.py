@@ -15,12 +15,12 @@ known_chains = {
         "prefix": "TEST",
     },
     "CHARLIE": {
-        "chain_id": "56ac9f92ef2413363c26fdd3cbb0e09bbc59acb04cfc59f4cf6ef41960dcba4b",
+        "chain_id": "3de67447ef7e7390371cdf8f2c775b4a6a9b8692ab4376942746dea73f5a37dd",
         "core_symbol": "TEST",
         "prefix": "TEST",
     },
     "DICK": {
-        "chain_id": "4b1f5041bd11377cca5e3d440be543f55d8e242cdac4cc915fb93e7537f91bd6",
+        "chain_id": "318cea7d376eb81a0beba3623e12af66ab76b736860ae50739d0aaf5cecb5a91",
         "core_symbol": "TEST",
         "prefix": "TEST",
     },
