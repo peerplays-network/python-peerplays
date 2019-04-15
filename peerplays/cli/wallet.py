@@ -130,12 +130,22 @@ def listkeys(ctx):
 def listaccounts(ctx):
     """ List accounts (for the connected network)
     """
-    t = PrettyTable(["Name", "Type", "Available Key"])
-    t.align = "l"
-    for account in ctx.peerplays.wallet.getAccounts():
-        t.add_row(
-            [account["name"] or "n/a", account["type"] or "n/a", account["pubkey"]]
-        )
+    t = PrettyTable(["Name", "Key", "Owner", "Active", "Memo"])
+    for key in ctx.blockchain.wallet.getPublicKeys(True):
+        for account in ctx.blockchain.wallet.getAccountsFromPublicKey(key):
+            account = Account(account)
+            is_owner = key in [x[0] for x in account["owner"]["key_auths"]]
+            is_active = key in [x[0] for x in account["active"]["key_auths"]]
+            is_memo = key == account["options"]["memo_key"]
+            t.add_row(
+                [
+                    account["name"],
+                    key,
+                    "x" if is_owner else "",
+                    "x" if is_active else "",
+                    "x" if is_memo else "",
+                ]
+            )
     click.echo(t)
 
 
