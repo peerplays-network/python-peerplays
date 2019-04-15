@@ -12,7 +12,7 @@ except LookupError:
     ascii = codecs.lookup("ascii")
     codecs.register(lambda name, enc=ascii: {True: enc}.get(name == "mbcs"))
 
-VERSION = "0.3.8"
+VERSION = "0.3.9"
 
 setup(
     name="peerplays",
