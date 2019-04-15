@@ -6,7 +6,7 @@ scrypt
 pyyaml
 
 # for AES, installed through graphenelib already
-pycryptodome
+pycryptodome==3.8.0
 
 # for the CLI tool
 click
