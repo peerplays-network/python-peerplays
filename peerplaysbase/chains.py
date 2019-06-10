@@ -29,4 +29,9 @@ known_chains = {
         "core_symbol": "TEST",
         "prefix": "TEST",
     },
+    "FRED": {
+        "chain_id": "fb6ff714f8dfcf97eef01591fc938aa97755bf641aef711b3609a94578df9e5e",
+        "core_symbol": "TEST",
+        "prefix": "TEST",
+    },       
 }
