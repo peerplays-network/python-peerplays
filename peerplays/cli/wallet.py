@@ -16,7 +16,7 @@ from .main import main
 )
 @offlineChain
 def createwallet(ctx, password):
-    """ Change the wallet passphrase
+    """ Create a wallet
     """
     ctx.peerplays.wallet.create(password)
 
