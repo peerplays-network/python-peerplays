@@ -25,13 +25,13 @@ known_chains = {
         "prefix": "TEST",
     },
     "ELIZABETH": {
-        "chain_id": "8cbc8c5dcfa8ea450ae0c80e3749231334df9983c3521146f18493513bbd417d",
+        "chain_id": "09f618610b6449f230f133addd388dc6dc15072e80e39f2c0d76088550413d47",
         "core_symbol": "TEST",
         "prefix": "TEST",
     },
     "FRED": {
-        "chain_id": "fb6ff714f8dfcf97eef01591fc938aa97755bf641aef711b3609a94578df9e5e",
+        "chain_id": "735f88594e5b7521047864f7cca7367ff27e95ce7bd40482b85c978d1337f881",
         "core_symbol": "TEST",
         "prefix": "TEST",
-    },       
+    },
 }
