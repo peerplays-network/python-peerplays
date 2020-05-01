@@ -25,7 +25,8 @@ The python-peerplays library has following dependencies
   libxslt1-dev 
   zlib1g-dev 
 
-Make sure that the above dependencies are installed, if not install with  
+Make sure that the above dependencies are installed, if not install with:  
+
     $ sudo apt-get install <dependency name>
 
 Install with `pip3`:
