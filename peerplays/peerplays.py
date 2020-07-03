@@ -1,3 +1,4 @@
+from pprint import pprint
 import logging
 
 from datetime import datetime
@@ -181,7 +182,7 @@ class PeerPlays(AbstractGrapheneChain):
         proxy_account="proxy-to-self",
         storekeys=True,
         **kwargs
-    ):
+        ):
         """ Create new account on PeerPlays
 
             The brainkey/password can be used to recover all generated keys
@@ -1550,6 +1551,34 @@ class PeerPlays(AbstractGrapheneChain):
                 "fee": {"amount": 0, "asset_id": "1.3.0"},
                 "bettor_id": account["id"],
                 "bet_to_cancel": bet["id"],
+                "prefix": self.prefix,
+            }
+        )
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
+
+    # -------------------------------------------------------------------------
+    # RBAC methods
+    # -------------------------------------------------------------------------
+    def create_custom_permission(self, name, opJson, account=None, **kwargs):
+        """ Create a sport. This needs to be **proposed**.
+
+            :param list names: Internationalized names, e.g. ``[['de', 'Foo'],
+                ['en', 'bar']]``
+            :param str account: (optional) the account to allow access
+                to (defaults to ``default_account``)
+        """
+        assert isinstance(name, str)
+        if not account:
+            if "default_account" in self.config:
+                account = self.config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account)
+        op = operations.Create_custom_permission(
+            **{
+                "fee": {"amount": 0, "asset_id": "1.3.0"},
+                "name": name,
+                "opJson": opJson,
                 "prefix": self.prefix,
             }
         )

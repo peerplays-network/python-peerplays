@@ -60,7 +60,9 @@ class PeerPlaysNodeRPC(Api):
         """
         props = self.get_chain_properties()
         chain_id = props["chain_id"]
+        # print('chain_id:', chain_id)
         for k, v in known_chains.items():
+            # print(k, v)
             if v["chain_id"] == chain_id:
                 return v
         raise Exception("Connecting to unknown network!")

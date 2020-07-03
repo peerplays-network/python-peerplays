@@ -25,7 +25,7 @@ known_chains = {
         "prefix": "TEST",
     },
     "ELIZABETH": {
-        "chain_id": "09f618610b6449f230f133addd388dc6dc15072e80e39f2c0d76088550413d47",
+        "chain_id": "a312a16c49104f5eb20560b50bd5c1c4319c7ff676653e03f5732d9421e4e6f1",
         "core_symbol": "TEST",
         "prefix": "TEST",
     },

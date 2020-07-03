@@ -1240,3 +1240,30 @@ class Balance_claim(GrapheneObject):
                     ]
                 )
             )
+
+
+class Create_custom_permission(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            # Sort names by countrycode
+            # kwargs["name"] = sorted(
+            #     kwargs["name"], key=lambda x: repr(x[0]), reverse=False
+            # )
+            # name = Map([[String(e[0]), String(e[1])] for e in kwargs["name"]])
+            name = kwargs["name"]
+            opJson = kwargs["opJson"] 
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("name", name),
+                        ("opJson", opJson),
+                        ("extensions", Set([])),
+                    ]
+                )
+            )
+

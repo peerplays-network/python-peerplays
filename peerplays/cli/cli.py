@@ -28,6 +28,7 @@ from . import (
     rpc,
     asset,
     bos,
+    rbac,
 )
 
 log = logging.getLogger(__name__)

@@ -128,6 +128,7 @@ def listkeys(ctx):
 @click.pass_context
 @onlineChain
 def listaccounts(ctx):
+    print('ctx:', ctx)
     """ List accounts (for the connected network)
     """
     t = PrettyTable(["Name", "Key", "Owner", "Active", "Memo"])
