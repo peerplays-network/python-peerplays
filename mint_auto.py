@@ -405,10 +405,10 @@ if __name__ == "__main__":
         print(mintAuto.helpText)
 
     self = mintAuto
-    j = { "weight_threshold": 1, "account_auths": [["1.2.8",1]], "key_auths": [], "address_auths": [] }
+    j = { "weight_threshold": 1, "account_auths": [["1.2.9",1]], "key_auths": [], "address_auths": [] }
     jj = json.dumps(j)
     # self.ppy.create_custom_permission()
     # self.ppy.create_custom_permission("perm1", weight_threshold=1, account_auths=[["1.2.7", 1]], key_auths=[])
     # self.ppy.create_custom_permission("perm1", weight_threshold=1, account_auths=[], key_auths=[])
-    self.ppy.custom_permission_create("perm1", jj) 
+    self.ppy.custom_permission_create("permi1", jj) 
     self.ppy.txbuffer.broadcast()

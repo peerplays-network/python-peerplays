@@ -1574,11 +1574,13 @@ class PeerPlays(AbstractGrapheneChain):
         if not account:
             raise ValueError("You need to provide an account")
         account = Account(account)
+        print("prefix:", self.prefix)
         op = operations.Custom_permission_create(
             **{
                 "fee": {"amount": 0, "asset_id": "1.3.0"},
+                "owner_account": account,
                 "permission_name": permission_name,
-                "opJson": opJson,
+                "auth": opJson,
                 "prefix": self.prefix,
             }
         )

@@ -1255,13 +1255,15 @@ class Custom_permission_create(GrapheneObject):
             # )
             # name = Map([[String(e[0]), String(e[1])] for e in kwargs["name"]])
             name = kwargs["permission_name"]
-            opJson = kwargs["opJson"] 
+            opJson = kwargs["auth"] 
+            account = kwargs["owner_account"]
             super().__init__(
                 OrderedDict(
                     [
                         ("fee", Asset(kwargs["fee"])),
+                        ("owner_account", account),
                         ("permission_name", name),
-                        ("opJson", opJson),
+                        ("auth", opJson),
                         ("extensions", Set([])),
                     ]
                 )
