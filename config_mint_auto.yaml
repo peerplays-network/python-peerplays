@@ -1,0 +1,4 @@
+node: ws://ec2-99-79-98-229.ca-central-1.compute.amazonaws.com:8090
+proposer: 'init1'
+proposal_expiration: 300
+password: peerplays**

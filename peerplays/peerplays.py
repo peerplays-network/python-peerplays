@@ -1559,7 +1559,7 @@ class PeerPlays(AbstractGrapheneChain):
     # -------------------------------------------------------------------------
     # RBAC methods
     # -------------------------------------------------------------------------
-    def create_custom_permission(self, name, opJson, account=None, **kwargs):
+    def custom_permission_create(self, permission_name, opJson, account=None, **kwargs):
         """ Create a sport. This needs to be **proposed**.
 
             :param list names: Internationalized names, e.g. ``[['de', 'Foo'],
@@ -1567,17 +1567,17 @@ class PeerPlays(AbstractGrapheneChain):
             :param str account: (optional) the account to allow access
                 to (defaults to ``default_account``)
         """
-        assert isinstance(name, str)
+        assert isinstance(permission_name, str)
         if not account:
             if "default_account" in self.config:
                 account = self.config["default_account"]
         if not account:
             raise ValueError("You need to provide an account")
         account = Account(account)
-        op = operations.Create_custom_permission(
+        op = operations.Custom_permission_create(
             **{
                 "fee": {"amount": 0, "asset_id": "1.3.0"},
-                "name": name,
+                "permission_name": permission_name,
                 "opJson": opJson,
                 "prefix": self.prefix,
             }

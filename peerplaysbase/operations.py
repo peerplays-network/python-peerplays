@@ -1242,7 +1242,7 @@ class Balance_claim(GrapheneObject):
             )
 
 
-class Create_custom_permission(GrapheneObject):
+class Custom_permission_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
             self.data = args[0].data
@@ -1254,13 +1254,13 @@ class Create_custom_permission(GrapheneObject):
             #     kwargs["name"], key=lambda x: repr(x[0]), reverse=False
             # )
             # name = Map([[String(e[0]), String(e[1])] for e in kwargs["name"]])
-            name = kwargs["name"]
+            name = kwargs["permission_name"]
             opJson = kwargs["opJson"] 
             super().__init__(
                 OrderedDict(
                     [
                         ("fee", Asset(kwargs["fee"])),
-                        ("name", name),
+                        ("permission_name", name),
                         ("opJson", opJson),
                         ("extensions", Set([])),
                     ]
