@@ -1554,3 +1554,34 @@ class PeerPlays(AbstractGrapheneChain):
             }
         )
         return self.finalizeOp(op, account["name"], "active", **kwargs)
+
+   # -------------------------------------------------------------------------
+   # RBAC/HRP methods
+   # -------------------------------------------------------------------------
+    def custom_permission_create(
+        self,
+        permission_name,
+        owner_account="jemshid1",
+        **kwargs
+        ):
+
+        key_authority = []
+        accounts_authority = [["1.2.30", 2]]
+
+        owner_account = Account(owner_account, blockchain_instance=self)
+
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "owner_account": owner_account["id"],
+            "permission_name": permission_name,
+            "auth": {
+                "account_auths": accounts_authority,
+                "key_auths": key_authority,
+                "address_auths": [],
+                "weight_threshold": 1,
+            },
+            "prefix": self.prefix,
+        }
+        op = operations.Custom_permission_create(**op)
+        return self.finalizeOp(op, owner_account, "active", **kwargs)
+    
