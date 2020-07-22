@@ -1561,12 +1561,15 @@ class PeerPlays(AbstractGrapheneChain):
     def custom_permission_create(
         self,
         permission_name,
-        owner_account="jemshid1",
+        owner_account=None,
+        weight_threshold=[],
+        account_auths=[],
+        key_auths=[],
+        address_auths=[],
         **kwargs
         ):
 
-        key_authority = []
-        accounts_authority = [["1.2.30", 2]]
+        #accounts_authority = [["1.2.30", 2]]
 
         owner_account = Account(owner_account, blockchain_instance=self)
 
@@ -1575,10 +1578,10 @@ class PeerPlays(AbstractGrapheneChain):
             "owner_account": owner_account["id"],
             "permission_name": permission_name,
             "auth": {
-                "account_auths": accounts_authority,
-                "key_auths": key_authority,
-                "address_auths": [],
-                "weight_threshold": 1,
+                "account_auths": account_auths,
+                "key_auths": key_auths,
+                "address_auths": address_auths,
+                "weight_threshold": weight_threshold,
             },
             "prefix": self.prefix,
         }
