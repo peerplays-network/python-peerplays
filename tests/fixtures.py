@@ -30,7 +30,7 @@ peerplays = PeerPlays(
 )
 print("peerplays info:", peerplays.info())
 # Set defaults
-peerplays.set_default_account("init0")
+peerplays.set_default_account("init1")
 set_shared_peerplays_instance(peerplays)
 
 # Ensure we are not going to transaction anythin on chain!
