@@ -23,6 +23,7 @@ wifs = [
 wif = wifs[0]
 core_unit = "TEST"
 
+print("core_unit:", core_unit)
 # peerplays instance
 peerplays = PeerPlays(
     # "wss://api.ppy-beatrice.blckchnd.com", keys=wifs, nobroadcast=True, num_retries=1
@@ -31,7 +32,9 @@ peerplays = PeerPlays(
 print("peerplays info:", peerplays.info())
 # Set defaults
 peerplays.set_default_account("init1")
+print("default instance set")
 set_shared_peerplays_instance(peerplays)
+print("set shared")
 
 # Ensure we are not going to transaction anythin on chain!
 assert peerplays.nobroadcast
