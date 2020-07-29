@@ -10,4 +10,4 @@ test:
     - apt-get install -y python-dev python-pip
     - pip install -r requirements-test.txt
       # - python manage.py test
-    - python -m unittest tests.test_rbac_small 
+    - python -m unittest tests/test_rbac_small.py 
