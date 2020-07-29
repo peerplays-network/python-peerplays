@@ -28,7 +28,7 @@ peerplays = PeerPlays(
     # "wss://api.ppy-beatrice.blckchnd.com", keys=wifs, nobroadcast=True, num_retries=1
     "wss://fred.peerplays.download/api", keys=wifs, nobroadcast=True, num_retries=1
 )
-
+print("peerplays info:", peerplays.info())
 # Set defaults
 peerplays.set_default_account("init0")
 set_shared_peerplays_instance(peerplays)
