@@ -103,3 +103,7 @@ class Testcases(unittest.TestCase):
         p1 = peerplays.new_tx()
         p2 = peerplays.new_tx()
         self.assertIsNotNone(id(p1), id(p2))
+
+
+if __name__ == "__main__":
+    unittest.main()

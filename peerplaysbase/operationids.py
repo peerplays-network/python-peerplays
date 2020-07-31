@@ -76,6 +76,17 @@ ops = [
     "event_group_delete",
     "affiliate_payout",
     "affiliate_referral_payout",
+    "lottery_asset_create",
+    "ticket_purchase",
+    "lottery_reward",
+    "lottery_end",
+    "sweeps_vesting_claim",
+    "custom_permission_create",
+    "custom_permission_update",
+    "custom_permission_delete",
+    "custom_account_authority_create",
+    "custom_account_authority_update",
+    "custom_account_authority_delete",
 ]
 operations = {o: ops.index(o) for o in ops}
 
