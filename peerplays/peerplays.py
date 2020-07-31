@@ -1556,7 +1556,7 @@ class PeerPlays(AbstractGrapheneChain):
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
    # -------------------------------------------------------------------------
-   # RBAC/HRP methods
+   # HRP methods
    # -------------------------------------------------------------------------
     def custom_permission_create(
         self,

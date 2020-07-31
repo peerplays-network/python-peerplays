@@ -28,9 +28,6 @@ ts = [
     "bet",
     "custom_permission",
     "custom_account_authority",
-    "offer",
-    "nft_metadata",
-    "nft"
 ]
 
 object_type = {k: ts.index(k) for k in ts}

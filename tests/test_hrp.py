@@ -25,7 +25,7 @@ class Testcases(unittest.TestCase):
         print("Cleaning done!")
 
 
-    def test_rbac(self):
+    def test_hrp(self):
         peerplays.custom_permission_create(
             self.testperm,
             owner_account="1.2.7",
