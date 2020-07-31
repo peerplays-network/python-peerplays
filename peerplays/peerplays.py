@@ -1554,3 +1554,151 @@ class PeerPlays(AbstractGrapheneChain):
             }
         )
         return self.finalizeOp(op, account["name"], "active", **kwargs)
+
+   # -------------------------------------------------------------------------
+   # HRP methods
+   # -------------------------------------------------------------------------
+    def custom_permission_create(
+        self,
+        permission_name,
+        owner_account=None,
+        weight_threshold=[],
+        account_auths=[],
+        key_auths=[],
+        address_auths=[],
+        **kwargs
+        ):
+
+        #accounts_authority = [["1.2.30", 2]]
+
+        owner_account = Account(owner_account, blockchain_instance=self)
+
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "owner_account": owner_account["id"],
+            "permission_name": permission_name,
+            "auth": {
+                "account_auths": account_auths,
+                "key_auths": key_auths,
+                "address_auths": address_auths,
+                "weight_threshold": weight_threshold,
+            },
+            "prefix": self.prefix,
+        }
+        op = operations.Custom_permission_create(**op)
+        return self.finalizeOp(op, owner_account, "active", **kwargs)
+
+    def custom_permission_update(
+        self,
+        permission_id,
+        owner_account=None,
+        weight_threshold=[],
+        account_auths=[],
+        key_auths=[],
+        address_auths=[],
+        **kwargs
+        ):
+
+        #accounts_authority = [["1.2.30", 2]]
+
+        owner_account = Account(owner_account, blockchain_instance=self)
+
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "owner_account": owner_account["id"],
+            "permission_id": permission_id,
+            "new_auth": {
+                "account_auths": account_auths,
+                "key_auths": key_auths,
+                "address_auths": address_auths,
+                "weight_threshold": weight_threshold,
+            },
+            "prefix": self.prefix,
+        }
+        op = operations.Custom_permission_update(**op)
+        return self.finalizeOp(op, owner_account, "active", **kwargs)
+    
+    def custom_permission_delete(
+        self,
+        permission_id,
+        owner_account=None,
+        **kwargs
+        ):
+
+        owner_account = Account(owner_account, blockchain_instance=self)
+
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "owner_account": owner_account["id"],
+            "permission_id": permission_id,
+            "prefix": self.prefix,
+        }
+        op = operations.Custom_permission_delete(**op)
+        # print('op:', op)
+        return self.finalizeOp(op, owner_account, "active", **kwargs)
+
+    def custom_account_authority_create(
+        self,
+        permission_id,
+        operation_type,
+        valid_from,
+        valid_to,
+        owner_account=None,
+        **kwargs
+        ):
+
+        #accounts_authority = [["1.2.30", 2]]
+
+        owner_account = Account(owner_account, blockchain_instance=self)
+
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "permission_id": permission_id,
+            "operation_type": operation_type,
+            "valid_from": valid_from,
+            "valid_to": valid_to,
+            "owner_account": owner_account["id"],
+            "prefix": self.prefix,
+        }
+        op = operations.Custom_account_authority_create(**op)
+        return self.finalizeOp(op, owner_account, "active", **kwargs)
+
+    def custom_account_authority_update(
+        self,
+        auth_id,
+        new_valid_from,
+        new_valid_to,
+        owner_account=None,
+        **kwargs
+        ):
+
+        owner_account = Account(owner_account, blockchain_instance=self)
+
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "auth_id": auth_id,
+            "new_valid_from": new_valid_from,
+            "new_valid_to": new_valid_to,
+            "owner_account": owner_account["id"],
+            "prefix": self.prefix,
+        }
+        op = operations.Custom_account_authority_update(**op)
+        return self.finalizeOp(op, owner_account, "active", **kwargs)
+
+    def custom_account_authority_delete(
+        self,
+        auth_id,
+        owner_account=None,
+        **kwargs
+        ):
+
+        owner_account = Account(owner_account, blockchain_instance=self)
+
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "auth_id": auth_id,
+            "owner_account": owner_account["id"],
+            "prefix": self.prefix,
+        }
+        op = operations.Custom_account_authority_delete(**op)
+        return self.finalizeOp(op, owner_account, "active", **kwargs)

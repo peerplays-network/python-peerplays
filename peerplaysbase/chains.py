@@ -30,8 +30,11 @@ known_chains = {
         "prefix": "TEST",
     },
     "FRED": {
-        "chain_id": "735f88594e5b7521047864f7cca7367ff27e95ce7bd40482b85c978d1337f881",
+        "chain_id": "ef688290dea16ee55ae83bbe30384c24a8ad06268897dd144fb3a677a88306fe",
         "core_symbol": "TEST",
         "prefix": "TEST",
     },
 }
+
+# old fred chain_id in the code
+# "chain_id": "735f88594e5b7521047864f7cca7367ff27e95ce7bd40482b85c978d1337f881",
