@@ -1240,3 +1240,275 @@ class Balance_claim(GrapheneObject):
                     ]
                 )
             )
+<<<<<<< Updated upstream
+=======
+
+
+class Custom_permission_create(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                        ("permission_name", String(kwargs["permission_name"])),
+                        ("auth", Permission(kwargs["auth"], prefix=prefix)),
+                    ]
+                )
+            )
+
+
+class Custom_permission_update(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("permission_id", ObjectId(kwargs["permission_id"], "custom_permission")),
+                        ("new_auth", Optional(Permission(kwargs["new_auth"], prefix=prefix))),
+                        ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                    ]
+                )
+            )
+
+
+class Custom_permission_delete(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("permission_id", ObjectId(kwargs["permission_id"], "custom_permission")),
+                        ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                    ]
+                )
+            )
+
+
+class Custom_account_authority_create(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("permission_id", ObjectId(kwargs["permission_id"], "custom_permission")),
+                        ("operation_type", Uint32(kwargs["operation_type"])),
+                        ("valid_from", PointInTime(kwargs["valid_from"])),
+                        ("valid_to", PointInTime(kwargs["valid_to"])),
+                        ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                    ]
+                )
+            )
+
+
+class Custom_account_authority_update(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("auth_id", ObjectId(kwargs["auth_id"], "custom_account_authority")),
+                        ("new_valid_from", Optional(PointInTime(kwargs["new_valid_from"]))),
+                        ("new_valid_to", Optional(PointInTime(kwargs["new_valid_to"]))),
+                        ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                    ]
+                )
+            )
+
+
+class Custom_account_authority_delete(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("auth_id", ObjectId(kwargs["auth_id"], "custom_account_authority")),
+                        ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                    ]
+                )
+            )
+
+
+# ----------------------------------------
+#       NFT Operations Classes
+# ----------------------------------------
+
+class Nft_metadata_create(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                        ("name", String(kwargs["name"])),
+                        ("symbol", String(kwargs["symbol"])),
+                        ("base_uri", String(kwargs["base_uri"])),
+                    ]
+                )
+            )
+
+
+class Custom_permission_update(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("permission_id", ObjectId(kwargs["permission_id"], "custom_permission")),
+                        ("new_auth", Optional(Permission(kwargs["new_auth"], prefix=prefix))),
+                        ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                    ]
+                )
+            )
+
+
+class Custom_permission_delete(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("permission_id", ObjectId(kwargs["permission_id"], "custom_permission")),
+                        ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                    ]
+                )
+            )
+
+
+class Custom_account_authority_create(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("permission_id", ObjectId(kwargs["permission_id"], "custom_permission")),
+                        ("operation_type", Uint32(kwargs["operation_type"])),
+                        ("valid_from", PointInTime(kwargs["valid_from"])),
+                        ("valid_to", PointInTime(kwargs["valid_to"])),
+                        ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                    ]
+                )
+            )
+
+
+class Custom_account_authority_update(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("auth_id", ObjectId(kwargs["auth_id"], "custom_account_authority")),
+                        ("new_valid_from", Optional(PointInTime(kwargs["new_valid_from"]))),
+                        ("new_valid_to", Optional(PointInTime(kwargs["new_valid_to"]))),
+                        ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                    ]
+                )
+            )
+
+
+class Custom_account_authority_delete(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("auth_id", ObjectId(kwargs["auth_id"], "custom_account_authority")),
+                        ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                    ]
+                )
+            )
+>>>>>>> Stashed changes

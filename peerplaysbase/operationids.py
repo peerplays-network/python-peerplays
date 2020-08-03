@@ -76,6 +76,29 @@ ops = [
     "event_group_delete",
     "affiliate_payout",
     "affiliate_referral_payout",
+<<<<<<< Updated upstream
+=======
+    "lottery_asset_create",
+    "ticket_purchase",
+    "lottery_reward",
+    "lottery_end",
+    "sweeps_vesting_claim",
+    "custom_permission_create",
+    "custom_permission_update",
+    "custom_permission_delete",
+    "custom_account_authority_create",
+    "custom_account_authority_update",
+    "custom_account_authority_delete",
+    "offer_operation",
+    "bid_operation",
+    "finalize_offer_operation",
+    "nft_metadata_create_operation",
+    "nft_metadata_update_operation",
+    "nft_mint_operation",
+    "nft_safe_transfer_from_operation",
+    "nft_approve_operation",
+    "nft_set_approval_for_all_operation"
+>>>>>>> Stashed changes
 ]
 operations = {o: ops.index(o) for o in ops}
 
