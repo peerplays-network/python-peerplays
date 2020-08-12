@@ -25,16 +25,13 @@ ts = [
     "betting_market_rules",
     "betting_market_group",
     "betting_market",
-<<<<<<< Updated upstream
     "bet"
-=======
     "bet",
     "custom_permission",
     "custom_account_authority",
     "offer_object_type",
     "nft_metadata_type",
     "nft_object_type",
->>>>>>> Stashed changes
 ]
 
 object_type = {k: ts.index(k) for k in ts}

@@ -45,6 +45,7 @@ from .objects import (
     GameSpecificMoves,
     ResolutionConstraint,
 )
+from .types import Double
 
 default_prefix = "PPY"
 
@@ -1240,8 +1241,6 @@ class Balance_claim(GrapheneObject):
                     ]
                 )
             )
-<<<<<<< Updated upstream
-=======
 
 
 class Custom_permission_create(GrapheneObject):
@@ -1390,18 +1389,160 @@ class Nft_metadata_create(GrapheneObject):
                 kwargs = args[0]
             prefix = kwargs.get("prefix", default_prefix)
 
+            if "revenue_partenr" in kwargs.keys():
+                if not isinstance(kwargs["revenue_partner"], type(None)):
+                    revenue_partner = Optional(ObjectId(kwargs["revenue_partner"], "account"))
+                    revenue_split = Optional(Uint16(kwargs["revenue_split"]))
+            else:
+                revenue_partner = Optional(None)
+                revenue_split = Optional(None)
+
             super().__init__(
                 OrderedDict(
                     [
                         ("fee", Asset(kwargs["fee"])),
-                        ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                        ("owner", ObjectId(kwargs["owner"], "account")),
                         ("name", String(kwargs["name"])),
                         ("symbol", String(kwargs["symbol"])),
                         ("base_uri", String(kwargs["base_uri"])),
+                        ("revenue_partner", revenue_partner),
+                        ("revenue_split", revenue_split),
+                        ("is_transferable", Bool(bool(kwargs["is_transferable"]))),
+                        ("is_sellable", Bool(bool(kwargs["is_sellable"]))),
+                        # ("extensions", Set([])),
                     ]
                 )
             )
 
+
+class Nft_metadata_update(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            if "revenue_partenr" in kwargs.keys():
+                if not isinstance(kwargs["revenue_partner"], type(None)):
+                    revenue_partner = Optional(ObjectId(kwargs["revenue_partner"], "account"))
+                    revenue_split = Optional(Uint16(kwargs["revenue_split"]))
+            else:
+                revenue_partner = Optional(None)
+                revenue_split = Optional(None)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("owner", ObjectId(kwargs["owner"], "account")),
+                        ("nft_metadata_id", ObjectId(kwargs["nft_metadata_id"])),
+                        ("name", Optional(String(kwargs["name"]))),
+                        ("symbol", Optional(String(kwargs["symbol"]))),
+                        ("base_uri", Optional(String(kwargs["base_uri"]))),
+                        ("revenue_partner", revenue_partner),
+                        ("revenue_split", revenue_split),
+                        ("is_transferable", Optional(Bool(kwargs["is_transferable"]))),
+                        ("is_sellable", Optional(Bool(kwargs["is_sellable"])))
+                    ]
+                )
+            )
+
+
+class Nft_mint(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("payer", ObjectId(kwargs["payer"], "account")),
+                        ("nft_metadata_id", ObjectId(kwargs["nft_metadata_id"])),
+                        ("owner", ObjectId(kwargs["owner"], "account")),
+                        ("approved", ObjectId(kwargs["approved"], "account")),
+                        ("approved_operators", Set([])),
+                        ("token_uri", String(kwargs["token_uri"])),
+                    ]
+                )
+            )
+
+
+class Nft_safe_transfer_from(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("operator_", ObjectId(kwargs["operator_"], "account")),
+                        ("from", ObjectId(kwargs["from"], "account")),
+                        ("to", ObjectId(kwargs["to"], "account")),
+                        ("token_id", ObjectId(kwargs["token_id"])),
+                        ("data", String(kwargs["data"])),
+                    ]
+                )
+            )
+
+
+class Nft_approve(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("operator_", ObjectId(kwargs["operator_"], "account")),
+                        ("approved", ObjectId(kwargs["approved"], "account")),
+                        ("token_id", ObjectId(kwargs["token_id"])),
+                    ]
+                )
+            )
+
+
+class Nft_set_approval_for_all(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("owner", ObjectId(kwargs["owner"], "account")),
+                        ("operator_", ObjectId(kwargs["operator_"], "account")),
+                        ("approved", Bool(kwargs["approved"])),
+                    ]
+                )
+            )
+            
 
 class Custom_permission_update(GrapheneObject):
     def __init__(self, *args, **kwargs):
@@ -1511,4 +1652,3 @@ class Custom_account_authority_delete(GrapheneObject):
                     ]
                 )
             )
->>>>>>> Stashed changes

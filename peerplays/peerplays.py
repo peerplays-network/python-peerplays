@@ -145,6 +145,7 @@ class PeerPlays(AbstractGrapheneChain):
 
         account = Account(account, blockchain_instance=self)
         amount = Amount(amount, asset, blockchain_instance=self)
+        print("amount:", amount)
         to = Account(to, blockchain_instance=self)
 
         memoObj = Memo(from_account=account, to_account=to, blockchain_instance=self)
@@ -159,6 +160,7 @@ class PeerPlays(AbstractGrapheneChain):
                 "prefix": self.prefix,
             }
         )
+        print("int(amount):", int(amount))
         return self.finalizeOp(op, account, "active", **kwargs)
 
     # -------------------------------------------------------------------------
@@ -1554,8 +1556,6 @@ class PeerPlays(AbstractGrapheneChain):
             }
         )
         return self.finalizeOp(op, account["name"], "active", **kwargs)
-<<<<<<< Updated upstream
-=======
 
    # -------------------------------------------------------------------------
    # HRP methods
@@ -1716,135 +1716,157 @@ class PeerPlays(AbstractGrapheneChain):
         symbol,
         base_uri,
         revenue_partner=None,
-        revenue_split=None,
+        revenue_split=200,
+        is_transferable=True,
+        is_sellable=True,
         **kwargs
         ):
 
         owner_account = Account(owner_account_id_or_name, blockchain_instance=self)
+        if not isinstance(revenue_partner, type(None)):
+            revenue_partner = Account(revenue_partner, blockchain_instance=self)["id"]
 
         op = {
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "owner_account": owner_account["id"],
+            "owner": owner_account["id"],
             "name": name,
-            "symbol" = symbol,
-            "base_uri" = base_uri,
+            "symbol": symbol,
+            "base_uri": base_uri,
+            "revenue_partner": revenue_partner,
+            "revenue_split": revenue_split,
+            "is_transferable": is_transferable,
+            "is_sellable": is_sellable,
             "prefix": self.prefix,
         }
         op = operations.Nft_metadata_create(**op)
         return self.finalizeOp(op, owner_account, "active", **kwargs)
 
-    def custom_permission_update(
+    def nft_metadata_update(
         self,
-        permission_id,
-        owner_account=None,
-        weight_threshold=[],
-        account_auths=[],
-        key_auths=[],
-        address_auths=[],
+        owner_account_id_or_name,
+        nft_metadata_id,
+        name,
+        symbol,
+        base_uri,
+        revenue_partner=None,
+        revenue_split=200,
+        is_transferable=True,
+        is_sellable=True,
         **kwargs
         ):
 
-        #accounts_authority = [["1.2.30", 2]]
-
-        owner_account = Account(owner_account, blockchain_instance=self)
+        owner_account = Account(owner_account_id_or_name, blockchain_instance=self)
+        if not isinstance(revenue_partner, type(None)):
+            revenue_partner = Account(revenue_partner, blockchain_instance=self)["id"]
 
         op = {
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "owner_account": owner_account["id"],
-            "permission_id": permission_id,
-            "new_auth": {
-                "account_auths": account_auths,
-                "key_auths": key_auths,
-                "address_auths": address_auths,
-                "weight_threshold": weight_threshold,
-            },
+            "owner": owner_account["id"],
+            "nft_metadata_id": nft_metadata_id,
+            "name": name,
+            "symbol": symbol,
+            "base_uri": base_uri,
+            "revenue_partner": revenue_partner,
+            "revenue_split": revenue_split,
+            "is_transferable": is_transferable,
+            "is_sellable": is_sellable,
             "prefix": self.prefix,
         }
-        op = operations.Custom_permission_update(**op)
+        op = operations.Nft_metadata_update(**op)
         return self.finalizeOp(op, owner_account, "active", **kwargs)
-    
-    def custom_permission_delete(
+
+    def nft_mint(
         self,
-        permission_id,
-        owner_account=None,
+        metadata_owner_account_id_or_name,
+        metadata_id,
+        owner_account_id_or_name,
+        approved_account_id_or_name,
+        approved_operators,
+        token_uri,
         **kwargs
         ):
 
-        owner_account = Account(owner_account, blockchain_instance=self)
+        payer = Account(metadata_owner_account_id_or_name, blockchain_instance=self)
+        owner = Account(owner_account_id_or_name, blockchain_instance=self)
+        approved = Account(approved_account_id_or_name, blockchain_instance=self)
+        approved_operators = Account(approved_operators, blockchain_instance=self)
 
         op = {
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "owner_account": owner_account["id"],
-            "permission_id": permission_id,
+            "payer": payer["id"],
+            "nft_metadata_id": metadata_id,
+            "owner": owner["id"],
+            "approved": approved["id"],
+            "approved_operators": approved_operators["id"],
+            "token_uri": token_uri,
             "prefix": self.prefix,
         }
-        op = operations.Custom_permission_delete(**op)
-        # print('op:', op)
-        return self.finalizeOp(op, owner_account, "active", **kwargs)
+        op = operations.Nft_mint(**op)
+        return self.finalizeOp(op, owner, "active", **kwargs)
 
-    def custom_account_authority_create(
+    def nft_safe_transfer_from(
         self,
-        permission_id,
-        operation_type,
-        valid_from,
-        valid_to,
-        owner_account=None,
+        operator_,
+        from_,
+        to_,
+        token_id,
+        data,
         **kwargs
         ):
 
-        #accounts_authority = [["1.2.30", 2]]
-
-        owner_account = Account(owner_account, blockchain_instance=self)
+        owner_account = Account(operator_, blockchain_instance=self)
 
         op = {
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "permission_id": permission_id,
-            "operation_type": operation_type,
-            "valid_from": valid_from,
-            "valid_to": valid_to,
-            "owner_account": owner_account["id"],
+            "operator_": owner_account["id"],
+            "from": from_,
+            "to": to_,
+            "token_id": token_id,
+            "data": data,
             "prefix": self.prefix,
         }
-        op = operations.Custom_account_authority_create(**op)
+        op = operations.Nft_safe_transfer_from(**op)
         return self.finalizeOp(op, owner_account, "active", **kwargs)
 
-    def custom_account_authority_update(
+    def nft_approve(
         self,
-        auth_id,
-        new_valid_from,
-        new_valid_to,
-        owner_account=None,
+        operator_,
+        approved,
+        token_id,
         **kwargs
         ):
 
-        owner_account = Account(owner_account, blockchain_instance=self)
+        owner_account = Account(operator_, blockchain_instance=self)
+        approved = Account(approved, blockchain_instance=self)
 
         op = {
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "auth_id": auth_id,
-            "new_valid_from": new_valid_from,
-            "new_valid_to": new_valid_to,
-            "owner_account": owner_account["id"],
+            "operator_": owner_account["id"],
+            "approved": approved["id"],
+            "token_id": token_id,
             "prefix": self.prefix,
         }
-        op = operations.Custom_account_authority_update(**op)
+        op = operations.Nft_approve(**op)
         return self.finalizeOp(op, owner_account, "active", **kwargs)
 
-    def custom_account_authority_delete(
+    def nft_set_approval_for_all(
         self,
-        auth_id,
-        owner_account=None,
+        owner,
+        operator_,
+        approved,
         **kwargs
         ):
 
-        owner_account = Account(owner_account, blockchain_instance=self)
+        owner_account = Account(owner, blockchain_instance=self)
+        operator_ = Account(operator_, blockchain_instance=self)
 
         op = {
             "fee": {"amount": 0, "asset_id": "1.3.0"},
-            "auth_id": auth_id,
-            "owner_account": owner_account["id"],
+            "owner": owner_account["id"],
+            "operator_": operator_["id"],
+            "approved": approved,
             "prefix": self.prefix,
         }
-        op = operations.Custom_account_authority_delete(**op)
+        op = operations.Nft_set_approval_for_all(**op)
         return self.finalizeOp(op, owner_account, "active", **kwargs)
->>>>>>> Stashed changes
+

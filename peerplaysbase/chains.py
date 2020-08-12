@@ -34,4 +34,9 @@ known_chains = {
         "core_symbol": "TEST",
         "prefix": "TEST",
     },
+    "IRONA": {
+        "chain_id": "6e50f8aea8dd3886a50321a9c4b5eb0e4498c4487e6d43f16f914329cfabcbff",
+        "core_symbol": "TEST",
+        "prefix": "TEST",
+    },
 }
