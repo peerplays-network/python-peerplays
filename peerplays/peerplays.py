@@ -145,7 +145,6 @@ class PeerPlays(AbstractGrapheneChain):
 
         account = Account(account, blockchain_instance=self)
         amount = Amount(amount, asset, blockchain_instance=self)
-        print("amount:", amount)
         to = Account(to, blockchain_instance=self)
 
         memoObj = Memo(from_account=account, to_account=to, blockchain_instance=self)
@@ -160,7 +159,6 @@ class PeerPlays(AbstractGrapheneChain):
                 "prefix": self.prefix,
             }
         )
-        print("int(amount):", int(amount))
         return self.finalizeOp(op, account, "active", **kwargs)
 
     # -------------------------------------------------------------------------
