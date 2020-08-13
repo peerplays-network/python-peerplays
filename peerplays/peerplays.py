@@ -1703,6 +1703,74 @@ class PeerPlays(AbstractGrapheneChain):
         op = operations.Custom_account_authority_delete(**op)
         return self.finalizeOp(op, owner_account, "active", **kwargs)
 
+   # -------------------------------------------------------------------------
+   # Market Place Methods
+   # -------------------------------------------------------------------------
+    def create_offer(
+        self,
+        item_ids, #list of items
+        issuer_id_or_name,
+        minimum_price, #asset type
+        maximum_price, #asset type
+        buying_item, #bool
+        offer_expiration_date, # "2020-09-18T11:05:39"
+        memo=None, #optional
+        **kwargs
+        ):
+
+        owner_account = Account(issuer_id_or_name, blockchain_instance=self)
+
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "item_ids": item_ids,
+            "issuer": owner_account["id"],
+            "minimum_price": minimum_price,
+            "maximum_price": maximum_price,
+            "buying_item": buying_item,
+            "offer_expiration_date": offer_expiration_date,
+            "memo": memo,
+            "prefix": self.prefix,
+        }
+        op = operations.Offer(**op)
+        return self.finalizeOp(op, owner_account, "active", **kwargs)
+
+    def create_bid(
+        self,
+        bidder_account_id_or_name,
+        bid_price, # asset
+        offer_id, # offer_id type, 1.29.x
+        **kwargs
+        ):
+
+        owner_account = Account(bidder_account_id_or_name, blockchain_instance=self)
+
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "bidder": owner_account["id"],
+            "offer_id": offer_id,
+            "bid_price": bid_price,
+            "prefix": self.prefix,
+        }
+        op = operations.Bid(**op)
+        return self.finalizeOp(op, owner_account, "active", **kwargs)
+
+    def cancel_offer(
+        self,
+        issuer_account_id_or_name,
+        offer_id, # offer_id type, 1.29.x
+        **kwargs
+        ):
+
+        owner_account = Account(issuer_account_id_or_name, blockchain_instance=self)
+
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "issuer": owner_account["id"],
+            "offer_id": offer_id,
+            "prefix": self.prefix,
+        }
+        op = operations.Cancel_offer(**op)
+        return self.finalizeOp(op, owner_account, "active", **kwargs)
 
    # -------------------------------------------------------------------------
    # NFT methods
