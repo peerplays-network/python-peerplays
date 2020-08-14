@@ -134,6 +134,7 @@ class Permission(GrapheneObject):
                         ("weight_threshold", Uint32(int(kwargs["weight_threshold"]))),
                         ("account_auths", accountAuths),
                         ("key_auths", keyAuths),
+                        ("address_auths", []),
                         ("extensions", Set([])),
                     ]
                 )

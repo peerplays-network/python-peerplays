@@ -1,8 +1,8 @@
+scrypt==0.8.13
+appdirs==1.4.3
 graphenelib==1.1.18
-appdirs
 prettytable
 events
-scrypt
 pyyaml
 
 # for AES, installed through graphenelib already
