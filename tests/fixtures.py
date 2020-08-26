@@ -30,7 +30,6 @@ peerplays = PeerPlays(
     # "wss://fred.peerplays.download/api", keys=wifs, nobroadcast=True, num_retries=1
 
 )
-
 # Set defaults
 # peerplays.set_default_account("init0")
 set_shared_peerplays_instance(peerplays)
