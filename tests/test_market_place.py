@@ -25,20 +25,20 @@ class Testcases(unittest.TestCase):
 
         self.setUp()
 
-        offers = peerplays.rpc.get_offers_by_item("1.29.0", "1.31.16", 1) 
+        offers = peerplays.rpc.get_offers_by_item("1.29.0", "1.31.5", 1) 
         if len(offers) >= 1:
             offer = offers[0]
-            peerplays.cancel_offer("1.2.7", offer["id"]) 
+            peerplays.cancel_offer("1.2.9", offer["id"]) 
 
-        peerplays.create_offer(["1.31.16"], "1.2.7", {"amount":5,"asset_id":"1.3.0"}, {"amount":15,"asset_id":"1.3.0"}, False, "2030-09-18T11:05:39", "") 
+        peerplays.create_offer(["1.31.5"], "1.2.9", {"amount":5,"asset_id":"1.3.0"}, {"amount":15,"asset_id":"1.3.0"}, False, "2030-09-18T11:05:39", "") 
         print("create_off Success!")
 
-        offers = peerplays.rpc.get_offers_by_item("1.29.0", "1.31.16", 1) 
+        offers = peerplays.rpc.get_offers_by_item("1.29.0", "1.31.5", 1) 
         offer = offers[0]
-        peerplays.create_bid("1.2.8", {"amount":8,"asset_id":"1.3.0"}, offer["id"]) 
+        peerplays.create_bid("1.2.10", {"amount":8,"asset_id":"1.3.0"}, offer["id"]) 
         print("create_bid Success!")
 
-        peerplays.cancel_offer("1.2.7", offer["id"]) 
+        peerplays.cancel_offer("1.2.9", offer["id"]) 
         print("cancel_offer Success!")
 
         print("All tests successful!")

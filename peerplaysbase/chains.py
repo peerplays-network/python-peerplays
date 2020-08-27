@@ -25,7 +25,7 @@ known_chains = {
         "prefix": "TEST",
     },
     "ELIZABETH": {
-        "chain_id": "09f618610b6449f230f133addd388dc6dc15072e80e39f2c0d76088550413d47",
+        "chain_id": "1d76e264e0a6f27be89d80bbff66c53ea87068bbdd73fc912cbcbcb7be53ec83",
         "core_symbol": "TEST",
         "prefix": "TEST",
     },
@@ -43,3 +43,4 @@ known_chains = {
 
 # old fred chain_id in the code
 # "chain_id": "735f88594e5b7521047864f7cca7367ff27e95ce7bd40482b85c978d1337f881",
+# "chain_id": "09f618610b6449f230f133addd388dc6dc15072e80e39f2c0d76088550413d47",

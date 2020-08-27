@@ -18,24 +18,33 @@ class Testcases(unittest.TestCase):
 
     def setUp(self):
         fixture_data()
-        self.nameMetadata = get_random_string(10)
-        self.nameNft = get_random_string(10)
+        self.nameMetadata = get_random_string(5)
+        self.nameNft = get_random_string(5)
+        # self.nameMetaData = "testmeta56"
+        # self.nameNft = "testnft56"
 
     def test_nft(self):
         self.setUp()
         peerplays.nft_metadata_create("1.2.7", self.nameMetadata, self.nameMetadata, self.nameMetadata, revenue_partner="1.2.8", revenue_split=300, is_sellable=False, is_transferable=False)
         print("nft_metadata_create Success!")
 
-        peerplays.nft_metadata_update("1.2.7", "1.30.5", self.nameMetadata + "modified", self.nameMetadata + "modified", self.nameMetadata + "modified", "1.2.9", 400, True, True)
+        peerplays.nft_metadata_update("1.2.7", "1.30.11", self.nameMetadata + "m", self.nameMetadata + "m", self.nameMetadata + "m", "1.2.9", 400, True, True)
         print("nft_metadata_update Success!")
 
-        peerplays.nft_mint("1.2.7", "1.30.5", "1.2.7", "1.2.7", "1.2.7", self.nameNft)
+        peerplays.nft_mint("1.2.7", "1.30.11", "1.2.7", "1.2.7", "1.2.7", self.nameNft)
         print("nft_mint Success!")
 
-        peerplays.nft_safe_transfer_from("1.2.7", "1.2.7", "1.2.9", "1.31.13", "whatever")
-        print("nft_safe_transfer_from Success!")
+        try:
+            peerplays.nft_safe_transfer_from("1.2.7", "1.2.7", "1.2.9", "1.31.5", "whatever")
+            print("nft_safe_transfer_from Success!")
+        except:
+            peerplays.nft_safe_transfer_from("1.2.9", "1.2.9", "1.2.7", "1.31.5", "whatever")
+            print("nft_safe_transfer_from Success!")
+            peerplays.nft_safe_transfer_from("1.2.7", "1.2.7", "1.2.9", "1.31.5", "whatever")
+            print("nft_safe_transfer_from Success!")
 
-        peerplays.nft_approve("1.2.11", "1.2.8", "1.31.13")
+
+        peerplays.nft_approve("1.2.9", "1.2.8", "1.31.5")
         print("nft_approve Success!")
 
         peerplays.nft_set_approval_for_all("1.2.7", "1.2.10", True)
