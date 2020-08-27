@@ -34,6 +34,7 @@ class Testcases(unittest.TestCase):
         print("custom_permission_create success")
 
         custom_permissions_existing = peerplays.rpc.get_custom_permissions("1.2.7")
+        print(" 37 custom_permissions_existing:", custom_permissions_existing)
         for permission in custom_permissions_existing:
             if permission["permission_name"] == self.testperm:
                 permission_id = permission['id']
@@ -44,9 +45,10 @@ class Testcases(unittest.TestCase):
                         owner_account="1.2.7"
                 )
                 break
-        print("custom_permission_update success")
+            print("custom_permission_update success")
 
         custom_permissions_existing = peerplays.rpc.get_custom_permissions("1.2.7")
+        print(" 51 custom_permissions_existing:", custom_permissions_existing)
         for permission in custom_permissions_existing:
             if permission["permission_name"] == self.testperm:
                 permission_id = permission['id']
@@ -54,7 +56,7 @@ class Testcases(unittest.TestCase):
                         permission_id,
                         0,
                         "2020-07-27T00:00:00",
-                        "2030-07-27T00:00:00",
+                        "2020-09-27T00:00:00",
                         owner_account="1.2.7") 
                 print("custom_account_authority_create success")
                 break
@@ -65,7 +67,7 @@ class Testcases(unittest.TestCase):
         op = peerplays.custom_account_authority_update(
                 authority_id,
                 "2020-07-27T00:00:00",
-                "2040-07-27T00:00:00",
+                "2020-09-27T00:00:00",
                 owner_account="1.2.7")
         print("custom_account_authority_update success")
 
