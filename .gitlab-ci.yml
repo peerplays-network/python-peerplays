@@ -11,4 +11,4 @@ test:
 
     - python3 -m unittest tests/test_nft.py 
     - python3 -m unittest tests/test_market_place.py 
-      python3 -m unittest tests/test_hrp.py 
+    - python3 -m unittest tests/test_hrp.py 
