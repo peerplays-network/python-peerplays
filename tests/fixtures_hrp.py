@@ -26,16 +26,15 @@ core_unit = "TEST"
 # peerplays instance
 peerplays = PeerPlays(
     # "wss://api.ppy-beatrice.blckchnd.com", keys=wifs, nobroadcast=True, num_retries=1
-    "wss://elizabeth.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1
     # "wss://irona.peerplays.download/api", keys=wifs, nobroadcast=True, num_retries=1
-    # "wss://fred.peerplays.download/api", keys=wifs, nobroadcast=True, num_retries=1
+    "wss://fred.peerplays.download/api", keys=wifs, nobroadcast=True, num_retries=1
 )
 # Set defaults
 # peerplays.set_default_account("init0")
 set_shared_peerplays_instance(peerplays)
 
 # Ensure we are not going to transaction anythin on chain!
-# assert peerplays.nobroadcast
+assert peerplays.nobroadcast
 
 
 def fixture_data():
