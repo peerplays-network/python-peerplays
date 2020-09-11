@@ -1,3 +1,4 @@
+import numpy as np
 import unittest
 import mock
 from pprint import pprint
@@ -41,7 +42,15 @@ class Testcases(unittest.TestCase):
         self.assertIsInstance(Account(account), Account)
 
     def test_account_upgrade(self):
-        account = Account("init0")
+        name = 'j1-' + str(np.random.randint(100000000000000000))
+        peerplays.create_account(
+            account_name=name,
+            registrar="jemshid",
+            owner_key='TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
+            active_key='TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
+            memo_key='TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV')
+        peerplays.transfer(name, 100000, "TEST")
+        account = Account(name)
         tx = account.upgrade()
         ops = tx["operations"]
         op = ops[0][1]

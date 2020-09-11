@@ -8,3 +8,5 @@ mock
 # black
 isort
 pre-commit
+
+numpy

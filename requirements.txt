@@ -11,3 +11,4 @@ pycryptodome==3.8.1
 # for the CLI tool
 click
 treelib
+

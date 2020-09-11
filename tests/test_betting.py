@@ -22,7 +22,12 @@ class Testcases(unittest.TestCase):
         fixture_data()
 
     def test_bet_place(self):
-        tx = peerplays.bet_place("1.25.2950", Amount(1244, "1.3.0"), 2, "back")
+        fixture_data()
+        print("making sure 1.25.2950 exists")
+        print("1.25.2950:", peerplays.rpc.get_object("1.25.2950"))
+        print("1.25.0:", peerplays.rpc.get_object("1.25.0"))
+        print('-----------------done-----------------')
+        tx = peerplays.bet_place("1.25.0", Amount(1244, "1.3.0"), 2, "back", account="init0")
         ops = tx["operations"]
         op = ops[0][1]
         self.assertEqual(len(ops), 1)
@@ -32,7 +37,7 @@ class Testcases(unittest.TestCase):
         )
         self.assertEqual(op["back_or_lay"], "back")
         self.assertEqual(op["backer_multiplier"], 2 * 10000)
-        self.assertEqual(op["betting_market_id"], "1.25.2950")
+        self.assertEqual(op["betting_market_id"], "1.25.0")
         self.assertEqual(op["bettor_id"], "1.2.7")
 
     def test_bet_cancel(self):
@@ -148,7 +153,11 @@ class Testcases(unittest.TestCase):
         self.assertIsInstance(BettingMarkets("1.24.2"), list)
 
     def test_event_status_update(self):
-        tx = peerplays.event_update_status("1.22.2241", "settled", ["0-0"])
+        print("Making sure event 1.22.0 exist:", peerplays.rpc.get_object("1.22.0"))
+        print("Making sure event 1.22.0 exist:", Event("1.22.0").values())
+        tx = peerplays.event_update_status("1.22.0", "settled", ["0-0"])
+        print("tx:", tx)
+        print("event update succesful")
         self.assertEqual(tx["operations"][0][0], operations["event_update_status"])
 
         self.assertEqual(tx["operations"][0][1]["event_id"], "1.22.2241")
