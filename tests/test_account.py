@@ -45,7 +45,7 @@ class Testcases(unittest.TestCase):
         name = 'j1-' + str(np.random.randint(100000000000000000))
         peerplays.create_account(
             account_name=name,
-            registrar="jemshid",
+            registrar="1.2.7",
             owner_key='TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
             active_key='TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',
             memo_key='TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV')
