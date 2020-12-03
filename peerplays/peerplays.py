@@ -1130,10 +1130,6 @@ class PeerPlays(AbstractGrapheneChain):
             raise ValueError("You need to provide an account")
         account = Account(account)
         event = Event(event_id)
-        print("value:", event.values())
-        print("event:", event)
-        print("event:", event.keys())
-        print("event_status:", event["status"])
 
         # Do not try to update status of it doesn't change it on the chain
         if event["status"] == status:
