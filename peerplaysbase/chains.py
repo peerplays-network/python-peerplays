@@ -39,8 +39,12 @@ known_chains = {
         "core_symbol": "TEST",
         "prefix": "TEST",
     },
+    "HERCULESE": {
+        "chain_id": "9e770aee9cb04b11f62391b89a38e1ee28981c94e2b8e7047e0902862568d285",
+        "core_symbol": "TEST",
+        "prefix": "TEST"},
+    "GLADIATOR": {
+        "chain_id": "63e4ed3747366527a485083b2e9ae8d7100d97bc132c7f28213b5439063981ef",
+        "core_symbol": "TEST",
+        "prefix": "TEST"},
 }
-
-# old fred chain_id in the code
-# "chain_id": "735f88594e5b7521047864f7cca7367ff27e95ce7bd40482b85c978d1337f881",
-# "chain_id": "09f618610b6449f230f133addd388dc6dc15072e80e39f2c0d76088550413d47",
