@@ -8,16 +8,17 @@ from peerplays.asset import Asset
 from peerplays.instance import set_shared_peerplays_instance
 from peerplaysbase.operationids import getOperationNameForId
 from .fixtures import fixture_data, peerplays
+# from .fixtures import peerplays
 
 
 class Testcases(unittest.TestCase):
 
     def setUp(self):
-        fixture_data()
+        # fixture_data()
+        pass
 
     def test_account(self):
         Account("witness-account")
-        Account("1.2.3")
         asset = Asset("1.3.0")
         symbol = asset["symbol"]
         account = Account("witness-account", full=True)
