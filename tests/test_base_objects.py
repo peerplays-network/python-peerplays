@@ -10,6 +10,7 @@ class Testcases(unittest.TestCase):
 
     def setUp(self):
         fixture_data()
+        pass
 
     def test_Committee(self):
         with self.assertRaises(
@@ -24,4 +25,6 @@ class Testcases(unittest.TestCase):
         with self.assertRaises(
             exceptions.CommitteeMemberDoesNotExistsException
         ):
-            Committee("faucet")
+            Committee("pbsaqa2")
+
+            # Committee("faucet")
