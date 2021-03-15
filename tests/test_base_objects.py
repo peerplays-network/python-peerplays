@@ -21,10 +21,11 @@ class Testcases(unittest.TestCase):
         c = Committee("init2")
         self.assertEqual(c["id"], "1.5.2")
         self.assertIsInstance(c.account, Account)
+        rpc = c.blockchain.rpc
+        nameNotCommittee = rpc.get_object("1.2.1")["name"]
 
         with self.assertRaises(
             exceptions.CommitteeMemberDoesNotExistsException
         ):
-            Committee("pbsaqa2")
-
+            Committee(nameNotCommittee)
             # Committee("faucet")
