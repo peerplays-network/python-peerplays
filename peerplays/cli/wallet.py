@@ -77,7 +77,7 @@ def addkey(ctx, key):
             click.echo("Setting new default user: %s" % account["name"])
             click.echo()
             click.echo("You can change these settings with:")
-            click.echo("    uptick set default_account <account>")
+            click.echo("    peerplays set default_account <account>")
             click.echo("=" * 30)
             ctx.blockchain.config["default_account"] = account["name"]
 
