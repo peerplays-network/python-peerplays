@@ -8,6 +8,8 @@ from peerplays.asset import Asset
 from peerplays.instance import set_shared_peerplays_instance
 from peerplaysbase.operationids import getOperationNameForId
 from .fixtures import fixture_data, peerplays
+import string
+import random
 
 
 class Testcases(unittest.TestCase):
@@ -40,8 +42,22 @@ class Testcases(unittest.TestCase):
         self.assertEqual(str(account), "<Account 1.2.1>")
         self.assertIsInstance(Account(account), Account)
 
-    def test_account_upgrade(self):
-        account = Account("init0")
+    def test_account_creation(self):
+        account_name = "".join(random.choices(string.ascii_lowercase, k=10))
+        account_name = account_name + "".join(random.choices(string.digits, k=10))
+        print("account_name:", account_name)
+        op_res = peerplays.create_account(
+            account_name,
+            referrer="1.2.7",
+            password=account_name,
+        )
+        print("op_res:", op_res)
+        self.assertTrue(op_res["operation_results"][0][0])
+        account_id = op_res["operation_results"][0][1]
+        account_name_from_chain = peerplays.rpc.get_object(account_id)["name"]
+        self.assertEqual(account_name, account_name_from_chain)
+        peerplays.transfer(account_name, 10000, "TEST", account="nathan")
+        account = Account(account_name)
         tx = account.upgrade()
         ops = tx["operations"]
         op = ops[0][1]
