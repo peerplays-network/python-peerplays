@@ -43,6 +43,15 @@ known_chains = {
         "chain_id": "9e770aee9cb04b11f62391b89a38e1ee28981c94e2b8e7047e0902862568d285",
         "core_symbol": "TEST",
         "prefix": "TEST"},
+    "FRED": {
+        "chain_id": "6d8462f65dc97688de4cd1e295ecbda8f34ca3def0dab96272faee251761cc08",
+        "core_symbol": "TEST",
+        "prefix": "TEST"},
+    "IRONA": {
+        "chain_id": "bfa03fc73c9310519bf20e30dc1d3130b4871e8ce7e93da4093696a0a21e5dc8",
+        "core_symbol": "TEST",
+        "prefix": "TEST"},
+
 }
 
 # old fred chain_id in the code

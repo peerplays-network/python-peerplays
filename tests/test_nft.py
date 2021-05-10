@@ -25,9 +25,9 @@ class Testcases(unittest.TestCase):
 
     def test_nft(self):
         self.setUp()
-        peerplays.blocking = True
+        # peerplays.blocking = True
         self.res = peerplays.nft_metadata_create("1.2.7", self.nameMetadata, self.nameMetadata, self.nameMetadata, revenue_partner="1.2.8", revenue_split=300, is_sellable=False, is_transferable=False)
-        peerplays.blocking = False
+        # peerplays.blocking = False
         print("nft_metadata_create Success!")
 
         self.metadataId = self.res["operation_results"][0][1]

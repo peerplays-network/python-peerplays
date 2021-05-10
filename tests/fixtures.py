@@ -27,10 +27,10 @@ core_unit = "TEST"
 # peerplays instance
 peerplays = PeerPlays(
     # "wss://api.ppy-beatrice.blckchnd.com", keys=wifs, nobroadcast=True, num_retries=1
-    # "wss://elizabeth.peerplays.download/api", keys=wifs, nobroadcast=True, num_retries=1
-    # "wss://irona.peerplays.download/api", keys=wifs, nobroadcast=True, num_retries=1
-    # "wss://fred.peerplays.download/api", keys=wifs, nobroadcast=True, num_retries=1
-    "wss://hercules.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
+    # "wss://elizabeth.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
+    "wss://irona.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
+    # "wss://fred.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
+    # "wss://hercules.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
 )
 # Set defaults
 peerplays.set_default_account("init0")
