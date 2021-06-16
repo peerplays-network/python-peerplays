@@ -1105,7 +1105,8 @@ class Bet_cancel(GrapheneObject):
                     [
                         ("fee", Asset(kwargs["fee"])),
                         ("bettor_id", ObjectId(kwargs["bettor_id"], "account")),
-                        ("bet_to_cancel", ObjectId(kwargs["bet_to_cancel"], "bet")),
+                        # ("bet_to_cancel", ObjectId(kwargs["bet_to_cancel"], "bet")),
+                        ("bet_to_cancel", ObjectId(kwargs["bet_to_cancel"])),
                         ("extensions", Set([])),
                     ]
                 )

@@ -22,6 +22,7 @@ class Testcases(unittest.TestCase):
         fixture_data()
 
     def test_bet_place(self):
+        peerplays.nobroadcast = True
         tx = peerplays.bet_place("1.25.2950", Amount(1244, "1.3.0"), 2, "back")
         ops = tx["operations"]
         op = ops[0][1]
@@ -34,8 +35,10 @@ class Testcases(unittest.TestCase):
         self.assertEqual(op["backer_multiplier"], 2 * 10000)
         self.assertEqual(op["betting_market_id"], "1.25.2950")
         self.assertEqual(op["bettor_id"], "1.2.7")
+        peerplays.nobroadcast = False
 
     def test_bet_cancel(self):
+        peerplays.nobroadcast = True
         tx = peerplays.bet_cancel("1.26.13")
         ops = tx["operations"]
         op = ops[0][1]
@@ -43,6 +46,7 @@ class Testcases(unittest.TestCase):
         self.assertEqual(getOperationNameForId(ops[0][0]), "bet_cancel")
         self.assertEqual(op["bet_to_cancel"], "1.26.13")
         self.assertEqual(op["bettor_id"], "1.2.7")
+        peerplays.nobroadcast = False
 
     def test_Bet_init(self):
 
