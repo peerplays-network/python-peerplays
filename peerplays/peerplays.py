@@ -21,11 +21,10 @@ from .bettingmarketgroup import BettingMarketGroup
 from .bettingmarket import BettingMarket
 from .bet import Bet
 from .genesisbalance import GenesisBalance
-from .exceptions import AccountExistsException, MissingKeyError
+from .exceptions import AccountExistsException, MissingKeyError, KeyAlreadyInStoreException
 from .wallet import Wallet
 from .transactionbuilder import TransactionBuilder, ProposalBuilder
 from .utils import formatTime, test_proposal_in_buffer
-
 log = logging.getLogger(__name__)
 
 
@@ -261,7 +260,11 @@ class PeerPlays(AbstractGrapheneChain):
             # store private keys
             if storekeys:
                 # self.wallet.addPrivateKey(str(owner_privkey))
-                self.wallet.addPrivateKey(str(active_privkey))
+                try:
+                    self.wallet.addPrivateKey(str(active_privkey))
+                except KeyAlreadyInStoreException:
+                    log.error("Account name already exists on the chain")
+                    return
                 self.wallet.addPrivateKey(str(memo_privkey))
         elif owner_key and active_key and memo_key:
             active_pubkey = PublicKey(active_key, prefix=self.prefix)
