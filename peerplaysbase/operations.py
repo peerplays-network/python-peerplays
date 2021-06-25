@@ -1490,6 +1490,10 @@ class Nft_metadata_create(GrapheneObject):
                 revenue_partner = Optional(None)
                 revenue_split = Optional(None)
 
+            role_id = Optional(None)
+            max_supply = Optional(None)
+            lottery_options = Optional(None)
+
             super().__init__(
                 OrderedDict(
                     [
@@ -1502,7 +1506,10 @@ class Nft_metadata_create(GrapheneObject):
                         ("revenue_split", revenue_split),
                         ("is_transferable", Bool(bool(kwargs["is_transferable"]))),
                         ("is_sellable", Bool(bool(kwargs["is_sellable"]))),
-                        # ("extensions", Set([])),
+                        ("role_id", role_id),
+                        ("max_supply", max_supply),
+                        ("lottery_options", lottery_options),
+                        ("extensions", Set([])),
                     ]
                 )
             )
@@ -1526,6 +1533,8 @@ class Nft_metadata_update(GrapheneObject):
                 revenue_partner = Optional(None)
                 revenue_split = Optional(None)
 
+            role_id = Optional(None)
+
             super().__init__(
                 OrderedDict(
                     [
@@ -1538,7 +1547,9 @@ class Nft_metadata_update(GrapheneObject):
                         ("revenue_partner", revenue_partner),
                         ("revenue_split", revenue_split),
                         ("is_transferable", Optional(Bool(kwargs["is_transferable"]))),
-                        ("is_sellable", Optional(Bool(kwargs["is_sellable"])))
+                        ("is_sellable", Optional(Bool(kwargs["is_sellable"]))),
+                        ("role_id", role_id),
+                        ("extensions", Set([])),
                     ]
                 )
             )
@@ -1564,6 +1575,7 @@ class Nft_mint(GrapheneObject):
                         ("approved", ObjectId(kwargs["approved"], "account")),
                         ("approved_operators", Set([])),
                         ("token_uri", String(kwargs["token_uri"])),
+                        ("extensions", Set([])),
                     ]
                 )
             )
@@ -1588,6 +1600,7 @@ class Nft_safe_transfer_from(GrapheneObject):
                         ("to", ObjectId(kwargs["to"], "account")),
                         ("token_id", ObjectId(kwargs["token_id"])),
                         ("data", String(kwargs["data"])),
+                        ("extensions", Set([])),
                     ]
                 )
             )
@@ -1610,6 +1623,7 @@ class Nft_approve(GrapheneObject):
                         ("operator_", ObjectId(kwargs["operator_"], "account")),
                         ("approved", ObjectId(kwargs["approved"], "account")),
                         ("token_id", ObjectId(kwargs["token_id"])),
+                        ("extensions", Set([])),
                     ]
                 )
             )
@@ -1632,6 +1646,7 @@ class Nft_set_approval_for_all(GrapheneObject):
                         ("owner", ObjectId(kwargs["owner"], "account")),
                         ("operator_", ObjectId(kwargs["operator_"], "account")),
                         ("approved", Bool(kwargs["approved"])),
+                        ("extensions", Set([])),
                     ]
                 )
             )

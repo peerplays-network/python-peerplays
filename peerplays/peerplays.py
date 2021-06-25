@@ -1788,6 +1788,9 @@ class PeerPlays(AbstractGrapheneChain):
         revenue_split=200,
         is_transferable=True,
         is_sellable=True,
+        role_id=None,
+        max_supply=None,
+        lottery_options=None,
         **kwargs
         ):
 
@@ -1805,6 +1808,9 @@ class PeerPlays(AbstractGrapheneChain):
             "revenue_split": revenue_split,
             "is_transferable": is_transferable,
             "is_sellable": is_sellable,
+            "role_id": None,
+            "max_supply": None,
+            "lottery_options": None,
             "prefix": self.prefix,
         }
         op = operations.Nft_metadata_create(**op)
@@ -1821,6 +1827,7 @@ class PeerPlays(AbstractGrapheneChain):
         revenue_split=200,
         is_transferable=True,
         is_sellable=True,
+        role_id=None,
         **kwargs
         ):
 
@@ -1839,6 +1846,7 @@ class PeerPlays(AbstractGrapheneChain):
             "revenue_split": revenue_split,
             "is_transferable": is_transferable,
             "is_sellable": is_sellable,
+            "role_id": None,
             "prefix": self.prefix,
         }
         op = operations.Nft_metadata_update(**op)
