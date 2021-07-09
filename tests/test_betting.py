@@ -152,9 +152,11 @@ class Testcases(unittest.TestCase):
         self.assertIsInstance(BettingMarkets("1.24.2"), list)
 
     def test_event_status_update(self):
+        peerplays.nobroadcast = True
         tx = peerplays.event_update_status("1.22.2241", "settled", ["0-0"])
         self.assertEqual(tx["operations"][0][0], operations["event_update_status"])
 
         self.assertEqual(tx["operations"][0][1]["event_id"], "1.22.2241")
         self.assertEqual(tx["operations"][0][1]["status"], "settled")
         self.assertEqual(tx["operations"][0][1]["scores"], ["0-0"])
+        peerplays.nobroadcast = False

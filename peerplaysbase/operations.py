@@ -400,7 +400,7 @@ class Proposal_update(GrapheneObject):
                 )
             )
 
-            
+
 class Proposal_delete(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
@@ -417,7 +417,7 @@ class Proposal_delete(GrapheneObject):
                 ('extenstions', Set([])),
             ]))
 
-                        
+
 class Sport_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
@@ -1261,6 +1261,7 @@ class Custom_permission_create(GrapheneObject):
                         ("owner_account", ObjectId(kwargs["owner_account"], "account")),
                         ("permission_name", String(kwargs["permission_name"])),
                         ("auth", Permission(kwargs["auth"], prefix=prefix)),
+                        ("extensions", Set([])),
                     ]
                 )
             )
@@ -1669,6 +1670,7 @@ class Custom_permission_update(GrapheneObject):
                         ("permission_id", ObjectId(kwargs["permission_id"], "custom_permission")),
                         ("new_auth", Optional(Permission(kwargs["new_auth"], prefix=prefix))),
                         ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                        ("extensions", Set([])),
                     ]
                 )
             )
@@ -1689,6 +1691,7 @@ class Custom_permission_delete(GrapheneObject):
                         ("fee", Asset(kwargs["fee"])),
                         ("permission_id", ObjectId(kwargs["permission_id"], "custom_permission")),
                         ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                        ("extensions", Set([])),
                     ]
                 )
             )
@@ -1713,6 +1716,7 @@ class Custom_account_authority_create(GrapheneObject):
                         ("valid_from", PointInTime(kwargs["valid_from"])),
                         ("valid_to", PointInTime(kwargs["valid_to"])),
                         ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                        ("extensions", Set([])),
                     ]
                 )
             )
@@ -1736,6 +1740,7 @@ class Custom_account_authority_update(GrapheneObject):
                         ("new_valid_from", Optional(PointInTime(kwargs["new_valid_from"]))),
                         ("new_valid_to", Optional(PointInTime(kwargs["new_valid_to"]))),
                         ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                        ("extensions", Set([])),
                     ]
                 )
             )
@@ -1757,6 +1762,7 @@ class Custom_account_authority_delete(GrapheneObject):
                         ("fee", Asset(kwargs["fee"])),
                         ("auth_id", ObjectId(kwargs["auth_id"], "custom_account_authority")),
                         ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                        ("extensions", Set([])),
                     ]
                 )
             )
