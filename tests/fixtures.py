@@ -33,7 +33,7 @@ peerplays = PeerPlays(
     # "wss://hercules.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
 )
 # Set defaults
-peerplays.set_default_account("init0")
+# peerplays.set_default_account("init0")
 set_shared_peerplays_instance(peerplays)
 
 # Ensure we are not going to transaction anythin on chain!
