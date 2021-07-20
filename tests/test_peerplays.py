@@ -141,6 +141,7 @@ class Testcases(unittest.TestCase):
         with self.assertRaises(ValueError):
             peerplays._test_weights_treshold(auth)
 
+    """
     def test_allow(self):
         tx = peerplays.allow(
             "TEST55VCzsb47NZwWe5F3qyQKedX9iHBHMVVFSc96PDvV7wuj7W86n",
@@ -158,6 +159,8 @@ class Testcases(unittest.TestCase):
             op["owner"]["key_auths"],
         )
         self.assertEqual(op["owner"]["weight_threshold"], 1)
+    """
+
 
     """ Disable this test until we can test with an actual setup on the
         main/testnet
