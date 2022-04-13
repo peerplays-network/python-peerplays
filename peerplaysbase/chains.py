@@ -34,11 +34,6 @@ known_chains = {
         "core_symbol": "TEST",
         "prefix": "TEST",
     },
-    "IRONA": {
-        "chain_id": "6e50f8aea8dd3886a50321a9c4b5eb0e4498c4487e6d43f16f914329cfabcbff",
-        "core_symbol": "TEST",
-        "prefix": "TEST",
-    },
     "HERCULES": {
         "chain_id": "9e770aee9cb04b11f62391b89a38e1ee28981c94e2b8e7047e0902862568d285",
         "core_symbol": "TEST",
@@ -48,7 +43,11 @@ known_chains = {
         "core_symbol": "TEST",
         "prefix": "TEST"},
     "IRONA": {
-        "chain_id": "bfa03fc73c9310519bf20e30dc1d3130b4871e8ce7e93da4093696a0a21e5dc8",
+        "chain_id": "bec1b83fc4752ad319dfc4e9f1fac37d8fb06c77382ad74438a827a4b16f2e9e",
+        "core_symbol": "TEST",
+        "prefix": "TEST"},
+    "QAENV": {
+        "chain_id": "7c1c72eb738b3ff1870350f85daca27e2d0f5dd25af27df7475fbd92815e421e",
         "core_symbol": "TEST",
         "prefix": "TEST"},
 
