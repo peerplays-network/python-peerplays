@@ -46,6 +46,10 @@ known_chains = {
         "chain_id": "bec1b83fc4752ad319dfc4e9f1fac37d8fb06c77382ad74438a827a4b16f2e9e",
         "core_symbol": "TEST",
         "prefix": "TEST"},
+    "QAENV": {
+        "chain_id": "7c1c72eb738b3ff1870350f85daca27e2d0f5dd25af27df7475fbd92815e421e",
+        "core_symbol": "TEST",
+        "prefix": "TEST"},
 
 }
 
