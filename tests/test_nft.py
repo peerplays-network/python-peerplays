@@ -3,7 +3,7 @@ from pprint import pprint
 from peerplays import PeerPlays
 from peerplaysbase.operationids import getOperationNameForId
 from peerplays.instance import set_shared_peerplays_instance
-from fixtures import fixture_data, peerplays, core_unit
+from .fixtures import fixture_data, peerplays, core_unit
 import random
 import string
 
