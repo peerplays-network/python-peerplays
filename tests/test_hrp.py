@@ -50,8 +50,8 @@ class Testcases(unittest.TestCase):
         op = peerplays.custom_account_authority_create(
                 permission_id,
                 0,
-                "2021-06-27T00:00:00",
-                "2021-10-27T00:00:00",
+                "2022-04-27T00:00:00",
+                "2022-05-27T00:00:00",
                 owner_account="1.2.7") 
         print("custom_account_authority_create success")
 
@@ -90,8 +90,8 @@ class Testcases(unittest.TestCase):
         authority_id = authority["id"]
         op = peerplays.custom_account_authority_update(
                 authority_id,
-                "2021-06-27T00:00:00",
-                "2021-10-27T00:00:00",
+                "2022-05-27T00:00:00",
+                "2022-06-27T00:00:00",
                 owner_account="1.2.7")
         print("custom_account_authority_update success")
 
@@ -116,4 +116,5 @@ class Testcases(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    s = Testcases()
+    # unittest.main()

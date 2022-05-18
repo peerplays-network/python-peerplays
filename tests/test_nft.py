@@ -76,3 +76,7 @@ class Testcases(unittest.TestCase):
         print("nft_set_approval_for_all Success!")
 
         print("All tests successful!")
+
+if __name__ == "__main__":
+    self = Testcases()
+    s = self
