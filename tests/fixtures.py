@@ -26,9 +26,9 @@ core_unit = "TEST"
 
 # peerplays instance
 peerplays = PeerPlays(
-    # "wss://api.ppy-beatrice.blckchnd.com", keys=wifs, nobroadcast=True, num_retries=1
+    "wss://api.i9networks.net.br", keys=wifs, nobroadcast=False, num_retries=10
     # "wss://elizabeth.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
-    "wss://irona.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
+    # "wss://irona.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
     # "wss://fred.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
     # "wss://hercules.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
 )

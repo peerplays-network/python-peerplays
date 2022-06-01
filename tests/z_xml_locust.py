@@ -5,13 +5,14 @@ import time
 from xmlrpc.client import ServerProxy, Fault
 
 from locust import User, task, HttpUser
-from fixtures import fixture_data, peerplays
+# from fixtures import fixture_data, peerplays
 
 # from locust import HttpUser, task, between
 
 class XmlRpcClient(ServerProxy):
 # class XmlRpcClient(peerplays):
 # class XmlRpcClient(HttpUser):
+    # from fixtures import peerplays
     """
     XmlRpcClient is a wrapper around the standard library's ServerProxy.
     It proxies any function calls and fires the *request* event when they finish,
@@ -25,9 +26,11 @@ class XmlRpcClient(ServerProxy):
 
     def __getattr__(self, name):
         # func = peerplays.__getattr__(self, name)
-        func = peerplays.info()
-
+        # func = peerplays.info()
+        func = time.asctime()
         def wrapper(*args, **kwargs):
+            start_perf_counter = time.perf_counter()
+            from tests.fixtures import fixture_data, peerplays
             request_meta = {
                 "request_type": "ws",
                 "name": name,
@@ -37,16 +40,20 @@ class XmlRpcClient(ServerProxy):
                 "context": {},  # see HttpUser if you actually want to implement contexts
                 "exception": None,
             }
-            start_perf_counter = time.perf_counter()
             try:
                 # request_meta["response"] = func(*args, **kwargs)
                 # request_meta["response"] = peerplays.info()
                 trash_resp_direct = peerplays.info()
+                # print("direct:", trash_resp_direct)
+                # trash_resp_direct = time.asctime()
                 request_meta["response"] = trash_resp_direct
-                print("direct:", trash_resp_direct)
+                # request_meta["exception"] = trash_resp_direct
+                # request_meta["exception"] = None
                 # trash_resp_func = func()
                 # print("func:", trash_resp_func)
                 # request_meta["response"] = func()
+                # print(a)
+            # except Fault as e:
             except Exception as e:
                 request_meta["exception"] = e
             request_meta["response_time"] = (time.perf_counter() - start_perf_counter) * 1000
@@ -76,9 +83,10 @@ class MyUser(XmlRpcUser):
 
     @task
     def get_time(self):
-        self.client.info()
+        result = self.client.info()
+        time.sleep(0.1)
         # self.client.get_time()
-        print("time:", time.asctime())
+        print("time:", time.asctime(), result)
 
 #    @task
 #    def get_random_number(self):
