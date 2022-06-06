@@ -32,3 +32,13 @@ Make sure that the above dependencies are installed, if not install with:
 Install with `pip3`:
 
     $ pip3 install peerplays
+
+## Testing
+
+Functionalities can be tested with 
+    $ tox 
+
+Performance testing can be done with 
+    $ locust -f tests/z_xml_locust.py -u 10 -r 2
+
+
