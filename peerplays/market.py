@@ -153,4 +153,110 @@ class Market(dict):
         data = {"asks": asks, "bids": bids}
         return data
 
+    def buy(
+        self,
+        price,
+        amount,
+        expiration=None,
+        killfill=False,
+        account=None,
+        returnOrderId=False,
+        **kwargs
+    ):
+        """
+        Places a buy order in a given market.
+
+        :param float price: price denoted in ``base``/``quote``
+        :param number amount: Amount of ``quote`` to buy
+        :param number expiration: (optional) expiration time of the order in seconds (defaults to 7 days)
+        :param bool killfill: flag that indicates if the order shall be killed if it is not filled (defaults to False)
+        :param string account: Account name that executes that order
+        :param string returnOrderId: If set to "head" or "irreversible" the call will wait for the tx to appear in
+                                    the head/irreversible block and add the key "orderid" to the tx output
+
+        Prices/Rates are denoted in 'base', i.e. the BTC_PPY market
+        is priced in PPY per BTC.
+
+        **Example:** in the BTC_PPY market, a price of 400 means
+        a BTC is worth 400 PPY 
+
+        .. note::
+
+            All prices returned are in the **reversed** orientation as the
+            market. I.e. in the BTC/PPY market, prices are PPY per BTC.
+            That way you can multiply prices with `1.05` to get a +5%.
+
+        .. warning::
+
+            Since buy orders are placed as
+            limit-sell orders for the base asset,
+            you may end up obtaining more of the
+            buy asset than you placed the order
+            for. Example:
+
+                * You place and order to buy 10 BTC for 100 PPY/BTC
+                * This means that you actually place a sell order for 1000 PPY in order to obtain **at least** 10 PPY
+                * If an order on the market exists that sells BTC for cheaper, you will end up with more than 10 BTC
+        """
+        if not expiration:
+            expiration = (
+                self.blockchain.config["order-expiration"] or 60 * 60 * 24 * 365
+            )
+        if not account:
+            if "default_account" in self.blockchain.config:
+                account = self.blockchain.config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account, blockchain_instance=self.blockchain)
+
+        if isinstance(price, Price):
+            price = price.as_base(self["base"]["symbol"])
+
+        if isinstance(amount, Amount):
+            amount = Amount(amount, blockchain_instance=self.blockchain)
+            assert (
+                amount["asset"]["symbol"] == self["quote"]["symbol"]
+            ), "Price: {} does not match amount: {}".format(str(price), str(amount))
+        else:
+            amount = Amount(
+                amount, self["quote"]["symbol"], blockchain_instance=self.blockchain
+            )
+
+        order = operations.Limit_order_create(
+            **{
+                "fee": {"amount": 0, "asset_id": "1.3.0"},
+                "seller": account["id"],
+                "amount_to_sell": {
+                    "amount": int(
+                        round(
+                            float(amount)
+                            * float(price)
+                            * 10 ** self["base"]["precision"]
+                        )
+                    ),
+                    "asset_id": self["base"]["id"],
+                },
+                "min_to_receive": {
+                    "amount": int(
+                        round(float(amount) * 10 ** self["quote"]["precision"])
+                    ),
+                    "asset_id": self["quote"]["id"],
+                },
+                "expiration": formatTimeFromNow(expiration),
+                "fill_or_kill": killfill,
+            }
+        )
+
+        if returnOrderId:
+            # Make blocking broadcasts
+            prevblocking = self.blockchain.blocking
+            self.blockchain.blocking = returnOrderId
+
+        tx = self.blockchain.finalizeOp(order, account["name"], "active", **kwargs)
+
+        if returnOrderId and tx.get("operation_results"):
+            tx["orderid"] = tx["operation_results"][0][1]
+            self.blockchain.blocking = prevblocking
+
+        return tx
 
