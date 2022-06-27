@@ -358,3 +358,30 @@ class Market(dict):
 
         return data
 
+    def volume24h(self):
+        """
+        Returns the 24-hour volume for all markets, plus totals for primary currencies.
+
+        Sample output:
+
+        .. code-block:: js
+
+            {
+                "PPY": 41.12345,
+                "BTC": 1.0
+            }
+        """
+        volume = self.blockchain.rpc.get_24_volume(
+            self["base"]["id"], self["quote"]["id"]
+        )
+        return {
+            self["base"]["symbol"]: Amount(
+                volume["base_volume"], self["base"], blockchain_instance=self.blockchain
+            ),
+            self["quote"]["symbol"]: Amount(
+                volume["quote_volume"],
+                self["quote"],
+                blockchain_instance=self.blockchain,
+            ),
+        }
+
