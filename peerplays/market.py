@@ -260,3 +260,101 @@ class Market(dict):
 
         return tx
 
+    def ticker(self):
+        """
+        Returns the ticker for all markets.
+
+        Output Parameters:
+
+        * ``last``: Price of the order last filled
+        * ``lowestAsk``: Price of the lowest ask
+        * ``highestBid``: Price of the highest bid
+        * ``baseVolume``: Volume of the base asset
+        * ``quoteVolume``: Volume of the quote asset
+        * ``percentChange``: 24h change percentage (in %)
+        * ``settlement_price``: Settlement Price for borrow/settlement
+        * ``core_exchange_rate``: Core exchange rate for payment of fee in non-BTS asset
+        * ``price24h``: the price 24h ago
+
+        Sample Output:
+
+        .. code-block:: js
+
+            {
+                {
+                    "quoteVolume": 48328.73333,
+                    "quoteSettlement_price": 332.3344827586207,
+                    "lowestAsk": 340.0,
+                    "baseVolume": 144.1862,
+                    "percentChange": -1.9607843231354893,
+                    "highestBid": 334.20000000000005,
+                    "latest": 333.33333330133934,
+                }
+            }
+        """
+        data = {}
+        # Core Exchange rate
+        if self["quote"]["id"] == "1.3.0":
+            cer = self["base"]["options"]["core_exchange_rate"]
+        else:
+            cer = self["quote"]["options"]["core_exchange_rate"]
+        data["core_exchange_rate"] = Price(cer, blockchain_instance=self.blockchain)
+        if cer["base"]["asset_id"] == self["quote"]["id"]:
+            data["core_exchange_rate"] = data["core_exchange_rate"].invert()
+
+        # smartcoin stuff
+        if "bitasset_data_id" in self["quote"]:
+            bitasset = self.blockchain.rpc.get_object(self["quote"]["bitasset_data_id"])
+            backing_asset_id = bitasset["options"]["short_backing_asset"]
+            if backing_asset_id == self["base"]["id"]:
+                sp = bitasset["current_feed"]["settlement_price"]
+                data["quoteSettlement_price"] = Price(
+                    sp, blockchain_instance=self.blockchain
+                )
+                if sp["base"]["asset_id"] == self["quote"]["id"]:
+                    data["quoteSettlement_price"] = data[
+                        "quoteSettlement_price"
+                    ].invert()
+
+        elif "bitasset_data_id" in self["base"]:
+            bitasset = self.blockchain.rpc.get_object(self["base"]["bitasset_data_id"])
+            backing_asset_id = bitasset["options"]["short_backing_asset"]
+            if backing_asset_id == self["quote"]["id"]:
+                data["baseSettlement_price"] = Price(
+                    bitasset["current_feed"]["settlement_price"],
+                    blockchain_instance=self.blockchain,
+                )
+
+        ticker = self.blockchain.rpc.get_ticker(self["base"]["id"], self["quote"]["id"])
+        data["baseVolume"] = Amount(
+            ticker["base_volume"] or 0.0,
+            self["base"],
+            blockchain_instance=self.blockchain,
+        )
+        data["quoteVolume"] = Amount(
+            ticker["quote_volume"] or 0.0,
+            self["quote"],
+            blockchain_instance=self.blockchain,
+        )
+        data["lowestAsk"] = Price(
+            ticker["lowest_ask"] or 0.0,
+            base=self["base"],
+            quote=self["quote"],
+            blockchain_instance=self.blockchain,
+        )
+        data["highestBid"] = Price(
+            ticker["highest_bid"] or 0.0,
+            base=self["base"],
+            quote=self["quote"],
+            blockchain_instance=self.blockchain,
+        )
+        data["latest"] = Price(
+            ticker["latest"] or 0.0,
+            quote=self["quote"],
+            base=self["base"],
+            blockchain_instance=self.blockchain,
+        )
+        data["percentChange"] = float(ticker.get("percent_change", 0.0) or 0.0)
+
+        return data
+
