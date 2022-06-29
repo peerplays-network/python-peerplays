@@ -351,6 +351,15 @@ class Market(dict):
 
         return tx
 
+    def cancel(self, orderNumber, account=None, **kwargs):
+        """
+        Cancels an order you have placed in a given market. Requires only the
+        "orderNumber". An order number takes the form ``1.7.xxx``.
+
+        :param str orderNumber: The Order Object ide of the form ``1.7.xxxx``
+        """
+        return self.blockchain.cancel(orderNumber, account=account, **kwargs)
+
 
     def ticker(self):
         """
