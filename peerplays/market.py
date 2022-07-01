@@ -550,3 +550,31 @@ class Market(dict):
                     return
                 sequence = order.get("sequence")
 
+    def accountopenorders(self, account=None):
+        """
+        Returns open Orders.
+
+        :param bitshares.account.Account account: Account name or instance of Account to show orders for in this market
+        """
+        if not account:
+            if "default_account" in self.blockchain.config:
+                account = self.blockchain.config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account, full=True, blockchain_instance=self.blockchain)
+
+        r = []
+        account.refresh()
+        orders = account["limit_orders"]
+        for o in orders:
+            if (
+                o["sell_price"]["base"]["asset_id"] == self["base"]["id"]
+                and o["sell_price"]["quote"]["asset_id"] == self["quote"]["id"]
+            ) or (
+                o["sell_price"]["base"]["asset_id"] == self["quote"]["id"]
+                and o["sell_price"]["quote"]["asset_id"] == self["base"]["id"]
+            ):
+                r.append(Order(o, blockchain_instance=self.blockchain))
+        return r
+
+
