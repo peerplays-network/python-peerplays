@@ -486,3 +486,67 @@ class Market(dict):
             ),
         }
 
+    def trades(self, limit=25, start=None, stop=None):
+        """
+        Returns your trade history for a given market.
+
+        :param int limit: Limit the amount of orders (default: 25)
+        :param datetime start: start time
+        :param datetime stop: stop time
+        """
+        # FIXME, this call should also return whether it was a buy or
+        # sell
+        if not stop:
+            stop = datetime.now()
+        if not start:
+            start = stop - timedelta(hours=24)
+        """
+            vector<market_trade> get_trade_history( const string& base, const string& quote, fc::time_point_sec start, fc::time_point_sec stop, unsigned limit = 100 )const;
+        """
+        sequence = None
+
+        cnt = 0
+        while True:
+            first_run = min(limit, 100)
+            if not sequence:
+                # Obtain first set of orders
+                orders = self.blockchain.rpc.get_trade_history(
+                    self["base"]["symbol"],
+                    self["quote"]["symbol"],
+                    formatTime(stop),
+                    formatTime(start),
+                    first_run,
+                )
+            else:
+                # obtain subsequent set of orders
+                continuous_limit = min(limit - cnt, 100)
+                orders = self.blockchain.rpc.get_trade_history_by_sequence(
+                    self["base"]["symbol"],
+                    self["quote"]["symbol"],
+                    sequence,
+                    formatTime(start),
+                    continuous_limit,
+                )
+
+            if len(orders) == 0:
+                return
+            for order in orders:
+                cnt += 1
+                yield FilledOrder(
+                    order,
+                    quote=Amount(
+                        order["amount"],
+                        self["quote"],
+                        blockchain_instance=self.blockchain,
+                    ),
+                    base=Amount(
+                        float(order["amount"]) * float(order["price"]),
+                        self["base"],
+                        blockchain_instance=self.blockchain,
+                    ),
+                    blockchain_instance=self.blockchain,
+                )
+                if cnt >= limit:
+                    return
+                sequence = order.get("sequence")
+
