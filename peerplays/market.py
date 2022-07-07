@@ -577,4 +577,83 @@ class Market(dict):
                 r.append(Order(o, blockchain_instance=self.blockchain))
         return r
 
+    def accounttrades(self, account=None, limit=25):
+        """
+        Returns your trade history for a given market, specified by the "currencyPair"
+        parameter. You may also specify "all" to get the orderbooks of all markets.
+
+        :param str currencyPair: Return results for a particular market only (default: "all")
+        :param int limit: Limit the amount of orders (default: 25)
+
+        Output Parameters:
+
+            - `type`: sell or buy
+            - `rate`: price for `quote` denoted in `base` per `quote`
+            - `amount`: amount of quote
+            - `total`: amount of base at asked price (amount/price)
+
+        .. note:: This call goes through the trade history and
+                  searches for your account, if there are no orders
+                  within ``limit`` trades, this call will return an
+                  empty array.
+        """
+        if not account:
+            if "default_account" in self.blockchain.config:
+                account = self.blockchain.config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account, blockchain_instance=self.blockchain)
+
+        filled = self.blockchain.rpc.get_fill_order_history(
+            self["base"]["id"], self["quote"]["id"], 2 * limit, api="history"
+        )
+        trades = []
+        for f in filled:
+            if f["op"]["account_id"] == account["id"]:
+                trades.append(
+                    FilledOrder(
+                        f,
+                        base=self["base"],
+                        quote=self["quote"],
+                        blockchain_instance=self.blockchain,
+                    )
+                )
+        return trades
+
+
+    def core_quote_market(self):
+        """
+        This returns an instance of the market that has the core market of the quote
+        asset.
+
+        It means that quote needs to be a market pegged asset and returns a market to
+        it's collateral asset.
+        """
+        if not self["quote"].is_bitasset:
+            raise ValueError("Quote (%s) is not a bitasset!" % self["quote"]["symbol"])
+        self["quote"].full = True
+        self["quote"].refresh()
+        collateral = Asset(
+            self["quote"]["bitasset_data"]["options"]["short_backing_asset"],
+            blockchain_instance=self.blockchain,
+        )
+        return Market(quote=self["quote"], base=collateral)
+
+    def core_base_market(self):
+        """
+        This returns an instance of the market that has the core market of the base
+        asset.
+
+        It means that base needs to be a market pegged asset and returns a market to
+        it's collateral asset.
+        """
+        if not self["base"].is_bitasset:
+            raise ValueError("base (%s) is not a bitasset!" % self["base"]["symbol"])
+        self["base"].full = True
+        self["base"].refresh()
+        collateral = Asset(
+            self["base"]["bitasset_data"]["options"]["short_backing_asset"],
+            blockchain_instance=self.blockchain,
+        )
+        return Market(quote=self["base"], base=collateral)
 
