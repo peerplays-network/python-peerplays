@@ -657,3 +657,39 @@ class Market(dict):
         )
         return Market(quote=self["base"], base=collateral)
 
+    def get_limit_orders(self, limit=25):
+        """
+        Returns the list of limit orders for a given market.
+
+        :param int limit: Limit the amount of orders (default: 25)
+
+        Sample output:
+
+        .. code-block:: js
+
+            [0.003679 BTC/PPY (1.9103 BTC|519.29602 PPY),
+            0.003676 BTC/PPY (299.9997 BTC|81606.16394 PPY),
+            0.003665 BTC/PPY (288.4618 BTC|78706.21881 PPY),
+            0.003665 BTC/PPY (3.5285 BTC|962.74409 PPY),
+            0.003665 BTC/PPY (72.5474 BTC|19794.41299 PPY),
+            [0.003738 BTC/PPY (36.4715 BTC|9756.17339 PPY),
+            0.003738 BTC/PPY (18.6915 BTC|5000.00000 PPY),
+            0.003742 BTC/PPY (182.6881 BTC|48820.22081 PPY),
+            0.003772 BTC/PPY (4.5200 BTC|1198.14798 PPY),
+            0.003799 BTC/PPY (148.4975 BTC|39086.59741 PPY)]
+
+
+        .. note:: Each bid is an instance of
+            class:`bitshares.price.Order` and thus carries the keys
+            ``base``, ``quote`` and ``price``. From those you can
+            obtain the actual amounts for sale
+        """
+        return list(
+            map(
+                lambda x: Order(x, blockchain_instance=self.blockchain),
+                self.blockchain.rpc.get_limit_orders(
+                    self["base"]["id"], self["quote"]["id"], limit
+                ),
+            )
+        )
+
