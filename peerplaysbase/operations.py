@@ -97,6 +97,26 @@ class Limit_order_create(GrapheneObject):
                 )
             )
 
+class Limit_order_cancel(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        (
+                            "fee_paying_account",
+                            ObjectId(kwargs["fee_paying_account"], "account"),
+                        ),
+                        ("order", ObjectId(kwargs["order"], "limit_order")),
+                        ("extensions", Set([])),
+                    ]
+                )
+            )
 
 class Account_create(GrapheneObject):
     def __init__(self, *args, **kwargs):

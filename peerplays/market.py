@@ -360,7 +360,6 @@ class Market(dict):
         """
         return self.blockchain.cancel(orderNumber, account=account, **kwargs)
 
-
     def ticker(self):
         """
         Returns the ticker for all markets.
