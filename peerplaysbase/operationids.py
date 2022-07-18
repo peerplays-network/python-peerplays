@@ -97,7 +97,34 @@ ops = [
     "nft_safe_transfer_from",
     "nft_approve",
     "nft_set_approval_for_all"
+    "account_role_create",
+    "account_role_update",
+    "account_role_delete",
+    "son_create",
+    "son_update",
+    "son_deregister",
+    "son_heartbeat",
+    "son_report_down",
+    "son_maintenance",
+    "son_wallet_recreate",
+    "son_wallet_update",
+    "son_wallet_deposit_create",
+    "son_wallet_deposit_process",
+    "son_wallet_withdraw_create",
+    "son_wallet_withdraw_process",
+    "sidechain_address_add",
+    "sidechain_address_update",
+    "sidechain_address_delete",
+    "sidechain_transaction_create",
+    "sidechain_transaction_sign",
+    "sidechain_transaction_send",
+    "sidechain_transaction_settle",
+    "nft_lottery_token_purchase",
+    "nft_lottery_reward",
+    "nft_lottery_end",
+    "random_number_store"
 ]
+
 operations = {o: ops.index(o) for o in ops}
 
 
