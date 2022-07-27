@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from .exceptions import ObjectNotInProposalBuffer
 from .instance import BlockchainInstance
+from datetime import datetime as dt
+from datetime import timedelta
 
 # Load methods from graphene and provide them here
 from graphenecommon.utils import (
@@ -46,3 +48,10 @@ def dList2Dict(l):
 
 def dict2dList(l):
     return [[k, v] for k, v in l.items()]
+
+def date_formated(daysFromToday):
+    """
+    Returns date in the peerplays accepted dateformat string, with daysFromToday added to today's date and time rounded to 00:00:00"""
+    date = dt.today() + timedelta(daysFromToday)
+    dateStr = date.strftime("%Y-%m-%dT00:00:00")
+    return dateStr
