@@ -96,7 +96,7 @@ ops = [
     "nft_mint",
     "nft_safe_transfer_from",
     "nft_approve",
-    "nft_set_approval_for_all"
+    "nft_set_approval_for_all",
     "account_role_create",
     "account_role_update",
     "account_role_delete",
