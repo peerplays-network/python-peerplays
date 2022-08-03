@@ -1980,3 +1980,31 @@ class PeerPlays(AbstractGrapheneChain):
             )
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
+    def create_son(self, accountName, url, listOflistOfChainPubKey):
+        sonAccount = Account(accountName, blockchain_instance=self)
+        accountId = sonAccount["id"]
+        print("======", sonAccount["name"], sonAccount["id"])
+        deposit_id = "1.13.18"
+        pay_vb_id = "1.13.17"
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            # "referrer_percent": int(referrer_percent * 100),
+            "accountId": accountId,
+            "url" : "www.test.com",
+            "deposit_id" : deposit_id,
+            "pay_vb_id" : pay_vb_id,
+            "sidechain_public_keys" : listOflistOfChainPubKey,
+            "options": {
+                # "memo_key": memo,
+                # "voting_account": voting_account["id"],
+                # "num_witness": 0,
+                # "num_committee": 0,
+                # "votes": [],
+                "extensions": [],
+            },
+            "extensions": {},
+            # "prefix": self.prefix,
+        }
+        op = operations.Create_son(**op) 
+        return self.finalizeOp(op, accountName, "active", **kwargs)
+
