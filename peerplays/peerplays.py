@@ -1980,7 +1980,7 @@ class PeerPlays(AbstractGrapheneChain):
             )
         return self.finalizeOp(op, account["name"], "active", **kwargs)
 
-    def create_son(self, accountName, url, listOflistOfChainPubKey):
+    def son_create(self, accountName, url, listOflistOfChainPubKey, **kwargs):
         sonAccount = Account(accountName, blockchain_instance=self)
         accountId = sonAccount["id"]
         print("======", sonAccount["name"], sonAccount["id"])
@@ -2005,6 +2005,6 @@ class PeerPlays(AbstractGrapheneChain):
             "extensions": {},
             # "prefix": self.prefix,
         }
-        op = operations.Create_son(**op) 
-        return self.finalizeOp(op, accountName, "active", **kwargs)
+        op = operations.Son_create(**op) 
+        return self.finalizeOp(op, accountId, "active", **kwargs)
 
