@@ -1983,16 +1983,18 @@ class PeerPlays(AbstractGrapheneChain):
     def son_create(self, accountName, url, listOflistOfChainPubKey, **kwargs):
         sonAccount = Account(accountName, blockchain_instance=self)
         accountId = sonAccount["id"]
+        signing_key = "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
         print("======", sonAccount["name"], sonAccount["id"])
         deposit_id = "1.13.18"
         pay_vb_id = "1.13.17"
         op = {
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             # "referrer_percent": int(referrer_percent * 100),
-            "accountId": accountId,
+            "owner_account": accountId,
+            # "signing_key": signing_key,
             "url" : "www.test.com",
-            "deposit_id" : deposit_id,
-            "pay_vb_id" : pay_vb_id,
+            "deposit" : deposit_id,
+            "pay_vb" : pay_vb_id,
             "sidechain_public_keys" : listOflistOfChainPubKey,
             "options": {
                 # "memo_key": memo,
