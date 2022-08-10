@@ -1807,3 +1807,31 @@ class Custom_account_authority_delete(GrapheneObject):
                     ]
                 )
             )
+
+
+class Son_create(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        # ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                        ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                        # ("signing_key", String(kwargs["signing_key"])),
+                        ("url", String(kwargs["url"])),
+                        ("deposit", ObjectId(kwargs["deposit"], "vesting_balance")),
+                        ("pay_vb", ObjectId(kwargs["pay_vb"], "vesting_balance")),
+                        ("sidechain_public_keys", Map(kwargs["sidechain_public_keys"])),
+                        # ("auth_id", ObjectId(kwargs["auth_id"], "custom_account_authority")),
+                        ("extensions", Set([]))
+                    ]
+                )
+            )
