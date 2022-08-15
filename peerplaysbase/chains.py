@@ -50,7 +50,10 @@ known_chains = {
         "chain_id": "7c1c72eb738b3ff1870350f85daca27e2d0f5dd25af27df7475fbd92815e421e",
         "core_symbol": "TEST",
         "prefix": "TEST"},
-
+    "MINT": {
+        "chain_id": "2c25aae5835fd54020329d4f150b04867e72cbd8f7f7b900a7c3da8a329a6014",
+        "core_symbol": "TEST",
+        "prefix": "TEST"},
 }
 
 # old fred chain_id in the code
