@@ -11,3 +11,4 @@ pycryptodome==3.8.1
 # for the CLI tool
 click
 treelib
+urllib3>=1.26.5 # not directly required, pinned by Snyk to avoid a vulnerability
