@@ -25,7 +25,8 @@ from graphenebase.types import (
 )
 from .objects import GrapheneObject, isArgsThisClass
 from .account import PublicKey
-from .operationids import operations, getOperationNameForId
+# print("making sure this line is executed +++++++++++++++++")
+# from .operationids import operations, getOperationNameForId
 from .objects import (
     Operation,
     Asset,
@@ -120,6 +121,7 @@ class Limit_order_cancel(GrapheneObject):
 
 class Account_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
+        print("====Account_create__init----")
         # Allow for overwrite of prefix
         if isArgsThisClass(self, args):
             self.data = args[0].data
@@ -203,7 +205,7 @@ class Account_upgrade(GrapheneObject):
                     ]
                 )
             )
-
+        
 
 class Asset_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
@@ -1825,11 +1827,11 @@ class Son_create(GrapheneObject):
                         ("fee", Asset(kwargs["fee"])),
                         # ("owner_account", ObjectId(kwargs["owner_account"], "account")),
                         ("owner_account", ObjectId(kwargs["owner_account"], "account")),
-                        # ("signing_key", String(kwargs["signing_key"])),
+                        ("signing_key", String(kwargs["signing_key"])),
                         ("url", String(kwargs["url"])),
                         ("deposit", ObjectId(kwargs["deposit"], "vesting_balance")),
                         ("pay_vb", ObjectId(kwargs["pay_vb"], "vesting_balance")),
-                        ("sidechain_public_keys", Map(kwargs["sidechain_public_keys"])),
+                        ("sidechain_public_keys", Array(kwargs["sidechain_public_keys"])),
                         # ("auth_id", ObjectId(kwargs["auth_id"], "custom_account_authority")),
                         ("extensions", Set([]))
                     ]
