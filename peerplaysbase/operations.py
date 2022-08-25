@@ -1821,19 +1821,27 @@ class Son_create(GrapheneObject):
                 kwargs = args[0]
             prefix = kwargs.get("prefix", default_prefix)
 
+            kwargs["side_chain_public_keys"] = sorted(
+                kwargs["side_chain_public_keys"], key=lambda x: repr(x[0]), reverse=False
+            )
+            side_chain_public_keys = Map([[String(e[0]), String(e[1])] for e in kwargs["side_chain_public_keys"]])
+            print("======side_chain_public_keys:", side_chain_public_keys)
+            print("====type side_chain_public_keys:", type(side_chain_public_keys))
+
             super().__init__(
                 OrderedDict(
                     [
                         ("fee", Asset(kwargs["fee"])),
-                        # ("owner_account", ObjectId(kwargs["owner_account"], "account")),
                         ("owner_account", ObjectId(kwargs["owner_account"], "account")),
-                        ("signing_key", String(kwargs["signing_key"])),
                         ("url", String(kwargs["url"])),
                         ("deposit", ObjectId(kwargs["deposit"], "vesting_balance")),
+                        ("signing_key", String(kwargs["signing_key"])),
+                        ("side_chain_public_keys", side_chain_public_keys),
                         ("pay_vb", ObjectId(kwargs["pay_vb"], "vesting_balance")),
-                        ("sidechain_public_keys", Array(kwargs["sidechain_public_keys"])),
+                        # ("options", AccountOptions(kwargs["options"], prefix=prefix)),
+                        # ("options", AccountOptions(None, prefix=prefix)),
                         # ("auth_id", ObjectId(kwargs["auth_id"], "custom_account_authority")),
-                        ("extensions", Set([]))
+                        # ("extensions", Set([]))
                     ]
                 )
             )

@@ -135,7 +135,6 @@ class PeerPlays(AbstractGrapheneChain):
                 if not ``default_account``
         """
         from .memo import Memo
-
         if not account:
             if "default_account" in self.config:
                 account = self.config["default_account"]
@@ -225,6 +224,7 @@ class PeerPlays(AbstractGrapheneChain):
                 the blockchain
 
         """
+        print("====self.prefix:", self.prefix)
         if not registrar and self.config["default_account"]:
             registrar = self.config["default_account"]
         if not registrar:
@@ -1987,28 +1987,34 @@ class PeerPlays(AbstractGrapheneChain):
     def son_create(self, accountName, url, listOflistOfChainPubKey, **kwargs):
         sonAccount = Account(accountName, blockchain_instance=self)
         accountId = sonAccount["id"]
-        signing_key = ["5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"]
+        # signing_key = ["5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"]
+        # signing_key = ["5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"]
+        pub = 'TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV'
         print("======", sonAccount["name"], sonAccount["id"])
         deposit_id = "1.13.18"
         pay_vb_id = "1.13.17"
+        # sport = [["de", "Fussball"], ["en", "Soccer"]]
+        # side_chain_public_keys = [["de", "Fussball"], ["en", "Soccer"]]
+        side_chain_public_keys = [["bitcoin", "03456772301e221026269d3095ab5cb623fc239835b583ae4632f99a15107ef275"], ["ethereum", "5fbbb31be52608d2f52247e8400b7fcaa9e0bc12"], ["hive", "sonaccount01"], ["peerplays", "TEST8TCQFzyYDp3DPgWZ24261fMPSCzXxVyoF3miWeTj6JTi2DZdrL"]]
         op = {
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             # "referrer_percent": int(referrer_percent * 100),
             "owner_account": accountId,
-            "signing_key": signing_key,
             "url" : "www.test.com",
             "deposit" : deposit_id,
+            "signing_key": pub,
+            # "sidechain_public_keys" : listOflistOfChainPubKey,
+            "side_chain_public_keys" : side_chain_public_keys,
             "pay_vb" : pay_vb_id,
-            "sidechain_public_keys" : listOflistOfChainPubKey,
-            "options": {
+            # "options": {
                 # "memo_key": memo,
                 # "voting_account": voting_account["id"],
                 # "num_witness": 0,
                 # "num_committee": 0,
                 # "votes": [],
-                "extensions": [],
-            },
-            "extensions": {},
+                # "extensions": [],
+            # },
+            # "extensions": {},
             # "prefix": self.prefix,
         }
         op = operations.Son_create(**op) 
