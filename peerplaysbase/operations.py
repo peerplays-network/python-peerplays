@@ -1821,12 +1821,12 @@ class Son_create(GrapheneObject):
                 kwargs = args[0]
             prefix = kwargs.get("prefix", default_prefix)
 
-            kwargs["side_chain_public_keys"] = sorted(
-                kwargs["side_chain_public_keys"], key=lambda x: repr(x[0]), reverse=False
+            kwargs["sidechain_public_keys"] = sorted(
+                kwargs["sidechain_public_keys"], key=lambda x: repr(x[0]), reverse=False
             )
-            side_chain_public_keys = Map([[String(e[0]), String(e[1])] for e in kwargs["side_chain_public_keys"]])
-            print("======side_chain_public_keys:", side_chain_public_keys)
-            print("====type side_chain_public_keys:", type(side_chain_public_keys))
+            sidechain_public_keys = Map([[String(e[0]), String(e[1])] for e in kwargs["sidechain_public_keys"]])
+            print("======sidechain_public_keys:", sidechain_public_keys)
+            print("====type sidechain_public_keys:", type(sidechain_public_keys))
 
             super().__init__(
                 OrderedDict(
@@ -1836,12 +1836,40 @@ class Son_create(GrapheneObject):
                         ("url", String(kwargs["url"])),
                         ("deposit", ObjectId(kwargs["deposit"], "vesting_balance")),
                         ("signing_key", String(kwargs["signing_key"])),
-                        ("side_chain_public_keys", side_chain_public_keys),
+                        ("sidechain_public_keys", sidechain_public_keys),
                         ("pay_vb", ObjectId(kwargs["pay_vb"], "vesting_balance")),
                         # ("options", AccountOptions(kwargs["options"], prefix=prefix)),
                         # ("options", AccountOptions(None, prefix=prefix)),
                         # ("auth_id", ObjectId(kwargs["auth_id"], "custom_account_authority")),
                         # ("extensions", Set([]))
+                    ]
+                )
+            )
+
+
+class Son_maintenance(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            # kwargs["sidechain_public_keys"] = sorted(
+            #     kwargs["sidechain_public_keys"], key=lambda x: repr(x[0]), reverse=False
+            # )
+            # sidechain_public_keys = Map([[String(e[0]), String(e[1])] for e in kwargs["sidechain_public_keys"]])
+            # print("======sidechain_public_keys:", sidechain_public_keys)
+            # print("====type sidechain_public_keys:", type(sidechain_public_keys))
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                        ("son_id", ObjectId(kwargs["son_id"], "son")),
                     ]
                 )
             )

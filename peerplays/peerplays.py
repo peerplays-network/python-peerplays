@@ -134,6 +134,7 @@ class PeerPlays(AbstractGrapheneChain):
             :param str account: (optional) the source account for the transfer
                 if not ``default_account``
         """
+        print("-------running this line======")
         from .memo import Memo
         if not account:
             if "default_account" in self.config:
@@ -157,6 +158,8 @@ class PeerPlays(AbstractGrapheneChain):
                 "prefix": self.prefix,
             }
         )
+        print("op:", op)
+        print("typeop:", type(op))
         return self.finalizeOp(op, account, "active", **kwargs)
 
     # -------------------------------------------------------------------------
@@ -2022,3 +2025,16 @@ class PeerPlays(AbstractGrapheneChain):
         print("op:", op)
         return self.finalizeOp(op, accountId, "active", **kwargs)
 
+    def son_maintenance(self, accountName):
+        sonAccount = Account(accountName, blockchain_instance=self)
+        accountId = sonAccount["id"]
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            # "referrer_percent": int(referrer_percent * 100),
+            "owner_account": accountId,
+            "son_id" : "1.33.16",
+        }
+        op = operations.Son_maintenance(**op) 
+        print("op:", op)
+        # return self.finalizeOp(op, accountId, "active", **kwargs)
+        return self.finalizeOp(op, accountId, "active")
