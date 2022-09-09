@@ -1870,6 +1870,8 @@ class Son_maintenance(GrapheneObject):
                         ("fee", Asset(kwargs["fee"])),
                         ("owner_account", ObjectId(kwargs["owner_account"], "account")),
                         ("son_id", ObjectId(kwargs["son_id"], "son")),
+                        # ("request_type", Bool(kwargs))
+                        ("request_type", Uint8(kwargs["request_type"])),
                     ]
                 )
             )

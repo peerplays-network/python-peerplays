@@ -2033,6 +2033,7 @@ class PeerPlays(AbstractGrapheneChain):
             # "referrer_percent": int(referrer_percent * 100),
             "owner_account": accountId,
             "son_id" : "1.33.16",
+            "request_type" : 0 
         }
         op = operations.Son_maintenance(**op) 
         print("op:", op)
