@@ -60,8 +60,15 @@ class Son():
         r = WalletCall(method, params)
         return r
 
+    def update_son(self, account_name, url, sidechainPublicKeyListOfList):
+        method = "try_create_son"
+        params = [account_name, url, sidechainPublicKeyListOfList, "true"]
+        r = WalletCall(method, params)
+        return r
+
 if __name__ == "__main__":
     son = Son(urlWitness = urlWitness)
     # r = son.set_password("peerplays**")
-    r = son.create_son("sonaccount01", "http://sonaddreess01.com", [["bitcoin", "03456772301e221026269d3095ab5cb623fc239835b583ae4632f99a15107ef275"], ["ethereum", "5fbbb31be52608d2f52247e8400b7fcaa9e0bc12"], ["hive", "sonaccount01"], ["peerplays", "TEST8TCQFzyYDp3DPgWZ24261fMPSCzXxVyoF3miWeTj6JTi2DZdrL"]]) 
+    # r = son.create_son("sonaccount01", "http://sonaddreess01.com", [["bitcoin", "03456772301e221026269d3095ab5cb623fc239835b583ae4632f99a15107ef275"], ["ethereum", "5fbbb31be52608d2f52247e8400b7fcaa9e0bc12"], ["hive", "sonaccount01"], ["peerplays", "TEST8TCQFzyYDp3DPgWZ24261fMPSCzXxVyoF3miWeTj6JTi2DZdrL"]]) 
+    r = son.update_son("sonaccount01", "http://sonaddreess01.com", [["bitcoin", "03456772301e221026269d3095ab5cb623fc239835b583ae4632f99a15107ef275"], ["ethereum", "5fbbb31be52608d2f52247e8400b7fcaa9e0bc12"], ["hive", "sonaccount01"], ["peerplays", "TEST8TCQFzyYDp3DPgWZ24261fMPSCzXxVyoF3miWeTj6JTi2DZdrL"]]) 
     print(r)
