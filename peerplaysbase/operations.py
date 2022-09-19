@@ -134,9 +134,9 @@ class Account_create(GrapheneObject):
                 OrderedDict(
                     [
                         ("fee", Asset(kwargs["fee"])),
-                        ("registrar", ObjectId(kwargs["registrar"], "account")),
                         ("referrer", ObjectId(kwargs["referrer"], "account")),
                         ("referrer_percent", Uint16(kwargs["referrer_percent"])),
+                        ("registrar", ObjectId(kwargs["registrar"], "account")),
                         ("name", String(kwargs["name"])),
                         ("owner", Permission(kwargs["owner"], prefix=prefix)),
                         ("active", Permission(kwargs["active"], prefix=prefix)),
