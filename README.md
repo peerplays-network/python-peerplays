@@ -32,3 +32,14 @@ Make sure that the above dependencies are installed, if not install with:
 Install with `pip3`:
 
     $ pip3 install peerplays
+    
+Starting cli_wallet server :
+	$ ./cli_wallet -s "ws://10.11.12.101:8090" --chain-id "7c1c72eb738b3ff1870350f85daca27e2d0f5dd25af27df7475fbd92815e421e" -r "0.0.0.0:8091"
+
+        This starts a cli_wallet server endpoint in the local machine at port 8091
+
+Example call
+	$ curl --silent --data '{"jsonrpc": "2.0", "method": "info", "params": [], "id": 1}' http://0.0.0.0:8091 | jq
+
+    
+
