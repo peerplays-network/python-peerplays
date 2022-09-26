@@ -12,8 +12,9 @@ class Testcases(unittest.TestCase):
         fixture_data()
 
     def test_Committee(self):
+        """ Testing for Committee exceptions"""
         with self.assertRaises(
-            exceptions.AccountDoesNotExistsException
+                exceptions.AccountDoesNotExistsException
         ):
             Committee("FOObarNonExisting")
 
@@ -22,6 +23,6 @@ class Testcases(unittest.TestCase):
         self.assertIsInstance(c.account, Account)
 
         with self.assertRaises(
-            exceptions.CommitteeMemberDoesNotExistsException
+                exceptions.CommitteeMemberDoesNotExistsException
         ):
-            Committee("faucet")
+            Committee("1.5.10000")

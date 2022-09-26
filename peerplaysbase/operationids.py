@@ -87,6 +87,16 @@ ops = [
     "custom_account_authority_create",
     "custom_account_authority_update",
     "custom_account_authority_delete",
+    "offer",
+    "bid",
+    "cancel_offer",
+    "finalize_offer_operation",
+    "nft_metadata_create",
+    "nft_metadata_update",
+    "nft_mint",
+    "nft_safe_transfer_from",
+    "nft_approve",
+    "nft_set_approval_for_all"
 ]
 operations = {o: ops.index(o) for o in ops}
 

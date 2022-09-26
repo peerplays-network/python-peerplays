@@ -21,11 +21,10 @@ from .bettingmarketgroup import BettingMarketGroup
 from .bettingmarket import BettingMarket
 from .bet import Bet
 from .genesisbalance import GenesisBalance
-from .exceptions import AccountExistsException, MissingKeyError
+from .exceptions import AccountExistsException, MissingKeyError, KeyAlreadyInStoreException
 from .wallet import Wallet
 from .transactionbuilder import TransactionBuilder, ProposalBuilder
 from .utils import formatTime, test_proposal_in_buffer
-
 log = logging.getLogger(__name__)
 
 
@@ -261,7 +260,11 @@ class PeerPlays(AbstractGrapheneChain):
             # store private keys
             if storekeys:
                 # self.wallet.addPrivateKey(str(owner_privkey))
-                self.wallet.addPrivateKey(str(active_privkey))
+                try:
+                    self.wallet.addPrivateKey(str(active_privkey))
+                except KeyAlreadyInStoreException:
+                    log.error("Account name already exists on the chain")
+                    return
                 self.wallet.addPrivateKey(str(memo_privkey))
         elif owner_key and active_key and memo_key:
             active_pubkey = PublicKey(active_key, prefix=self.prefix)
@@ -1702,3 +1705,278 @@ class PeerPlays(AbstractGrapheneChain):
         }
         op = operations.Custom_account_authority_delete(**op)
         return self.finalizeOp(op, owner_account, "active", **kwargs)
+
+   # -------------------------------------------------------------------------
+   # Market Place Methods
+   # -------------------------------------------------------------------------
+    def create_offer(
+        self,
+        item_ids, #list of items
+        issuer_id_or_name,
+        minimum_price, #asset type
+        maximum_price, #asset type
+        buying_item, #bool
+        offer_expiration_date, # "2020-09-18T11:05:39"
+        memo=None, #optional
+        **kwargs
+        ):
+
+        owner_account = Account(issuer_id_or_name, blockchain_instance=self)
+
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "item_ids": item_ids,
+            "issuer": owner_account["id"],
+            "minimum_price": minimum_price,
+            "maximum_price": maximum_price,
+            "buying_item": buying_item,
+            "offer_expiration_date": offer_expiration_date,
+            "memo": memo,
+            "prefix": self.prefix,
+        }
+        op = operations.Offer(**op)
+        return self.finalizeOp(op, owner_account, "active", **kwargs)
+
+    def create_bid(
+        self,
+        bidder_account_id_or_name,
+        bid_price, # asset
+        offer_id, # offer_id type, 1.29.x
+        **kwargs
+        ):
+
+        owner_account = Account(bidder_account_id_or_name, blockchain_instance=self)
+
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "bidder": owner_account["id"],
+            "offer_id": offer_id,
+            "bid_price": bid_price,
+            "prefix": self.prefix,
+        }
+        op = operations.Bid(**op)
+        return self.finalizeOp(op, owner_account, "active", **kwargs)
+
+    def cancel_offer(
+        self,
+        issuer_account_id_or_name,
+        offer_id, # offer_id type, 1.29.x
+        **kwargs
+        ):
+
+        owner_account = Account(issuer_account_id_or_name, blockchain_instance=self)
+
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "issuer": owner_account["id"],
+            "offer_id": offer_id,
+            "prefix": self.prefix,
+        }
+        op = operations.Cancel_offer(**op)
+        return self.finalizeOp(op, owner_account, "active", **kwargs)
+
+   # -------------------------------------------------------------------------
+   # NFT methods
+   # -------------------------------------------------------------------------
+    def nft_metadata_create(
+        self,
+        owner_account_id_or_name,
+        name,
+        symbol,
+        base_uri,
+        revenue_partner=None,
+        revenue_split=200,
+        is_transferable=True,
+        is_sellable=True,
+        role_id=None,
+        max_supply=None,
+        lottery_options=None,
+        **kwargs
+        ):
+
+        owner_account = Account(owner_account_id_or_name, blockchain_instance=self)
+        if not isinstance(revenue_partner, type(None)):
+            revenue_partner = Account(revenue_partner, blockchain_instance=self)["id"]
+
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "owner": owner_account["id"],
+            "name": name,
+            "symbol": symbol,
+            "base_uri": base_uri,
+            "revenue_partner": revenue_partner,
+            "revenue_split": revenue_split,
+            "is_transferable": is_transferable,
+            "is_sellable": is_sellable,
+            "role_id": None,
+            "max_supply": None,
+            "lottery_options": None,
+            "prefix": self.prefix,
+        }
+        op = operations.Nft_metadata_create(**op)
+        return self.finalizeOp(op, owner_account, "active", **kwargs)
+
+    def nft_metadata_update(
+        self,
+        owner_account_id_or_name,
+        nft_metadata_id,
+        name,
+        symbol,
+        base_uri,
+        revenue_partner=None,
+        revenue_split=200,
+        is_transferable=True,
+        is_sellable=True,
+        role_id=None,
+        **kwargs
+        ):
+
+        owner_account = Account(owner_account_id_or_name, blockchain_instance=self)
+        if not isinstance(revenue_partner, type(None)):
+            revenue_partner = Account(revenue_partner, blockchain_instance=self)["id"]
+
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "owner": owner_account["id"],
+            "nft_metadata_id": nft_metadata_id,
+            "name": name,
+            "symbol": symbol,
+            "base_uri": base_uri,
+            "revenue_partner": revenue_partner,
+            "revenue_split": revenue_split,
+            "is_transferable": is_transferable,
+            "is_sellable": is_sellable,
+            "role_id": None,
+            "prefix": self.prefix,
+        }
+        op = operations.Nft_metadata_update(**op)
+        return self.finalizeOp(op, owner_account, "active", **kwargs)
+
+    def nft_mint(
+        self,
+        metadata_owner_account_id_or_name,
+        metadata_id,
+        owner_account_id_or_name,
+        approved_account_id_or_name,
+        approved_operators,
+        token_uri,
+        **kwargs
+        ):
+
+        payer = Account(metadata_owner_account_id_or_name, blockchain_instance=self)
+        owner = Account(owner_account_id_or_name, blockchain_instance=self)
+        approved = Account(approved_account_id_or_name, blockchain_instance=self)
+        approved_operators = Account(approved_operators, blockchain_instance=self)
+
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "payer": payer["id"],
+            "nft_metadata_id": metadata_id,
+            "owner": owner["id"],
+            "approved": approved["id"],
+            "approved_operators": approved_operators["id"],
+            "token_uri": token_uri,
+            "prefix": self.prefix,
+        }
+        op = operations.Nft_mint(**op)
+        return self.finalizeOp(op, owner, "active", **kwargs)
+
+    def nft_safe_transfer_from(
+        self,
+        operator_,
+        from_,
+        to_,
+        token_id,
+        data,
+        **kwargs
+        ):
+
+        owner_account = Account(operator_, blockchain_instance=self)
+
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "operator_": owner_account["id"],
+            "from": from_,
+            "to": to_,
+            "token_id": token_id,
+            "data": data,
+            "prefix": self.prefix,
+        }
+        op = operations.Nft_safe_transfer_from(**op)
+        return self.finalizeOp(op, owner_account, "active", **kwargs)
+
+    def nft_approve(
+        self,
+        operator_,
+        approved,
+        token_id,
+        **kwargs
+        ):
+
+        owner_account = Account(operator_, blockchain_instance=self)
+        approved = Account(approved, blockchain_instance=self)
+
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "operator_": owner_account["id"],
+            "approved": approved["id"],
+            "token_id": token_id,
+            "prefix": self.prefix,
+        }
+        op = operations.Nft_approve(**op)
+        return self.finalizeOp(op, owner_account, "active", **kwargs)
+
+    def nft_set_approval_for_all(
+        self,
+        owner,
+        operator_,
+        approved,
+        **kwargs
+        ):
+
+        owner_account = Account(owner, blockchain_instance=self)
+        operator_ = Account(operator_, blockchain_instance=self)
+
+        op = {
+            "fee": {"amount": 0, "asset_id": "1.3.0"},
+            "owner": owner_account["id"],
+            "operator_": operator_["id"],
+            "approved": approved,
+            "prefix": self.prefix,
+        }
+        op = operations.Nft_set_approval_for_all(**op)
+        return self.finalizeOp(op, owner_account, "active", **kwargs)
+
+    def cancel(self, orderNumbers, account=None, **kwargs):
+        """
+        Cancels an order you have placed in a given market. Requires only the
+        "orderNumbers". An order number takes the form ``1.7.xxx``.
+
+        :param str orderNumbers: The Order Object ide of the form
+            ``1.7.xxxx``
+        """
+        if not account:
+            if "default_account" in self.config:
+                account = self.config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account, full=False, blockchain_instance=self)
+
+        if not isinstance(orderNumbers, (list, set, tuple)):
+            orderNumbers = {orderNumbers}
+
+        op = []
+        for order in orderNumbers:
+            op.append(
+                operations.Limit_order_cancel(
+                    **{
+                        "fee": {"amount": 0, "asset_id": "1.3.0"},
+                        "fee_paying_account": account["id"],
+                        "order": order,
+                        "extensions": [],
+                        "prefix": self.prefix,
+                    }
+                )
+            )
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
+

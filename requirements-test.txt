@@ -1,4 +1,5 @@
 # Unit testing
+tox
 pytest
 pytest-mock
 coverage
@@ -8,3 +9,5 @@ mock
 # black
 isort
 pre-commit
+
+locust
