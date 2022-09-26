@@ -459,8 +459,8 @@ bettingmarkets:
    status: 'unresolved'
 
 bets:
- - id: 1.26.13
- - id: 1.26.14
+ - id: "1.26.13"
+ - id: "1.26.14"
 
 rules:
  - id: "1.23.10"

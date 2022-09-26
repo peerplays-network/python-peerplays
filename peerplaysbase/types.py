@@ -1,5 +1,6 @@
 from binascii import unhexlify
 from graphenebase.types import varint
+import struct
 
 
 def zigzag_encode(i):
@@ -46,3 +47,14 @@ class Sha256():
 
     def __str__(self):
         return str(self.data)
+
+
+class Double():
+    def __init__(self, d):
+        self.data = float(d)
+
+    def __bytes__(self):
+        return struct.pack("<d", self.data)
+
+    def __str__(self):
+        return "%f" % self.data

@@ -45,6 +45,7 @@ from .objects import (
     GameSpecificMoves,
     ResolutionConstraint,
 )
+from .types import Double
 
 default_prefix = "PPY"
 
@@ -75,6 +76,47 @@ class Transfer(GrapheneObject):
                 )
             )
 
+class Limit_order_create(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("seller", ObjectId(kwargs["seller"], "account")),
+                        ("amount_to_sell", Asset(kwargs["amount_to_sell"])),
+                        ("min_to_receive", Asset(kwargs["min_to_receive"])),
+                        ("expiration", PointInTime(kwargs["expiration"])),
+                        ("fill_or_kill", Bool(kwargs["fill_or_kill"])),
+                        ("extensions", Set([])),
+                    ]
+                )
+            )
+
+class Limit_order_cancel(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        (
+                            "fee_paying_account",
+                            ObjectId(kwargs["fee_paying_account"], "account"),
+                        ),
+                        ("order", ObjectId(kwargs["order"], "limit_order")),
+                        ("extensions", Set([])),
+                    ]
+                )
+            )
 
 class Account_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
@@ -399,7 +441,7 @@ class Proposal_update(GrapheneObject):
                 )
             )
 
-            
+
 class Proposal_delete(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
@@ -416,7 +458,7 @@ class Proposal_delete(GrapheneObject):
                 ('extenstions', Set([])),
             ]))
 
-                        
+
 class Sport_create(GrapheneObject):
     def __init__(self, *args, **kwargs):
         if isArgsThisClass(self, args):
@@ -1104,7 +1146,8 @@ class Bet_cancel(GrapheneObject):
                     [
                         ("fee", Asset(kwargs["fee"])),
                         ("bettor_id", ObjectId(kwargs["bettor_id"], "account")),
-                        ("bet_to_cancel", ObjectId(kwargs["bet_to_cancel"], "bet")),
+                        # ("bet_to_cancel", ObjectId(kwargs["bet_to_cancel"], "bet")),
+                        ("bet_to_cancel", ObjectId(kwargs["bet_to_cancel"])),
                         ("extensions", Set([])),
                     ]
                 )
@@ -1259,6 +1302,7 @@ class Custom_permission_create(GrapheneObject):
                         ("owner_account", ObjectId(kwargs["owner_account"], "account")),
                         ("permission_name", String(kwargs["permission_name"])),
                         ("auth", Permission(kwargs["auth"], prefix=prefix)),
+                        ("extensions", Set([])),
                     ]
                 )
             )
@@ -1369,6 +1413,397 @@ class Custom_account_authority_delete(GrapheneObject):
                         ("fee", Asset(kwargs["fee"])),
                         ("auth_id", ObjectId(kwargs["auth_id"], "custom_account_authority")),
                         ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                    ]
+                )
+            )
+
+
+# ----------------------------------------
+#       Market Place Classes
+# ----------------------------------------
+
+class Offer(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            for o in [
+                    "item_ids",
+                    ]:
+                if o not in kwargs:
+                    kwargs[o] = []
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        # ("item_ids", Set([ObjectId(kwargs["item_ids"])])),
+                        # ("item_ids", Set([ObjectId(item_ids)])),
+                        (
+                            "item_ids",
+                            Array(
+                                [
+                                    ObjectId(o)
+                                    for o in kwargs["item_ids"]
+                                ]
+                            ),
+                        ),
+                        ("issuer", ObjectId(kwargs["issuer"], "account")),
+                        ("minimum_price", Asset(kwargs["minimum_price"])),
+                        ("maximum_price", Asset(kwargs["maximum_price"])),
+                        ("buying_item", Bool(kwargs["buying_item"])),
+                        ("offer_expiration_date", PointInTime(kwargs["offer_expiration_date"])),
+                        ("memo", Optional(None)), 
+                        ("extensions", Set([])),
+                    ]
+                )
+            )
+
+
+class Bid(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("bidder", ObjectId(kwargs["bidder"], "account")),
+                        ("bid_price", Asset(kwargs["bid_price"])),
+                        ("offer_id", ObjectId(kwargs["offer_id"])),
+                        ("extensions", Set([])),
+                    ]
+                )
+            )
+
+
+class Cancel_offer(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("issuer", ObjectId(kwargs["issuer"], "account")),
+                        ("offer_id", ObjectId(kwargs["offer_id"])),
+                        ("extensions", Set([])),
+                    ]
+                )
+            )
+
+
+# ----------------------------------------
+#       NFT Operations Classes
+# ----------------------------------------
+
+class Nft_metadata_create(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            if "revenue_partenr" in kwargs.keys():
+                if not isinstance(kwargs["revenue_partner"], type(None)):
+                    revenue_partner = Optional(ObjectId(kwargs["revenue_partner"], "account"))
+                    revenue_split = Optional(Uint16(kwargs["revenue_split"]))
+            else:
+                revenue_partner = Optional(None)
+                revenue_split = Optional(None)
+
+            role_id = Optional(None)
+            max_supply = Optional(None)
+            lottery_options = Optional(None)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("owner", ObjectId(kwargs["owner"], "account")),
+                        ("name", String(kwargs["name"])),
+                        ("symbol", String(kwargs["symbol"])),
+                        ("base_uri", String(kwargs["base_uri"])),
+                        ("revenue_partner", revenue_partner),
+                        ("revenue_split", revenue_split),
+                        ("is_transferable", Bool(bool(kwargs["is_transferable"]))),
+                        ("is_sellable", Bool(bool(kwargs["is_sellable"]))),
+                        ("role_id", role_id),
+                        ("max_supply", max_supply),
+                        ("lottery_options", lottery_options),
+                        ("extensions", Set([])),
+                    ]
+                )
+            )
+
+
+class Nft_metadata_update(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            if "revenue_partenr" in kwargs.keys():
+                if not isinstance(kwargs["revenue_partner"], type(None)):
+                    revenue_partner = Optional(ObjectId(kwargs["revenue_partner"], "account"))
+                    revenue_split = Optional(Uint16(kwargs["revenue_split"]))
+            else:
+                revenue_partner = Optional(None)
+                revenue_split = Optional(None)
+
+            role_id = Optional(None)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("owner", ObjectId(kwargs["owner"], "account")),
+                        ("nft_metadata_id", ObjectId(kwargs["nft_metadata_id"])),
+                        ("name", Optional(String(kwargs["name"]))),
+                        ("symbol", Optional(String(kwargs["symbol"]))),
+                        ("base_uri", Optional(String(kwargs["base_uri"]))),
+                        ("revenue_partner", revenue_partner),
+                        ("revenue_split", revenue_split),
+                        ("is_transferable", Optional(Bool(kwargs["is_transferable"]))),
+                        ("is_sellable", Optional(Bool(kwargs["is_sellable"]))),
+                        ("role_id", role_id),
+                        ("extensions", Set([])),
+                    ]
+                )
+            )
+
+
+class Nft_mint(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("payer", ObjectId(kwargs["payer"], "account")),
+                        ("nft_metadata_id", ObjectId(kwargs["nft_metadata_id"])),
+                        ("owner", ObjectId(kwargs["owner"], "account")),
+                        ("approved", ObjectId(kwargs["approved"], "account")),
+                        ("approved_operators", Set([])),
+                        ("token_uri", String(kwargs["token_uri"])),
+                        ("extensions", Set([])),
+                    ]
+                )
+            )
+
+
+class Nft_safe_transfer_from(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("operator_", ObjectId(kwargs["operator_"], "account")),
+                        ("from", ObjectId(kwargs["from"], "account")),
+                        ("to", ObjectId(kwargs["to"], "account")),
+                        ("token_id", ObjectId(kwargs["token_id"])),
+                        ("data", String(kwargs["data"])),
+                        ("extensions", Set([])),
+                    ]
+                )
+            )
+
+
+class Nft_approve(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("operator_", ObjectId(kwargs["operator_"], "account")),
+                        ("approved", ObjectId(kwargs["approved"], "account")),
+                        ("token_id", ObjectId(kwargs["token_id"])),
+                        ("extensions", Set([])),
+                    ]
+                )
+            )
+
+
+class Nft_set_approval_for_all(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("owner", ObjectId(kwargs["owner"], "account")),
+                        ("operator_", ObjectId(kwargs["operator_"], "account")),
+                        ("approved", Bool(kwargs["approved"])),
+                        ("extensions", Set([])),
+                    ]
+                )
+            )
+            
+
+class Custom_permission_update(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("permission_id", ObjectId(kwargs["permission_id"], "custom_permission")),
+                        ("new_auth", Optional(Permission(kwargs["new_auth"], prefix=prefix))),
+                        ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                        ("extensions", Set([])),
+                    ]
+                )
+            )
+
+
+class Custom_permission_delete(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("permission_id", ObjectId(kwargs["permission_id"], "custom_permission")),
+                        ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                        ("extensions", Set([])),
+                    ]
+                )
+            )
+
+
+class Custom_account_authority_create(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("permission_id", ObjectId(kwargs["permission_id"], "custom_permission")),
+                        ("operation_type", Uint32(kwargs["operation_type"])),
+                        ("valid_from", PointInTime(kwargs["valid_from"])),
+                        ("valid_to", PointInTime(kwargs["valid_to"])),
+                        ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                        ("extensions", Set([])),
+                    ]
+                )
+            )
+
+
+class Custom_account_authority_update(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("auth_id", ObjectId(kwargs["auth_id"], "custom_account_authority")),
+                        ("new_valid_from", Optional(PointInTime(kwargs["new_valid_from"]))),
+                        ("new_valid_to", Optional(PointInTime(kwargs["new_valid_to"]))),
+                        ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                        ("extensions", Set([])),
+                    ]
+                )
+            )
+
+
+class Custom_account_authority_delete(GrapheneObject):
+    def __init__(self, *args, **kwargs):
+        # Allow for overwrite of prefix
+        if isArgsThisClass(self, args):
+            self.data = args[0].data
+        else:
+            if len(args) == 1 and len(kwargs) == 0:
+                kwargs = args[0]
+            prefix = kwargs.get("prefix", default_prefix)
+
+            super().__init__(
+                OrderedDict(
+                    [
+                        ("fee", Asset(kwargs["fee"])),
+                        ("auth_id", ObjectId(kwargs["auth_id"], "custom_account_authority")),
+                        ("owner_account", ObjectId(kwargs["owner_account"], "account")),
+                        ("extensions", Set([])),
                     ]
                 )
             )

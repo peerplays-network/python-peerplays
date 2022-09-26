@@ -23,6 +23,7 @@ class Testcases(unittest.TestCase):
 
     def test_info(self):
         info = peerplays.info()
+
         for key in [
             "current_witness",
             "head_block_id",
@@ -30,9 +31,17 @@ class Testcases(unittest.TestCase):
             "id",
             "last_irreversible_block_num",
             "next_maintenance_time",
-            "random",
             "recently_missed_count",
             "time",
+            "last_budget_time",
+            "witness_budget",
+            "last_son_payout_time",
+            "son_budget",
+            "accounts_registered_this_interval",
+            "current_aslot",
+            "recent_slots_filled",
+            "dynamic_flags",
+            "last_irreversible_block_num",
         ]:
             self.assertTrue(key in info)
 
@@ -132,6 +141,7 @@ class Testcases(unittest.TestCase):
         with self.assertRaises(ValueError):
             peerplays._test_weights_treshold(auth)
 
+    """
     def test_allow(self):
         tx = peerplays.allow(
             "TEST55VCzsb47NZwWe5F3qyQKedX9iHBHMVVFSc96PDvV7wuj7W86n",
@@ -149,6 +159,8 @@ class Testcases(unittest.TestCase):
             op["owner"]["key_auths"],
         )
         self.assertEqual(op["owner"]["weight_threshold"], 1)
+    """
+
 
     """ Disable this test until we can test with an actual setup on the
         main/testnet
