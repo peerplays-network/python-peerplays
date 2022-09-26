@@ -21,11 +21,10 @@ from .bettingmarketgroup import BettingMarketGroup
 from .bettingmarket import BettingMarket
 from .bet import Bet
 from .genesisbalance import GenesisBalance
-from .exceptions import AccountExistsException, MissingKeyError
+from .exceptions import AccountExistsException, MissingKeyError, KeyAlreadyInStoreException
 from .wallet import Wallet
 from .transactionbuilder import TransactionBuilder, ProposalBuilder
 from .utils import formatTime, test_proposal_in_buffer
-
 log = logging.getLogger(__name__)
 
 
@@ -261,7 +260,11 @@ class PeerPlays(AbstractGrapheneChain):
             # store private keys
             if storekeys:
                 # self.wallet.addPrivateKey(str(owner_privkey))
-                self.wallet.addPrivateKey(str(active_privkey))
+                try:
+                    self.wallet.addPrivateKey(str(active_privkey))
+                except KeyAlreadyInStoreException:
+                    log.error("Account name already exists on the chain")
+                    return
                 self.wallet.addPrivateKey(str(memo_privkey))
         elif owner_key and active_key and memo_key:
             active_pubkey = PublicKey(active_key, prefix=self.prefix)
@@ -1785,6 +1788,9 @@ class PeerPlays(AbstractGrapheneChain):
         revenue_split=200,
         is_transferable=True,
         is_sellable=True,
+        role_id=None,
+        max_supply=None,
+        lottery_options=None,
         **kwargs
         ):
 
@@ -1802,6 +1808,9 @@ class PeerPlays(AbstractGrapheneChain):
             "revenue_split": revenue_split,
             "is_transferable": is_transferable,
             "is_sellable": is_sellable,
+            "role_id": None,
+            "max_supply": None,
+            "lottery_options": None,
             "prefix": self.prefix,
         }
         op = operations.Nft_metadata_create(**op)
@@ -1818,6 +1827,7 @@ class PeerPlays(AbstractGrapheneChain):
         revenue_split=200,
         is_transferable=True,
         is_sellable=True,
+        role_id=None,
         **kwargs
         ):
 
@@ -1836,6 +1846,7 @@ class PeerPlays(AbstractGrapheneChain):
             "revenue_split": revenue_split,
             "is_transferable": is_transferable,
             "is_sellable": is_sellable,
+            "role_id": None,
             "prefix": self.prefix,
         }
         op = operations.Nft_metadata_update(**op)
@@ -1935,4 +1946,37 @@ class PeerPlays(AbstractGrapheneChain):
         }
         op = operations.Nft_set_approval_for_all(**op)
         return self.finalizeOp(op, owner_account, "active", **kwargs)
+
+    def cancel(self, orderNumbers, account=None, **kwargs):
+        """
+        Cancels an order you have placed in a given market. Requires only the
+        "orderNumbers". An order number takes the form ``1.7.xxx``.
+
+        :param str orderNumbers: The Order Object ide of the form
+            ``1.7.xxxx``
+        """
+        if not account:
+            if "default_account" in self.config:
+                account = self.config["default_account"]
+        if not account:
+            raise ValueError("You need to provide an account")
+        account = Account(account, full=False, blockchain_instance=self)
+
+        if not isinstance(orderNumbers, (list, set, tuple)):
+            orderNumbers = {orderNumbers}
+
+        op = []
+        for order in orderNumbers:
+            op.append(
+                operations.Limit_order_cancel(
+                    **{
+                        "fee": {"amount": 0, "asset_id": "1.3.0"},
+                        "fee_paying_account": account["id"],
+                        "order": order,
+                        "extensions": [],
+                        "prefix": self.prefix,
+                    }
+                )
+            )
+        return self.finalizeOp(op, account["name"], "active", **kwargs)
 
