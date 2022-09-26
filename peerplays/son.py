@@ -79,6 +79,12 @@ class Son():
         r = WalletCall(method, params)
         return r
 
+    def sidechain_withdrawal_transaction(self, son_name, block_num, sidechain, peerplays_uid, peerplays_transaction_id, peerplays_from, widthdraw_sidechain, widthdraw_address, widthdraw_currency, widthdraw_amount):
+        method =  "sidechain_withdrawal_transaction"
+        params = [son_name, block_num, sidechain, peerplays_uid, peerplays_transaction_id, peerplays_from, widthdraw_sidechain, widthdraw_address, widthdraw_currency, widthdraw_amount, "true"]
+        r = WalletCall(method, params)
+        return r
+
 if __name__ == "__main__":
     son = Son(urlWitness = urlWitness)
     # r = son.set_password("peerplays**")
