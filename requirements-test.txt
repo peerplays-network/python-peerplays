@@ -27,4 +27,5 @@ click
 treelib
 
 # ecdsa>=0.14 # not directly required, pinned by Snyk to avoid a vulnerability
-ecdsa>=0.13.3,<0.14
+ecdsa>=0.14,<0.14
+websockets>=10.0 # not directly required, pinned by Snyk to avoid a vulnerability
