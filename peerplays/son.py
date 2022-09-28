@@ -85,6 +85,25 @@ class Son():
         r = WalletCall(method, params)
         return r
 
+    def sidechain_deposit_transaction(self, sidechain, transaction_id, operation_index, sidechain_from, sidechain_to, sidechain_currency, siechain_amount, peerplays_from_name_or_id, peerplays_to_name_or_id):
+        """
+        params:
+           const sidechain_type& sidechain,
+           const string &transaction_id,
+           uint32_t operation_index,
+           const string &sidechain_from,
+           const string &sidechain_to,
+           const string &sidechain_currency,
+           int64_t sidechain_amount,
+           const string &peerplays_from_name_or_id,
+           const string &peerplays_to_name_or_id
+        """
+        method =  "sidechain_deposit_transaction"
+        params = [sidechain, transaction_id, operation_index, sidechain_from, sidechain_to, sidechain_currency, siechain_amount, peerplays_from_name_or_id, peerplays_to_name_or_id, "true"]
+        r = WalletCall(method, params)
+        return r
+
+
 if __name__ == "__main__":
     son = Son(urlWitness = urlWitness)
     # r = son.set_password("peerplays**")
