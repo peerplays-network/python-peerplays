@@ -103,6 +103,19 @@ class Son():
         r = WalletCall(method, params)
         return r
 
+    def vote_for_witness(self, voting_account, witness, approve):
+        """
+        params:
+            string voting_account,
+            string witness,
+            bool approve,
+            bool broadcast
+        """
+        method =  "vote_for_witness"
+        params = [voting_account, witness, approve, "true"]
+        r = WalletCall(method, params)
+        return r
+
 
 if __name__ == "__main__":
     son = Son(urlWitness = urlWitness)
