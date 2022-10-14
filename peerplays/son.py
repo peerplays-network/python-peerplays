@@ -144,6 +144,25 @@ class Son():
         r = WalletCall(method, params)
         return r
 
+    def report_down(self):
+        pass
+
+    def heartbeat(self):
+        pass
+
+    def update_witness_votes (self, voting_account, sons_to_approve, sons_to_reject, sidechain, desired_number_of_sons):
+        """
+        params:
+            string voting_account,
+            sons_to_approve,
+            sons_to_reject,
+            sidechain,
+            desired_number_of_sons
+        """
+        method =  "update_son_votes"
+        params = [voting_account, sons_to_approve, sons_to_reject, sidechain, number_of_sons, "true"]
+        r = WalletCall(method, params)
+        return r
 
 if __name__ == "__main__":
     son = Son(urlWitness = urlWitness)
