@@ -150,17 +150,16 @@ class Son():
     def heartbeat(self):
         pass
 
-    def update_witness_votes (self, voting_account, sons_to_approve, sons_to_reject, sidechain, desired_number_of_sons):
+    def update_witness_votes (self, voting_account, witnesses_to_approve, witnesses_to_reject, desired_number_of_witnesses):
         """
         params:
-            string voting_account,
-            sons_to_approve,
-            sons_to_reject,
-            sidechain,
-            desired_number_of_sons
+            voting_account,
+            witnesses_to_approve,
+            witnesses_to_reject,
+            desired_number_of_witnesses,
         """
-        method =  "update_son_votes"
-        params = [voting_account, sons_to_approve, sons_to_reject, sidechain, number_of_sons, "true"]
+        method =  "update_witness_votes"
+        params = [voting_account, witnesses_to_approve, witnesses_to_reject, desired_number_of_witnesses, "true"]
         r = WalletCall(method, params)
         return r
 
