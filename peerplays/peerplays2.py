@@ -7,6 +7,7 @@ import random
 
 # urlWitness = "http://0.0.0.0:8092"
 urlWitness = "http://10.11.12.101:8092"
+brainKey = "CHOROGI EERIE RETUCK PRAECOX MUDDLER LITERAL ACRON CARBRO BABBY AGAZED UNBOLT ABASED HALA TEMBLOR EMANATE HEMIPIC"
 
 def WalletCall(method, params=[]):
     data = dict()
@@ -61,6 +62,11 @@ class PeerPlays():
         r = WalletCall(method, params)
         return r
 
+    def transfer(self, fromAccount, toAccount, amount, asset, memo):
+        method = "transfer"
+        params = [fromAccount, toAccount, amount, asset, memo]
+        r = WalletCall(method, params)
+        return r
 
 if __name__ == "__main__":
     peerplays = PeerPlays(urlWitness = urlWitness)

@@ -14,8 +14,8 @@ import random
 from peerplays.son import Son
 
 # Initializing son objet
-son = Son(urlWitness = urlWitness)
 urlWitness = "http://10.11.12.101:8092"
+son = Son(urlWitness = urlWitness)
 
 
 class Testcases(unittest.TestCase):
@@ -38,9 +38,6 @@ class Testcases(unittest.TestCase):
         peerplays.blocking = True
         print("peerplays blocking:", peerplays.blocking)
 
-
-
-
         op_res = peerplays.create_account(
             account_name,
             referrer="1.2.7",
@@ -57,6 +54,7 @@ class Testcases(unittest.TestCase):
         peerplays.transfer(account_name, 10000, "TEST", account="nathan")
         tx = peerplays.upgrade_account(account_name)
         account = Account(account_name)
+        print("====================================", account, "============================")
         # tx = account.upgrade()
         ops = tx["operations"]
         op = ops[0][1]
@@ -72,4 +70,7 @@ class Testcases(unittest.TestCase):
             op["account_to_upgrade"],
             account["id"],
         )
-        r = son.create_son(account_name, "http://sonaddreess01.com", [["bitcoin", "03456772301e221026269d3095ab5cb623fc239835b583ae4632f99a15107ef275"], ["ethereum", "5fbbb31be52608d2f52247e8400b7fcaa9e0bc12"], ["hive", "sonaccount01"], ["peerplays", "TEST8TCQFzyYDp3DPgWZ24261fMPSCzXxVyoF3miWeTj6JTi2DZdrL"]]) 
+        account_name = "test1234"
+        r = son.create_son("sonaccount01", "http://sonaddreess01.com", [["bitcoin", "03456772301e221026269d3095ab5cb623fc239835b583ae4632f99a15107ef275"], ["ethereum", "5fbbb31be52608d2f52247e8400b7fcaa9e0bc12"], ["hive", "sonaccount01"], ["peerplays", "TEST8TCQFzyYDp3DPgWZ24261fMPSCzXxVyoF3miWeTj6JTi2DZdrL"]]) 
+        print ("tested ========================")
+        print(r)
