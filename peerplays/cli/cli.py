@@ -2,6 +2,7 @@
 
 import sys
 import logging
+import ast
 
 try:
     import click
@@ -68,7 +69,7 @@ def sign(ctx, filename):
         tx = filename.read()
     else:
         tx = sys.stdin.read()
-    tx = TransactionBuilder(eval(tx), peerplays_instance=ctx.peerplays)
+    tx = TransactionBuilder(ast.literal_eval(tx), peerplays_instance=ctx.peerplays)
     tx.appendMissingSignatures()
     tx.sign()
     pprint(tx.json())
@@ -83,7 +84,7 @@ def broadcast(ctx, filename):
         tx = filename.read()
     else:
         tx = sys.stdin.read()
-    tx = TransactionBuilder(eval(tx), peerplays_instance=ctx.peerplays)
+    tx = TransactionBuilder(ast.literal_eval(tx), peerplays_instance=ctx.peerplays)
     tx.broadcast()
     pprint(tx.json())
 

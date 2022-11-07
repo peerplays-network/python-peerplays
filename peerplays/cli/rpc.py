@@ -1,3 +1,4 @@
+import ast
 import click
 from pprint import pprint
 from .decorators import (
@@ -33,7 +34,7 @@ def rpc(ctx, call, arguments, api):
 
     """
     try:
-        data = list(eval(d) for d in arguments)
+        data = list(ast.literal_eval(d) for d in arguments)
     except:
         data = arguments
     ret = getattr(ctx.peerplays.rpc, call)(*data, api=api)
