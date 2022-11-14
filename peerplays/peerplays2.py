@@ -61,6 +61,25 @@ class PeerPlays():
         r = WalletCall(method, params)
         return r
 
+    def create_account( 
+                        self,
+                        account_name,
+                        registrar=None,
+                        referrer="1.2.0",
+                        referrer_percent=50,
+                        owner_key=None,
+                        active_key=None,
+                        memo_key=None,
+                        password=None,
+                        additional_owner_keys=[],
+                        additional_active_keys=[],
+                        additional_owner_accounts=[],
+                        additional_active_accounts=[],
+                        proxy_account="proxy-to-self",
+                        storekeys=True,
+                        ):
+        r = self.register_account (account_name, owner_key, active_key, registrar, referrer, referrer_percent)
+        return r
 
 if __name__ == "__main__":
     peerplays = PeerPlays(urlWitness = urlWitness)
