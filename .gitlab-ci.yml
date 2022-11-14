@@ -20,7 +20,7 @@ test:
     - pip3 install -r requirements-test.txt
     - tox
   tags:
-    - python-peerplays-cicd
+    - testing
       #    - python3 -m unittest tests/test_nft.py 
       #    - python3 -m unittest tests/test_market_place.py 
       #    - python3 -m unittest tests/test_hrp.py 
