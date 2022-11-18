@@ -5,27 +5,9 @@ import requests
 import json
 import random
 
-# urlWitness = "http://0.0.0.0:8092"
-urlWitness = "http://10.11.12.101:8091"
+urlWitness = "http://0.0.0.0:8091"
+# urlWitness = "http://10.11.12.101:8091"
 
-def WalletCall(method, params=[]):
-    data = dict()
-    data["jsonrpc"] = "2.0"
-    data["id"] = 1
-
-    # data["method"] = "info"
-    data["method"] = method
-    # data["params"] = []
-    data["params"] = params
-    dataJson = json.dumps(data)
-    r = requests.get(urlWitness, data = dataJson)
-    # return r
-
-    resultJson = r.text
-    result = json.loads(resultJson)
-    return result
-    result = result["result"]
-    return result
 
 
 class PeerPlays():
@@ -38,10 +20,29 @@ class PeerPlays():
         self.urlwitness = urlWitness
         pass
 
+    def WalletCall(method, params=[]):
+        data = dict()
+        data["jsonrpc"] = "2.0"
+        data["id"] = 1
+
+        # data["method"] = "info"
+        data["method"] = method
+        # data["params"] = []
+        data["params"] = params
+        dataJson = json.dumps(data)
+        r = requests.get(self.urlWitness, data = dataJson)
+        # return r
+
+        resultJson = r.text
+        result = json.loads(resultJson)
+        return result
+        # result = result["result"]
+        # return result
+
     def info(self):
         method = "info"
         params = []
-        r = WalletCall(method, params)
+        r = self.WalletCall(method, params)
         return r
         # pass
 
@@ -49,25 +50,25 @@ class PeerPlays():
     def unlock(self, password):
         method = "unlock"
         params = [password]
-        r = WalletCall(method, params)
+        r = self.WalletCall(method, params)
         return r
         pass
 
     def set_password(self, password):
         method = "set_password"
         params = [password]
-        r = WalletCall(method, params)
+        r = self.WalletCall(method, params)
         return r
 
     def is_locked(self):
         method = "is_locked"
-        r = WalletCall(method)
+        r = self.WalletCall(method)
         return r
 
     def register_account (self, accountName, ownerKey, activeKey, registrarAccount, referrerAccount, referrerPercent):
         method = "register_account"
         params = [accountName, ownerKey, activeKey, registrarAccount, referrerAccount, referrerPercent, "true"]
-        r = WalletCall(method, params)
+        r = self.WalletCall(method, params)
         return r
 
     def create_account( 
@@ -86,7 +87,7 @@ class PeerPlays():
     def suggest_brain_key(self):
         method = "suggest_brain_key"
         params = []
-        r = WalletCall(method, params)
+        r = self.WalletCall(method, params)
         return r
 
 if __name__ == "__main__":
