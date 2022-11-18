@@ -17,7 +17,7 @@ class PeerPlays():
     """
 
     def __init__(self, urlWitness):
-        self.urlwitness = urlWitness
+        self.urlWitness = urlWitness
         pass
 
     def WalletCall(method, params=[]):
