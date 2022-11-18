@@ -1,3 +1,5 @@
+# commit log verification, 2
+
 import logging
 
 from datetime import datetime
