@@ -20,7 +20,7 @@ class PeerPlays():
         self.urlWitness = urlWitness
         pass
 
-    def WalletCall(method, params=[]):
+    def WalletCall(self, method, params=[]):
         data = dict()
         data["jsonrpc"] = "2.0"
         data["id"] = 1
