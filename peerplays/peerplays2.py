@@ -6,7 +6,7 @@ import json
 import random
 
 # urlWitness = "http://0.0.0.0:8092"
-urlWitness = "http://10.11.12.101:8092"
+urlWitness = "http://10.11.12.101:8091"
 
 def WalletCall(method, params=[]):
     data = dict()
@@ -38,10 +38,19 @@ class PeerPlays():
         self.urlwitness = urlWitness
         pass
 
+    def info(self):
+        method = "info"
+        params = []
+        r = WalletCall(method, params)
+        return r
+        # pass
+
+
     def unlock(self, password):
         method = "unlock"
         params = [password]
-        WalletCall(method, params)
+        r = WalletCall(method, params)
+        return r
         pass
 
     def set_password(self, password):
@@ -64,21 +73,20 @@ class PeerPlays():
     def create_account( 
                         self,
                         account_name,
-                        registrar=None,
+                        registrar="None",
                         referrer="1.2.0",
                         referrer_percent=50,
                         owner_key=None,
                         active_key=None,
                         memo_key=None,
-                        password=None,
-                        additional_owner_keys=[],
-                        additional_active_keys=[],
-                        additional_owner_accounts=[],
-                        additional_active_accounts=[],
-                        proxy_account="proxy-to-self",
-                        storekeys=True,
                         ):
         r = self.register_account (account_name, owner_key, active_key, registrar, referrer, referrer_percent)
+        return r
+
+    def suggest_brain_key(self):
+        method = "suggest_brain_key"
+        params = []
+        r = WalletCall(method, params)
         return r
 
 if __name__ == "__main__":

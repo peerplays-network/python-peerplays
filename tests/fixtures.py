@@ -2,6 +2,7 @@
 import os
 import yaml
 
+from peerplays.peerplays2 import PeerPlays as PeerPlays2
 from peerplays import PeerPlays
 from peerplays.account import Account
 from peerplays.instance import set_shared_peerplays_instance
@@ -22,7 +23,11 @@ wifs = [
     "5KCBDTcyDqzsqehcb52tW5nU6pXife6V2rX9Yf7c3saYSzbDZ5W",
 ]
 wif = wifs[0]
+publicKey = "TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
 core_unit = "TEST"
+
+urlWitness = "http://10.11.12.101:8091"
+peerplays2 = PeerPlays2(urlWitness = urlWitness)
 
 # peerplays instance
 peerplays = PeerPlays(
