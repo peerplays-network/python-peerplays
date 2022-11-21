@@ -4,11 +4,15 @@
 import requests
 import json
 import random
+import os
+# import multiprocessing
+import time
+# import subprocess
 
 urlWitness = "http://0.0.0.0:8091"
 # urlWitness = "http://10.11.12.101:8091"
-
-
+# witnessNode = "ws://10.11.12.101:8090"
+# chainId = "7c1c72eb738b3ff1870350f85daca27e2d0f5dd25af27df7475fbd92815e421e"
 
 class PeerPlays():
     """ 
@@ -16,9 +20,36 @@ class PeerPlays():
 
     """
 
-    def __init__(self, urlWitness):
+    def __init__(self, urlWalletServer):
+        # self.witnessNode = witnessNode
         self.urlWitness = urlWitness
+        self.chainId = chainId
+        # self.wallet_server_start()
+        # time.sleep(5)
+        # self.set_password("password")
+        # self.unlock("password)")
         pass
+
+    def wallet_server(self):
+        self.urlWitnessR = urlWitness.split("://")[1]
+        commandServer = ""
+        commandServer = commandServer + './cli_wallet '
+        # commandServer = commandServer + '-s "' + self.witnessNode + '" '
+        # commandServer = commandServer + "--chain-id " +  chainId + " "
+        commandServer = commandServer + '-r "' +  self.urlWitnessR + '" '
+        commandString = './cli_wallet -s "ws://10.11.12.101:8090" --chain-id "7c1c72eb738b3ff1870350f85daca27e2d0f5dd25af27df7475fbd92815e421e" -r "0.0.0.0:8091" -d'
+        # os.system(commandServer)
+        os.system(commandString)
+        # subprocess.run(commandString)
+
+    def wallet_server_start(self):
+        # print("process to begin")
+        process = multiprocessing.Process(target=self.wallet_server)
+        # process = subprocess.call(self.wallet_server)
+        process.start()
+        # process.join()
+        # print("process started:" , process)
+
 
     def WalletCall(self, method, params=[]):
         data = dict()
@@ -46,7 +77,6 @@ class PeerPlays():
         return r
         # pass
 
-
     def unlock(self, password):
         method = "unlock"
         params = [password]
@@ -64,6 +94,11 @@ class PeerPlays():
         method = "is_locked"
         r = self.WalletCall(method)
         return r
+
+    def import_key(self, accountName, wif):
+        method = "import_key"
+        params = [accountName, wif]
+        r = self.WalletCall(method)
 
     def register_account (self, accountName, ownerKey, activeKey, registrarAccount, referrerAccount, referrerPercent):
         method = "register_account"
@@ -91,9 +126,11 @@ class PeerPlays():
         return r
 
 if __name__ == "__main__":
-    peerplays = PeerPlays(urlWitness = urlWitness)
+    p2 = PeerPlays(urlWalletServer=urlWitness)
+    # p2.wallet_server_start()
+    # print("----server --- started ----")
 
-    name = "trash" + str(random.randint(1,10000))
-    publicKey = "TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
-    r = peerplays.register_account(name, publicKey, publicKey, "nathan", "nathan", 10)
-    print(r)
+    # name = "trash" + str(random.randint(1,10000))
+    # publicKey = "TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
+    # r = peerplays.register_account(name, publicKey, publicKey, "nathan", "nathan", 10)
+    # print(r)
