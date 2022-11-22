@@ -9,7 +9,7 @@ import os
 import time
 # import subprocess
 
-urlWitness = "http://0.0.0.0:8091"
+# urlWitness = "http://0.0.0.0:8091"
 # urlWitness = "http://10.11.12.101:8091"
 # witnessNode = "ws://10.11.12.101:8090"
 # chainId = "7c1c72eb738b3ff1870350f85daca27e2d0f5dd25af27df7475fbd92815e421e"
@@ -22,8 +22,8 @@ class PeerPlays():
 
     def __init__(self, urlWalletServer):
         # self.witnessNode = witnessNode
-        self.urlWitness = urlWitness
-        self.chainId = chainId
+        self.urlWitness = urlWalletServer
+        # self.chainId = chainId
         # self.wallet_server_start()
         # time.sleep(5)
         # self.set_password("password")
