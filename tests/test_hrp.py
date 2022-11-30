@@ -6,6 +6,8 @@ from peerplays.instance import set_shared_peerplays_instance
 from .fixtures import fixture_data, peerplays, core_unit
 import string
 import random
+from datetime import datetime as dt
+from datetime import timedelta
 
 
 class Testcases(unittest.TestCase):
@@ -47,11 +49,16 @@ class Testcases(unittest.TestCase):
             owner_account="1.2.7"
         )
 
+        startDate = dt.today()
+        endDate = startDate + timedelta(30)
+        startDate = startDate.strftime("%Y-%m-%dT%H:%M:%S") 
+        endDate = endDate.strftime("%Y-%m-%dT%H:%M:%S") 
+
         op = peerplays.custom_account_authority_create(
                 permission_id,
                 0,
-                "2022-06-27T00:00:00",
-                "2022-07-27T00:00:00",
+                startDate,
+                endDate,
                 owner_account="1.2.7") 
         print("custom_account_authority_create success")
 
@@ -88,10 +95,16 @@ class Testcases(unittest.TestCase):
         authorities = peerplays.rpc.get_custom_account_authorities("1.2.7")
         authority = authorities[0]
         authority_id = authority["id"]
+
+        startDate = dt.today()
+        endDate = startDate + timedelta(30)
+        startDate = startDate.strftime("%Y-%m-%dT%H:%M:%S") 
+        endDate = endDate.strftime("%Y-%m-%dT%H:%M:%S") 
+
         op = peerplays.custom_account_authority_update(
                 authority_id,
-                "2022-07-28T00:00:00",
-                "2022-08-29T00:00:00",
+                startDate,
+                endDate,
                 owner_account="1.2.7")
         print("custom_account_authority_update success")
 

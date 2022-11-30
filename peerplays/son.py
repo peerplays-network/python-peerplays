@@ -6,6 +6,7 @@ import json
 
 # urlWitness = "http://0.0.0.0:8092"
 urlWitness = "http://10.11.12.101:8092"
+brainKey = "CHOROGI EERIE RETUCK PRAECOX MUDDLER LITERAL ACRON CARBRO BABBY AGAZED UNBOLT ABASED HALA TEMBLOR EMANATE HEMIPIC"
 
 def WalletCall(method, params=[]):
     data = dict()
