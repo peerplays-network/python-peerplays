@@ -26,8 +26,9 @@ wif = wifs[0]
 publicKey = "TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
 core_unit = "TEST"
 
-urlWitness = "http://10.11.12.101:8091"
-peerplays2 = PeerPlays2(urlWitness = urlWitness)
+urlWalletServer = "http://10.11.12.101:8091"
+peerplays2 = PeerPlays2(urlWalletServer=urlWalletServer)
+peerplays2.unlock("password")
 
 # peerplays instance
 peerplays = PeerPlays(
@@ -39,7 +40,7 @@ peerplays = PeerPlays(
     # "wss://hercules.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
 )
 # Set defaults
-peerplays.set_default_account("init0")
+# peerplays.set_default_account("init0")
 set_shared_peerplays_instance(peerplays)
 
 # Ensure we are not going to transaction anythin on chain!

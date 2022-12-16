@@ -54,6 +54,9 @@ class Testcases(unittest.TestCase):
         # print("peerplays blocking:", peerplays.blocking)
 
         op_res = peerplays2.create_account(account_name, registrar="nathan", owner_key=publicKey, active_key=publicKey, memo_key=publicKey)
+        print("======op_res===========")
+        print(op_res)
+        print("======op_res===========")
 
         self.assertEqual(op_res["result"]["operations"][0][0], 5)
         print (account_name, "account created")
