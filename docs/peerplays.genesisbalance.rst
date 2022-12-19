@@ -1,5 +1,5 @@
-peerplays\.genesisbalance module
-================================
+peerplays.genesisbalance module
+===============================
 
 .. automodule:: peerplays.genesisbalance
     :members:

@@ -1,5 +1,5 @@
-peerplays\.block module
-=======================
+peerplays.block module
+======================
 
 .. automodule:: peerplays.block
     :members:

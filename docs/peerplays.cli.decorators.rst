@@ -1,5 +1,5 @@
-peerplays\.cli\.decorators module
-=================================
+peerplays.cli.decorators module
+===============================
 
 .. automodule:: peerplays.cli.decorators
     :members:

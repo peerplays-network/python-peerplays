@@ -1,5 +1,5 @@
-peerplays\.asset module
-=======================
+peerplays.asset module
+======================
 
 .. automodule:: peerplays.asset
     :members:

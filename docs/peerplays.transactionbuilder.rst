@@ -1,5 +1,5 @@
-peerplays\.transactionbuilder module
-====================================
+peerplays.transactionbuilder module
+===================================
 
 .. automodule:: peerplays.transactionbuilder
     :members:

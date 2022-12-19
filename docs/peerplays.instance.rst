@@ -1,5 +1,5 @@
-peerplays\.instance module
-==========================
+peerplays.instance module
+=========================
 
 .. automodule:: peerplays.instance
     :members:

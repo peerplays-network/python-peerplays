@@ -1,5 +1,5 @@
-peerplays\.wallet module
-========================
+peerplays.wallet module
+=======================
 
 .. automodule:: peerplays.wallet
     :members:

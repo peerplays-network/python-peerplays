@@ -1,5 +1,5 @@
-peerplays\.exceptions module
-============================
+peerplays.exceptions module
+===========================
 
 .. automodule:: peerplays.exceptions
     :members:

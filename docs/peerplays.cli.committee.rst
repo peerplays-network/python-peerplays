@@ -1,5 +1,5 @@
-peerplays\.cli\.committee module
-================================
+peerplays.cli.committee module
+==============================
 
 .. automodule:: peerplays.cli.committee
     :members:

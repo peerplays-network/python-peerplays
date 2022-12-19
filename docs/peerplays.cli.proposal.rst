@@ -1,5 +1,5 @@
-peerplays\.cli\.proposal module
-===============================
+peerplays.cli.proposal module
+=============================
 
 .. automodule:: peerplays.cli.proposal
     :members:

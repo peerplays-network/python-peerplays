@@ -1,5 +1,5 @@
-peerplays\.bettingmarketgroup module
-====================================
+peerplays.bettingmarketgroup module
+===================================
 
 .. automodule:: peerplays.bettingmarketgroup
     :members:

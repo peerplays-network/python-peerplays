@@ -28,12 +28,16 @@ Submodules
    peerplays.exceptions
    peerplays.genesisbalance
    peerplays.instance
+   peerplays.market
    peerplays.memo
    peerplays.message
    peerplays.notify
    peerplays.peerplays
+   peerplays.peerplays2
+   peerplays.price
    peerplays.proposal
    peerplays.rule
+   peerplays.son
    peerplays.sport
    peerplays.storage
    peerplays.transactionbuilder
