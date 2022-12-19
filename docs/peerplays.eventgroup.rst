@@ -1,5 +1,5 @@
-peerplays\.eventgroup module
-============================
+peerplays.eventgroup module
+===========================
 
 .. automodule:: peerplays.eventgroup
     :members:

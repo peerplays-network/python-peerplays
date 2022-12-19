@@ -1,5 +1,5 @@
-peerplays\.utils module
-=======================
+peerplays.utils module
+======================
 
 .. automodule:: peerplays.utils
     :members:

@@ -1,5 +1,5 @@
-peerplays\.storage module
-=========================
+peerplays.storage module
+========================
 
 .. automodule:: peerplays.storage
     :members:

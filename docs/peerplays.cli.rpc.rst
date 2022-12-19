@@ -1,5 +1,5 @@
-peerplays\.cli\.rpc module
-==========================
+peerplays.cli.rpc module
+========================
 
 .. automodule:: peerplays.cli.rpc
     :members:

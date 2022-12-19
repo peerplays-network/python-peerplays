@@ -1,5 +1,5 @@
-peerplays\.blockchainobject module
-==================================
+peerplays.blockchainobject module
+=================================
 
 .. automodule:: peerplays.blockchainobject
     :members:

@@ -1,5 +1,5 @@
-peerplays\.rule module
-======================
+peerplays.rule module
+=====================
 
 .. automodule:: peerplays.rule
     :members:

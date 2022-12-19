@@ -1,5 +1,5 @@
-peerplays\.sport module
-=======================
+peerplays.sport module
+======================
 
 .. automodule:: peerplays.sport
     :members:

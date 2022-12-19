@@ -1,5 +1,5 @@
-peerplays\.memo module
-======================
+peerplays.memo module
+=====================
 
 .. automodule:: peerplays.memo
     :members:

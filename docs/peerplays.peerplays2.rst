@@ -1,7 +1,7 @@
-peerplays.cli.wallet module
+peerplays.peerplays2 module
 ===========================
 
-.. automodule:: peerplays.cli.wallet
+.. automodule:: peerplays.peerplays2
     :members:
     :undoc-members:
     :show-inheritance:

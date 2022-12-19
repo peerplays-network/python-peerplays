@@ -1,5 +1,5 @@
-peerplays\.cli\.bookie module
-=============================
+peerplays.cli.bookie module
+===========================
 
 .. automodule:: peerplays.cli.bookie
     :members:

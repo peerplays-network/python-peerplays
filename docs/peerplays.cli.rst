@@ -1,5 +1,5 @@
-peerplays\.cli package
-======================
+peerplays.cli package
+=====================
 
 Submodules
 ----------

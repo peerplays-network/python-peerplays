@@ -1,5 +1,5 @@
-peerplays\.proposal module
-==========================
+peerplays.proposal module
+=========================
 
 .. automodule:: peerplays.proposal
     :members:
