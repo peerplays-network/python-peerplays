@@ -128,9 +128,6 @@ class Account_create(GrapheneObject):
                 kwargs = args[0]
             prefix = kwargs.get("prefix", default_prefix)
 
-            # numSon = String(0)
-            # extensionNumSon = Set([numSon])
-
             super().__init__(
                 OrderedDict(
                     [

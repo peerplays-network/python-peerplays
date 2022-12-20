@@ -1,5 +1,3 @@
-# commit log verification, 2
-
 import logging
 
 from datetime import datetime
@@ -29,30 +27,6 @@ from .transactionbuilder import TransactionBuilder, ProposalBuilder
 from .utils import formatTime, test_proposal_in_buffer
 log = logging.getLogger(__name__)
 
-from graphenebase.types import (
-    Uint8,
-    Int16,
-    Uint16,
-    Uint32,
-    Uint64,
-    Varint32,
-    Int64,
-    String,
-    Bytes,
-    Void,
-    Array,
-    PointInTime,
-    Signature,
-    Bool,
-    Set,
-    Fixed_array,
-    Optional,
-    Static_variant,
-    Map,
-    Id,
-    VoteId,
-    FullObjectId,
-)
 
 class PeerPlays(AbstractGrapheneChain):
     """ Connect to the PeerPlays network.
@@ -327,8 +301,6 @@ class PeerPlays(AbstractGrapheneChain):
             proxy_account or "proxy-to-self", blockchain_instance=self
         )
 
-        numSonExtension = [Set(["num_son", String(0)])]
-
         op = {
             "fee": {"amount": 0, "asset_id": "1.3.0"},
             "registrar": registrar["id"],
@@ -353,8 +325,7 @@ class PeerPlays(AbstractGrapheneChain):
                 "num_witness": 0,
                 "num_committee": 0,
                 "votes": [],
-                "num_son": 0,
-                "extensions": numSonExtension,
+                "extensions": [],
             },
             "extensions": {},
             "prefix": self.prefix,
