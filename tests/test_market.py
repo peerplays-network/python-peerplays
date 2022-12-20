@@ -120,7 +120,7 @@ class Testcases(unittest.TestCase):
         default_account = "1.2.7"
         orders = market.accountopenorders(account=default_account)
         # print("orders:", orders)
-        assert len(orders) >= 0
+        assert type(orders) == list
 
     def test_buy(self):
         market = Market("HIVE:TEST", blockchain_instance=peerplays)

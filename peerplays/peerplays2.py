@@ -110,7 +110,6 @@ class PeerPlays():
         params = [password]
         r = self.WalletCall(method, params)
         return r
-        pass
 
     def set_password(self, password):
         """ Set remote wallet password
