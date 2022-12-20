@@ -1,0 +1,13 @@
+# Unit testing
+tox
+pytest
+pytest-mock
+coverage
+mock
+
+# Code style
+# black
+isort
+pre-commit
+
+
