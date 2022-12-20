@@ -15,7 +15,7 @@ lint:
 	flake8 peerplays*/
 
 test:
-	python3 setup.py test
+	tox
 
 build:
 	python3 setup.py build
