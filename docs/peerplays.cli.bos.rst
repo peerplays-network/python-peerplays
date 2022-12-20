@@ -1,5 +1,5 @@
-peerplays\.cli\.bos module
-==========================
+peerplays.cli.bos module
+========================
 
 .. automodule:: peerplays.cli.bos
     :members:

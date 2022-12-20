@@ -1,5 +1,5 @@
-peerplays\.account module
-=========================
+peerplays.account module
+========================
 
 .. automodule:: peerplays.account
     :members:

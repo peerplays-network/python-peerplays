@@ -1,5 +1,5 @@
-peerplays\.cli\.info module
-===========================
+peerplays.cli.info module
+=========================
 
 .. automodule:: peerplays.cli.info
     :members:

@@ -1,5 +1,5 @@
-peerplays\.cli\.witness module
-==============================
+peerplays.cli.witness module
+============================
 
 .. automodule:: peerplays.cli.witness
     :members:

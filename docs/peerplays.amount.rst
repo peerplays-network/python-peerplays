@@ -1,5 +1,5 @@
-peerplays\.amount module
-========================
+peerplays.amount module
+=======================
 
 .. automodule:: peerplays.amount
     :members:

@@ -1,5 +1,5 @@
-peerplays\.cli\.main module
-===========================
+peerplays.cli.main module
+=========================
 
 .. automodule:: peerplays.cli.main
     :members:
