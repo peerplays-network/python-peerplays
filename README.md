@@ -44,7 +44,7 @@ Example
 
 
 Example call
-	$ curl --silent --data '{"jsonrpc": "2.0", "method": "info", "params": [], "id": 1}' http://0.0.0.0:8091 | jq
+	  $ curl --silent --data '{"jsonrpc": "2.0", "method": "info", "params": [], "id": 1}' http://0.0.0.0:8091 | jq
 
     
 
