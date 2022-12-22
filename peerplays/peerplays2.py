@@ -5,14 +5,7 @@ import requests
 import json
 import random
 import os
-# import multiprocessing
 import time
-# import subprocess
-
-# urlWitness = "http://0.0.0.0:8091"
-# urlWitness = "http://10.11.12.101:8091"
-# witnessNode = "ws://10.11.12.101:8090"
-# chainId = "7c1c72eb738b3ff1870350f85daca27e2d0f5dd25af27df7475fbd92815e421e"
 
 class PeerPlays():
     """ 
@@ -53,22 +46,13 @@ class PeerPlays():
         self.urlWitnessR = urlWitness.split("://")[1]
         commandServer = ""
         commandServer = commandServer + './cli_wallet '
-        # commandServer = commandServer + '-s "' + self.witnessNode + '" '
-        # commandServer = commandServer + "--chain-id " +  chainId + " "
         commandServer = commandServer + '-r "' +  self.urlWitnessR + '" '
         commandString = './cli_wallet -s "ws://10.11.12.101:8090" --chain-id "7c1c72eb738b3ff1870350f85daca27e2d0f5dd25af27df7475fbd92815e421e" -r "0.0.0.0:8091" -d'
-        # os.system(commandServer)
         os.system(commandString)
-        # subprocess.run(commandString)
 
     def wallet_server_start(self):
-        # print("process to begin")
         process = multiprocessing.Process(target=self.wallet_server)
-        # process = subprocess.call(self.wallet_server)
         process.start()
-        # process.join()
-        # print("process started:" , process)
-
 
     def WalletCall(self, method, params=[]):
         """ Genric method for making calls to peerplays node through remote wallet.
@@ -79,19 +63,14 @@ class PeerPlays():
         data["jsonrpc"] = "2.0"
         data["id"] = 1
 
-        # data["method"] = "info"
         data["method"] = method
-        # data["params"] = []
         data["params"] = params
         dataJson = json.dumps(data)
         r = requests.get(self.urlWitness, data = dataJson)
-        # return r
 
         resultJson = r.text
         result = json.loads(resultJson)
         return result
-        # result = result["result"]
-        # return result
 
     def info(self):
         """ Info command
@@ -100,7 +79,6 @@ class PeerPlays():
         params = []
         r = self.WalletCall(method, params)
         return r
-        # pass
 
     def unlock(self, password):
         """ Method to unlock wallet

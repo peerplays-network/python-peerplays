@@ -32,8 +32,6 @@ class Testcases(unittest.TestCase):
         self.assertIsInstance(account.balance("1.3.0"), Amount)
         self.assertIsInstance(account.balance({"symbol": symbol}), Amount)
         self.assertIsInstance(account.balances, list)
-        for h in account.history(limit=1):
-            pass
 
         # BlockchainObjects method
         account.cached = False
@@ -46,12 +44,9 @@ class Testcases(unittest.TestCase):
         self.assertIsInstance(Account(account), Account)
 
     def test_account_creation(self):
-        # peerplays.blocking = True
         account_name = "".join(random.choices(string.ascii_lowercase, k=10))
         account_name = account_name + "".join(random.choices(string.digits, k=10))
         print("account_name:", account_name)
-        # peerplays.blocking = True
-        # print("peerplays blocking:", peerplays.blocking)
 
         op_res = peerplays2.create_account(account_name, registrar="nathan", owner_key=publicKey, active_key=publicKey, memo_key=publicKey)
         print("======op_res===========")

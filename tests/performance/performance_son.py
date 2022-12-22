@@ -13,7 +13,6 @@ from peerplaysbase import memo, account, operations, objects
 from peerplaysbase.account import PrivateKey, PublicKey
 from peerplaysbase.objects import Operation
 from peerplaysbase.signedtransactions import Signed_Transaction
-# from tests.fixtures import peerplays
 from peerplays import PeerPlays
 
 TEST_AGAINST_CLI_WALLET = False
@@ -24,7 +23,6 @@ ref_block_num = 34294
 ref_block_prefix = 3707022213
 expiration = "2016-04-06T08:29:27"
 GRAPHENE_BETTING_ODDS_PRECISION = 10000
-# peerplays.blocking = True
 
 wifs = [
     "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3",
@@ -56,9 +54,6 @@ class Testcases():
 
             rpc = GrapheneAPI("localhost", 8092)
             self.cm = rpc.serialize_transaction(tx.json())
-            # print("soll: %s" % self.cm[:-130])
-            # print("ist:  %s" % txWire[:-130])
-            # print(txWire[:-130] == self.cm[:-130])
             self.assertEqual(self.cm[:-130], txWire[:-130])
 
         # Test against Bitshares backened
@@ -116,29 +111,18 @@ class Testcases():
         self.doit()
 
     def transfer_On_Chain(self):
-        from tests.fixtures import peerplays as pp
-
         pp = PeerPlays(
             "ws://10.11.12.101:8090", keys=wifs, nobroadcast=False, num_retries=1, blocking=False
-            # "wss://api.ppy-beatrice.blckchnd.com", keys=wifs, nobroadcast=True, num_retries=1
-            # "wss://elizabeth.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
-            # "wss://irona.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
-            # "wss://fred.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
-            # "wss://hercules.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
             )
         pp.transfer ("1.2.9", 1, "TEST", memo="", account="1.2.8") #, blocking=False) 
         print("transfer done")
-        # time.sleep(6)
-        # pp.close()
 
 testcases = Testcases()
 
 def task(x):
     print("   ")
-    # rand = random.randint(1000,2000)
     rand = x
     print("-------------", rand, "------------------", "Started")
-    # time.sleep(1)
     testcases.transfer_On_Chain()
     print(rand, "Done")
     print("------------------------------", rand, "---------------", "Ended")
@@ -146,7 +130,6 @@ def task(x):
     return x
 
 if __name__ == "__main__":
-    # pool = multiprocessing.pool.Pool()
     countTask = 2
     p = multiprocessing.Pool(countTask)
     tic = time.time()

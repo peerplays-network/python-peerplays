@@ -141,7 +141,7 @@ class Son():
             desired_number_of_sons
         """
         method =  "update_son_votes"
-        params = [voting_account, sons_to_approve, sons_to_reject, sidechain, number_of_sons, "true"]
+        params = [voting_account, sons_to_approve, sons_to_reject, sidechain, desired_number_of_sons, "true"]
         r = WalletCall(method, params)
         return r
 
