@@ -26,15 +26,15 @@ wif = wifs[0]
 publicKey = "TEST6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"
 core_unit = "TEST"
 
-urlWalletServer = "http://10.11.12.101:8091"
-peerplays2 = PeerPlays2(urlWalletServer=urlWalletServer)
-peerplays2.unlock("password")
+# urlWalletServer = "http://10.11.12.101:8091"
+# peerplays2 = PeerPlays2(urlWalletServer=urlWalletServer)
+# peerplays2.unlock("password")
 
 # peerplays instance
 peerplays = PeerPlays(
-    "ws://10.11.12.101:8090", keys=wifs, nobroadcast=False, num_retries=1, blocking=True 
+    # "ws://10.11.12.101:8090", keys=wifs, nobroadcast=False, num_retries=1, blocking=True 
     # "wss://api.ppy-beatrice.blckchnd.com", keys=wifs, nobroadcast=True, num_retries=1
-    # "wss://mint.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
+    "wss://mint.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
     # "wss://irona.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
     # "wss://fred.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
     # "wss://hercules.peerplays.download/api", keys=wifs, nobroadcast=False, num_retries=1, blocking=True
