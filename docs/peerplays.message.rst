@@ -1,5 +1,5 @@
-peerplays\.message module
-=========================
+peerplays.message module
+========================
 
 .. automodule:: peerplays.message
     :members:

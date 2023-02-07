@@ -1,5 +1,5 @@
-peerplays\.committee module
-===========================
+peerplays.committee module
+==========================
 
 .. automodule:: peerplays.committee
     :members:

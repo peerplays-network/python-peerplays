@@ -1,7 +1,7 @@
-peerplays.bet module
-====================
+peerplays.market module
+=======================
 
-.. automodule:: peerplays.bet
+.. automodule:: peerplays.market
     :members:
     :undoc-members:
     :show-inheritance:

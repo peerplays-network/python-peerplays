@@ -1,5 +1,5 @@
-peerplays\.cli\.message module
-==============================
+peerplays.cli.message module
+============================
 
 .. automodule:: peerplays.cli.message
     :members:

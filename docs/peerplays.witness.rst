@@ -1,5 +1,5 @@
-peerplays\.witness module
-=========================
+peerplays.witness module
+========================
 
 .. automodule:: peerplays.witness
     :members:

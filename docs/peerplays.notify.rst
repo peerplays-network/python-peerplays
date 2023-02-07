@@ -1,5 +1,5 @@
-peerplays\.notify module
-========================
+peerplays.notify module
+=======================
 
 .. automodule:: peerplays.notify
     :members:
