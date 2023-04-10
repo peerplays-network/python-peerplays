@@ -13,7 +13,7 @@ except LookupError:
     ascii = codecs.lookup("ascii")
     codecs.register(lambda name, enc=ascii: {True: enc}.get(name == "mbcs"))
 
-VERSION = "0.6.0-dev"
+VERSION = "0.5.1"
 
 # Strip some stuff from README for PyPI description:
 long_desc = open("README.md").read()
