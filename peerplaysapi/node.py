@@ -21,12 +21,6 @@ class Api(Original_Api):
 
 class PeerPlaysNodeRPC(Api):
 
-    def register_apis(self):
-        self.login("", "", api_id=1)
-        self.api_id["database"] = self.database(api_id=1)
-        self.api_id["history"] = self.history(api_id=1)
-        self.api_id["network_broadcast"] = self.network_broadcast(api_id=1)
-
     def get_account(self, name, **kwargs):
         """ Get full account details from account name or id
 
