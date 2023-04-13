@@ -3,6 +3,7 @@ import json
 import click
 from pprint import pprint
 from prettytable import PrettyTable
+from peerplays.block import BlockHeader
 from peerplays.account import Account
 from .decorators import onlineChain, unlockWallet
 from .ui import print_permissions, pprintOperation
@@ -73,8 +74,13 @@ def disallow(ctx, foreign_account, permission, threshold, account):
 )
 @click.option("--exclude", type=str, help="Exclude certain types", multiple=True)
 @click.option("--limit", type=int, help="Limit number of elements", default=15)
-@click.option("--raw/--no-raw", default=False)
-def history(ctx, account, limit, type, csv, exclude, raw):
+@click.option("--raw/--no-raw", default=False,
+              help="Show raw operation JSON"
+)
+@click.option("--results/--no-results", default=False,
+              help="Show operation results"
+)
+def history(ctx, account, limit, type, csv, exclude, raw, results):
     """ Show history of an account
     """
     from peerplaysbase.operations import getOperationNameForId
@@ -93,11 +99,16 @@ def history(ctx, account, limit, type, csv, exclude, raw):
     for a in account:
         account = Account(a, peerplays_instance=ctx.peerplays)
         for b in account.history(limit=limit, only_ops=type, exclude_ops=exclude):
+            block = BlockHeader(b["block_num"])
             row = [
-                b["id"].split(".")[2],
-                "%s" % (b["block_num"]),
+                b["id"],
+                "%s (%s)" % (block.time(), b["block_num"]),
                 "{} ({})".format(getOperationNameForId(b["op"][0]), b["op"][0]),
-                pprintOperation(b) if not raw else json.dumps(b, indent=4),
+                (
+                    pprintOperation(b) if not raw else json.dumps(b, indent=4)
+                ) + (
+                    "" if not results else "\n\nresults: %s\n"%b["result"]
+                ),
             ]
             if csv:
                 t.writerow(row)
